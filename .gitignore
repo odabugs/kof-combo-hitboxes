@@ -5,4 +5,5 @@
 *.zip
 *.exe
 *.o
+*.h.gch
 *.vim

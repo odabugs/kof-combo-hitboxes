@@ -3,28 +3,31 @@ CFLAGS=-std=c99 -w
 LDFLAGS=-lgdi32
 MAIN_C_FILE=main.c
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=main.o playerstruct.o render.o draw.o gamedefs.o gamestate.o
+OBJECTS=playerstruct.o render.o draw.o gamedefs.o gamestate.o
+HEADERS=playerstruct.h render.h draw.h gamedefs.h gamestate.h
+MAIN_AND_OBJECTS=main.o $(OBJECTS)
+VPATH=src
 
-kof-hitboxes.exe: $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) 
+default: $(MAIN_AND_OBJECTS)
+	$(CC) -o $(EXE_NAME) $^ $(LDFLAGS) 
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c $<
+main.o: main.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $^
 
 playerstruct.o: playerstruct.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $^
 
 render.o: render.c playerstruct.h
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $^
 
-draw.o: draw.c render.h playerstruct.h gamestate.o
-	$(CC) $(CFLAGS) -c $<
+draw.o: draw.c render.h playerstruct.h gamestate.h
+	$(CC) $(CFLAGS) -c $^
 
 gamedefs.o: gamedefs.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $^
 
 gamestate.o: gamestate.c playerstruct.h render.h gamedefs.h
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -f $(EXE_NAME) $(OBJECTS)
+	rm -f $(EXE_NAME) $(MAIN_AND_OBJECTS) src/*.h.gch
