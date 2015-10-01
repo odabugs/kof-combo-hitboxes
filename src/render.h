@@ -18,6 +18,21 @@ typedef struct screen_coords
 	int y;
 } screen_coords_t;
 
+// TODO: implement this shit
+typedef enum
+{
+	// game supports only one aspect and enforces it when window is scaled
+	AM_FIXED,
+	// game stretches to fit any aspect ratio
+	AM_STRETCH,
+	// game is 4:3 native and supports widescreen with vertical bars
+	AM_PILLARBOX,
+	// game is widescreen native and supports 4:3 with horizontal bars
+	AM_LETTERBOX,
+	// game is fixed aspect but centers the screen in a frame as needed
+	AM_WINDOW_FRAME
+} aspect_mode_t;
+
 typedef struct screen_dimensions
 {
 	union
@@ -29,11 +44,21 @@ typedef struct screen_dimensions
 		};
 		screen_coords_t size;
 	};
-	int xOffset; // rightward from the LEFT edge of the game window
-	int yOffset; // upward from the BOTTOM edge of the game window
-	double scale; // should be equal to (game window height / 224.0)
-	double aspect; // aspect ratio of game window width to height
-	bool isWidescreen; // false if 4:3, true if 16:9 (pillarboxed)
+	double widthAsDouble;
+	double heightAsDouble;
+	double xScale; // scale X coords onscreen by this amount
+	double yScale; // scale Y coords onscreen by this amount
+	int leftOffset; // pad X coords rightward from LEFT edge by this amount
+	int topOffset; // pad Y coords downward from TOP of screen by this amount
+	int groundOffset; // Y coordinate on screen where ingame Y = 0 ("ground")
+	double aspect; // (window width / window height)
+	int basicWidth; // closest to 1:1 scale resolution
+	int basicHeight; // closest to 1:1 scale resolution (in either aspect)
+	double basicWidthAsDouble;
+	double basicHeightAsDouble;
+	double basicGroundOffset; // closest to 1:1 scale resolution
+	double basicAspect; // closest to 1:1 scale resolution
+	aspect_mode_t aspectMode; // how does the game handle widescreen?
 } screen_dimensions_t;
 
 extern const player_coord_t baseY;

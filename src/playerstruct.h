@@ -53,6 +53,7 @@ typedef struct __attribute__((__packed__)) camera
 // not using enums for these because we need control over their size in bytes
 typedef uint32_t facing_t;
 typedef uint8_t costume_t;
+typedef uint8_t player_input_t;
 
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
@@ -104,7 +105,24 @@ typedef struct __attribute__((__packed__)) player
 
 typedef struct __attribute__((__packed__)) player_extra
 {
-	uint32_t doThisShitLater; // TODO
+	player_coord_t walkSpeed; // +000h: Walk speed
+	player_coord_t jumpMomentum; // +004h: Jump upward momentum
+	player_coord_t jumpGravity;  // +008h: Jump gravity
+	uint8_t farARange;        // +00Ch: Far A activation range (whole pixels)
+	uint8_t farBRange;        // +00Dh: Far B activation range (whole pixels)
+	uint8_t farCRange;        // +00Eh: Far C activation range (whole pixels)
+	uint8_t farDRange;        // +00Fh: Far D activation range (whole pixels)
+	uint8_t padding01[0x004]; // +010h to +014h: unknown
+	player_coord_t runSpeed;  // +014h: Run speed
+	uint8_t padding02[0x008]; // +018h to +020h: unknown
+	uint16_t backdashPart1;   // +020h: Backdash component 1 (unknown use)
+	uint16_t backdashPart2;   // +022h: Backdash component 2 (unknown use)
+	uint8_t padding03[0x004]; // +024h to +028h: unknown
+	game_pixel_t backdashUpPush; // +028h: Backdash upward momentum
+	player_coord_t backdashGravity; // +02Ah: Backdash gravity
+	player_input_t inputBuffer[0x03C]; // +023h to 06Bh: Input buffer
+	uint8_t padding04[0x001]; // +06Bh to +06Ch: unknown
+	uint16_t frameCounter;    // +06Ch: Frame counter
 } player_extra_t;
 
 extern const facing_t FACING_LEFT, FACING_RIGHT;

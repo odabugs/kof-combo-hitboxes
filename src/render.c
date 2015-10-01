@@ -1,31 +1,12 @@
 #include "render.h"
 #include "playerstruct.h"
 
-// used for scaling game coords and adjusting X/Y offsets
-// based on the client window size; "natural" window size is 640x448 pixels
-// (though this is twice the scale of the original NeoGeo games)
-#define BASIC_SCALE 2.0
-#define BASIC_HEIGHT 224.0
-#define BASIC_ASPECT (640.0 / 448.0)
-#define BASIC_WIDE_ASPECT (796.0 / 448.0)
-#define BASIC_PADDING ((796.0 - 640.0) / (BASIC_SCALE * 2.0))
-#define BASIC_GROUND_Y ((45.0) / BASIC_SCALE)
-
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
-
-bool isWidescreen(double aspect)
-{
-	// determine which is closer to the screen's actual aspect ratio
-	// (don't use exact value comparisons because precision is not perfect)
-	double normalDifference = fabs(BASIC_ASPECT - aspect);
-	double wideDifference = fabs(BASIC_WIDE_ASPECT - aspect);
-	return (normalDifference > wideDifference);
-}
 
 void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 {
 	int newWidth, newHeight, newXPadding, newGroundY;
-	double newScale, newAspect;
+	double dblWidth, dblHeight, newScale, newAspect;
 	RECT target;
 	GetClientRect(handle, &target);
 	newWidth = (int)target.right;
@@ -34,34 +15,59 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 	// has the game window size changed since we last checked?
 	if (dimensions->width != target.right || dimensions->height != target.bottom)
 	{
-		newScale = (newHeight / BASIC_HEIGHT);
-		newGroundY = newHeight - (int)(newScale * BASIC_GROUND_Y);
-		newAspect = (double)newWidth / (double)newHeight;
-		dimensions->aspect = newAspect;
-		if (isWidescreen(newAspect))
-		{
-			newXPadding = (int)(newScale * BASIC_PADDING);
-			dimensions->isWidescreen = true;
-		}
-		else
-		{
-			newXPadding = 0;
-			dimensions->isWidescreen = false;
-		}
-		
 		dimensions->width = newWidth;
 		dimensions->height = newHeight;
-		dimensions->xOffset = newXPadding;
-		dimensions->yOffset = newGroundY;
-		dimensions->scale = newScale;
+		dimensions->widthAsDouble = dblWidth = (double)newWidth;
+		dimensions->heightAsDouble = dblHeight = (double)newHeight;
+		dimensions->aspect = dblWidth / dblHeight;
+
+		switch (dimensions->aspectMode)
+		{
+			case AM_FIXED:
+			case AM_STRETCH:
+				dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
+				dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
+				dimensions->leftOffset = 0;
+				dimensions->topOffset = 0;
+				break;
+			case AM_PILLARBOX:
+				dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
+				dimensions->xScale = dimensions->yScale;
+				dimensions->leftOffset = calculateScreenOffset(
+					dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
+				dimensions->topOffset = 0;
+				break;
+			case AM_LETTERBOX:
+				dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
+				dimensions->yScale = dimensions->xScale;
+				dimensions->leftOffset = 0;
+				dimensions->topOffset = calculateScreenOffset(
+					dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
+				break;
+			case AM_WINDOW_FRAME:
+				// TODO
+				break;
+			default:
+				printf("Encountered invalid aspect mode.");
+				return;
+		}
+		dimensions->groundOffset =
+			dblHeight - (int)floor(dimensions->basicGroundOffset * dimensions->yScale);
 	}
 }
 
+int calculateScreenOffset(double actual, double baseline, double baselineScale)
+{
+	double scaled = floor(baseline * baselineScale);
+	return (actual <= scaled) ? 0 : (int)((actual - scaled) / 2.0);
+}
+
+// also applies offsetting from the left/top of the screen
 void scaleScreenCoords(screen_dimensions_t dimensions, screen_coords_t *target)
 {
-	double screenScale = dimensions.scale;
-	int newX = dimensions.xOffset + (int)(target->x * screenScale);
-	int newY = dimensions.yOffset - (int)(target->y * screenScale);
+	int newX = dimensions.leftOffset + (int)(target->x * dimensions.xScale);
+	int newY = dimensions.groundOffset - (int)(target->y * dimensions.yScale);
+	newY += dimensions.topOffset;
 	target->x = newX;
 	target->y = newY;
 }

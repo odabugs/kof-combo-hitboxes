@@ -14,7 +14,7 @@
 
 #define PEN_COLORS 2
 #define PEN_INTERVAL 20
-#define SLEEP_TIME 15
+#define SLEEP_TIME 10
 
 HWND wHandle;
 DWORD procID;

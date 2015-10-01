@@ -6,14 +6,23 @@
 //#include <tchar.h>
 #include <stdlib.h>
 #include "playerstruct.h"
+#include "render.h"
 
 #define PLAYERS 2
 
-typedef struct gamedef
+typedef struct game_definition
 {
 	char *windowTitle;
-	void *playerAddresses[2];
+	void *playerAddresses[PLAYERS];
 	void *cameraAddress;
+	// should be the width:height closest to 1:1 scale for onscreen objects
+	// (e.g., use 320x224 for kof98/02 even though the smallest resolution
+	// offered by the steam versions is 640x448 which amounts to 2:1 scale)
+	int basicWidth;
+	int basicWidescreenWidth; // for the SAME basic height
+	int basicHeight;
+	double groundOffset; // from BOTTOM edge of game screen (at 1:1 scale)
+	aspect_mode_t aspectMode; // how does the game handle widescreen?
 } gamedef_t;
 
 extern gamedef_t gamedefs_list[];

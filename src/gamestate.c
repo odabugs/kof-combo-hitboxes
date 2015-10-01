@@ -22,6 +22,7 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 			{
 				success = true;
 				target->gamedef = gamedefs[i];
+				establishScreenDimensions(&(target->dimensions), gamedefs[i]);
 				break;
 			}
 			else
@@ -35,6 +36,28 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 	target->processID = newProcID;
 	target->wHandle = wHandle;
 	return success;
+}
+
+void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t source)
+{
+	dims->basicWidth = source.basicWidth;
+	dims->basicHeight = source.basicHeight;
+	dims->basicWidthAsDouble = (double)source.basicWidth;
+	dims->basicHeightAsDouble = (double)source.basicHeight;
+	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
+	dims->basicGroundOffset = source.groundOffset;
+	dims->aspectMode = source.aspectMode;
+	// calculated later when retrieving actual current screen dimensions
+	dims->size.x = 0;
+	dims->size.y = 0;
+	dims->widthAsDouble = 0;
+	dims->heightAsDouble = 0;
+	dims->xScale = 0;
+	dims->yScale = 0;
+	dims->leftOffset = 0;
+	dims->topOffset = 0;
+	dims->groundOffset = 0;
+	dims->aspect = 0;
 }
 
 bool openGame(game_state_t *target)
