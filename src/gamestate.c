@@ -40,6 +40,7 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 
 void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t source)
 {
+	memset(dims, 0, sizeof(screen_dimensions_t));
 	dims->basicWidth = source.basicWidth;
 	dims->basicHeight = source.basicHeight;
 	dims->basicWidthAsDouble = (double)source.basicWidth;
@@ -47,15 +48,6 @@ void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t source)
 	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
 	dims->basicGroundOffset = source.groundOffset;
 	dims->aspectMode = source.aspectMode;
-	// calculated later when retrieving actual current screen dimensions
-	dims->size.x = 0;
-	dims->size.y = 0;
-	dims->xScale = 0;
-	dims->yScale = 0;
-	dims->leftOffset = 0;
-	dims->topOffset = 0;
-	dims->groundOffset = 0;
-	dims->aspect = 0;
 }
 
 bool openGame(game_state_t *target)

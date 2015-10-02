@@ -52,7 +52,13 @@ typedef struct __attribute__((__packed__)) camera
 
 // not using enums for these because we need control over their size in bytes
 typedef uint32_t facing_t;
+static const facing_t FACING_LEFT = 0, FACING_RIGHT = 1;
+
 typedef uint8_t costume_t;
+static const costume_t
+	COSTUME_A  = 0, COSTUME_B  = 1, COSTUME_C  = 2, COSTUME_D  = 3,
+	COSTUME_CD = 4, COSTUME_AB = 5, COSTUME_AD = 6, COSTUME_BC = 7;
+
 typedef uint8_t player_input_t;
 
 // "primary" player structure, used for state during gameplay
@@ -124,13 +130,5 @@ typedef struct __attribute__((__packed__)) player_extra
 	uint8_t padding04[0x001]; // +06Bh to +06Ch: unknown
 	uint16_t frameCounter;    // +06Ch: Frame counter
 } player_extra_t;
-
-extern const facing_t FACING_LEFT, FACING_RIGHT;
-extern const costume_t
-	COSTUME_A,  COSTUME_B,  COSTUME_C,  COSTUME_D,
-	COSTUME_CD, COSTUME_AB, COSTUME_AD, COSTUME_BC;
-
-extern void *CAMERA_ADDR;
-extern void *PLAYER_STRUCT_ADDRS[];
 
 #endif /* PLAYERSTRUCT_H */
