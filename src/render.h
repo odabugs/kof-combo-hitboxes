@@ -44,8 +44,6 @@ typedef struct screen_dimensions
 		};
 		screen_coords_t size;
 	};
-	double widthAsDouble;
-	double heightAsDouble;
 	double xScale; // scale X coords onscreen by this amount
 	double yScale; // scale Y coords onscreen by this amount
 	int leftOffset; // pad X coords rightward from LEFT edge by this amount

@@ -50,8 +50,6 @@ void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t source)
 	// calculated later when retrieving actual current screen dimensions
 	dims->size.x = 0;
 	dims->size.y = 0;
-	dims->widthAsDouble = 0;
-	dims->heightAsDouble = 0;
 	dims->xScale = 0;
 	dims->yScale = 0;
 	dims->leftOffset = 0;

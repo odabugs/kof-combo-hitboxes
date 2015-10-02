@@ -5,8 +5,8 @@ const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 
 void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 {
-	int newWidth, newHeight, newXPadding, newGroundY;
-	double dblWidth, dblHeight, newScale, newAspect;
+	int newWidth, newHeight;
+	double dblWidth, dblHeight;
 	RECT target;
 	GetClientRect(handle, &target);
 	newWidth = (int)target.right;
@@ -17,8 +17,8 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 	{
 		dimensions->width = newWidth;
 		dimensions->height = newHeight;
-		dimensions->widthAsDouble = dblWidth = (double)newWidth;
-		dimensions->heightAsDouble = dblHeight = (double)newHeight;
+		dblWidth = (double)newWidth;
+		dblHeight = (double)newHeight;
 		dimensions->aspect = dblWidth / dblHeight;
 
 		switch (dimensions->aspectMode)
