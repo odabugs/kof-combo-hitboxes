@@ -52,7 +52,7 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 				return;
 		}
 		dimensions->groundOffset =
-			dblHeight - (int)floor(dimensions->basicGroundOffset * dimensions->yScale);
+			dblHeight - (int)(dimensions->basicGroundOffset * dimensions->yScale);
 	}
 }
 
@@ -63,41 +63,41 @@ int calculateScreenOffset(double actual, double baseline, double baselineScale)
 }
 
 // also applies offsetting from the left/top of the screen
-void scaleScreenCoords(screen_dimensions_t dimensions, screen_coords_t *target)
+void scaleScreenCoords(screen_dimensions_t *dimensions, screen_coords_t *target)
 {
-	int newX = dimensions.leftOffset + (int)(target->x * dimensions.xScale);
-	int newY = dimensions.groundOffset - (int)(target->y * dimensions.yScale);
-	newY += dimensions.topOffset;
+	int newX = dimensions->leftOffset + (int)(target->x * dimensions->xScale);
+	int newY = dimensions->groundOffset - (int)(target->y * dimensions->yScale);
+	newY += dimensions->topOffset;
 	target->x = newX;
 	target->y = newY;
 }
 
 void translateAbsoluteGameCoords(
-	player_coords_t source, screen_dimensions_t dimensions,
+	player_coords_t *source, screen_dimensions_t *dimensions,
 	screen_coords_t *target)
 {
-	target->x = source.x;
-	target->y = source.y;
+	target->x = source->x;
+	target->y = source->y;
 	scaleScreenCoords(dimensions, target);
 }
 
 void translateRelativeGameCoords(
-	player_coords_t source, screen_dimensions_t dimensions,
-	camera_t camera, screen_coords_t *target)
+	player_coords_t *source, screen_dimensions_t *dimensions,
+	camera_t *camera, screen_coords_t *target)
 {
 	player_coords_t adjusted;
-	adjusted.x = source.x - (int)(camera.x.whole);
-	adjusted.y = source.y - (int)(camera.y.whole);
-	translateAbsoluteGameCoords(adjusted, dimensions, target);
+	adjusted.x = source->x - (int)(camera->x.whole);
+	adjusted.y = source->y - (int)(camera->y.whole);
+	translateAbsoluteGameCoords(&adjusted, dimensions, target);
 }
 
 void translatePlayerCoords(
-	player_t player, screen_dimensions_t dimensions,
-	camera_t camera, screen_coords_t *target)
+	player_t *player, screen_dimensions_t *dimensions,
+	camera_t *camera, screen_coords_t *target)
 {
 	player_coords_t source;
-	int32_t yOffset = baseY.value - player.yOffset.value;
-	source.xComplete.value = player.xPivot.value;
-	source.yComplete.value = player.yPivot.value - yOffset;
-	translateRelativeGameCoords(source, dimensions, camera, target);
+	int32_t yOffset = baseY.value - player->yOffset.value;
+	source.xComplete.value = player->xPivot.value;
+	source.yComplete.value = player->yPivot.value - yOffset;
+	translateRelativeGameCoords(&source, dimensions, camera, target);
 }

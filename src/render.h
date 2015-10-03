@@ -64,15 +64,15 @@ extern const player_coord_t baseY;
 extern void getGameScreenDimensions(
 	HWND handle, screen_dimensions_t *dimensions);
 extern void scaleScreenCoords(
-	screen_dimensions_t dimensions, screen_coords_t *target);
+	screen_dimensions_t *dimensions, screen_coords_t *target);
 extern void translateAbsoluteGameCoords(
-	player_coords_t source, screen_dimensions_t dimensions,
+	player_coords_t *source, screen_dimensions_t *dimensions,
 	screen_coords_t *target);
 extern void translateRelativeGameCoords(
-	player_coords_t source, screen_dimensions_t dimensions,
-	camera_t camera, screen_coords_t *target);
+	player_coords_t *source, screen_dimensions_t *dimensions,
+	camera_t *camera, screen_coords_t *target);
 extern void translatePlayerCoords(
-	player_t player, screen_dimensions_t dimensions,
-	camera_t camera, screen_coords_t *target);
+	player_t *player, screen_dimensions_t *dimensions,
+	camera_t *camera, screen_coords_t *target);
 
 #endif /* RENDER_H */

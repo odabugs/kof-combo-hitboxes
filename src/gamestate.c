@@ -22,7 +22,7 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 			{
 				success = true;
 				target->gamedef = gamedefs[i];
-				establishScreenDimensions(&(target->dimensions), gamedefs[i]);
+				establishScreenDimensions(&(target->dimensions), &(gamedefs[i]));
 				break;
 			}
 			else
@@ -38,16 +38,17 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 	return success;
 }
 
-void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t source)
+void establishScreenDimensions(
+	screen_dimensions_t *dims, gamedef_t *source)
 {
-	memset(dims, 0, sizeof(screen_dimensions_t));
-	dims->basicWidth = source.basicWidth;
-	dims->basicHeight = source.basicHeight;
-	dims->basicWidthAsDouble = (double)source.basicWidth;
-	dims->basicHeightAsDouble = (double)source.basicHeight;
+	memset(dims, 0, sizeof(*dims));
+	dims->basicWidth = source->basicWidth;
+	dims->basicHeight = source->basicHeight;
+	dims->basicWidthAsDouble = (double)source->basicWidth;
+	dims->basicHeightAsDouble = (double)source->basicHeight;
 	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
-	dims->basicGroundOffset = source.groundOffset;
-	dims->aspectMode = source.aspectMode;
+	dims->basicGroundOffset = source->groundOffset;
+	dims->aspectMode = source->aspectMode;
 }
 
 bool openGame(game_state_t *target)

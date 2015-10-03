@@ -4,8 +4,8 @@
 #define PIVOTWIDTH 1
 
 void drawPivot(
-	HDC hdcArea, player_t player, screen_dimensions_t dimensions,
-	camera_t camera)
+	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
+	camera_t *camera)
 {
 	screen_coords_t coords;
 	translatePlayerCoords(player, dimensions, camera, &coords);
@@ -23,6 +23,6 @@ void drawPivot(
 
 extern void drawPlayer(game_state_t *source, int which)
 {
-	drawPivot(source->hdc, source->players[which], source->dimensions,
-		source->camera);
+	drawPivot(source->hdc, &(source->players[which]), &(source->dimensions),
+		&(source->camera));
 }
