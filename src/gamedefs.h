@@ -22,6 +22,7 @@ typedef struct game_definition
 	int basicWidth;
 	int basicWidescreenWidth; // for the SAME basic height
 	int basicHeight;
+	char *recommendResolution;
 	double groundOffset; // from BOTTOM edge of game screen (at 1:1 scale)
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
 } gamedef_t;

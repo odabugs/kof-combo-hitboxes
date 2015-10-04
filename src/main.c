@@ -66,6 +66,8 @@ int main(int argc, char **argv)
 	}
 
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
+	printf("We recommend setting your game to %s resolution.\n",
+		gameState.gamedef.recommendResolution);
 	printf("Press Q in this console window to exit the hitbox viewer.\n");
 
 	hdcArea = gameState.hdc;
