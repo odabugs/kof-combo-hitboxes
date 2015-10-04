@@ -13,6 +13,7 @@
 typedef struct game_definition
 {
 	char *windowTitle;
+	char *shortName;
 	void *playerAddresses[PLAYERS];
 	void *cameraAddress;
 	// should be the width:height closest to 1:1 scale for onscreen objects

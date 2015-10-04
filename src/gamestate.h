@@ -24,6 +24,7 @@ typedef struct game_state
 
 extern bool detectGame(game_state_t *target, gamedef_t gamedefs[]);
 extern bool openGame(game_state_t *target);
+extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);
 
 #endif /* GAMESTATE_H */

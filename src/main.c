@@ -1,7 +1,10 @@
 // to compile with MinGW: mingw32-make
 // TODO: support Visual Studio
 #define WIN32_LEAN_AND_MEAN
+// required for use of GetConsoleWindow() et al.
+#define _WIN32_WINNT 0x0500
 #include <windows.h>
+#include <winuser.h>
 #include <stdlib.h>
 #include <stdio.h>
 //#include <gdiplusflat.h>
@@ -15,8 +18,9 @@
 #define PEN_COLORS 2
 #define PEN_INTERVAL 20
 #define SLEEP_TIME 10
+#define QUIT_KEY 0x51 /* Q key */
 
-HWND wHandle;
+HWND wHandle, myself;
 DWORD procID;
 HANDLE wProcHandle;
 HDC hdcArea;
@@ -34,7 +38,11 @@ game_state_t gameState;
 
 int main(int argc, char **argv)
 {
-	detectGame(&gameState, gamedefs_list);
+	if (!detectGame(&gameState, gamedefs_list))
+	{
+		printf("Failed to detect any supported game running.  Exiting now.\n");
+		exit(EXIT_FAILURE);
+	}
 	wHandle = gameState.wHandle;
 	procID = gameState.processID;
 	if (procID == (DWORD)NULL)
@@ -49,7 +57,10 @@ int main(int argc, char **argv)
 		printf("Failed to obtain handle to target process.  Exiting now.\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("Press Ctrl+C in this console window to stop the hitbox viewer.\n");
+
+	myself = GetConsoleWindow();
+	printf("Game detected: %s\n", gameState.gamedef.shortName);
+	printf("Press Q in this console window to exit the hitbox viewer.\n");
 
 	hdcArea = gameState.hdc;
 	pens[0] = CreatePen(PS_SOLID, 1, RGB(255, 0, 0)); // red
@@ -58,7 +69,8 @@ int main(int argc, char **argv)
 	brushes[1] = CreateSolidBrush(RGB(255, 255, 255));
 
 	int nextPen = 0, penSwitchTimer = PEN_INTERVAL;
-	while (1)
+	bool running = true;
+	while (running)
 	{
 		if (penSwitchTimer <= 0)
 		{
@@ -79,12 +91,27 @@ int main(int argc, char **argv)
 		Sleep(SLEEP_TIME);
 		InvalidateRect(wHandle, &rect, TRUE);
 		penSwitchTimer--;
+
+		// zeroing out the low bit prevents an issue where pressing the
+		// quit key in another window then switching focus to the hitbox
+		// viewer's console window still causes the viewer to quit
+		SHORT quitKeyPressed = (GetKeyState(QUIT_KEY) & ~1);
+		if (quitKeyPressed && (GetForegroundWindow() == myself))
+		{
+			running = false;
+		}
 	}
 
+	cleanupProgram();
+	return 0;
+}
+
+void cleanupProgram()
+{
+	closeGame(&gameState);
 	for (int i = 0; i < PEN_COLORS; i++)
 	{
 		DeleteObject(pens[i]);
 		DeleteObject(brushes[i]);
 	}
-	return 0;
 }

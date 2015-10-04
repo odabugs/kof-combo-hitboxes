@@ -21,8 +21,9 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 			if (newProcID != (DWORD)NULL)
 			{
 				success = true;
-				target->gamedef = gamedefs[i];
-				establishScreenDimensions(&(target->dimensions), &(gamedefs[i]));
+				gamedef_t *pGamedef = &(gamedefs[i]);
+				memcpy(&(target->gamedef), pGamedef, sizeof(*pGamedef));
+				establishScreenDimensions(&(target->dimensions), pGamedef);
 				break;
 			}
 			else
@@ -55,7 +56,7 @@ bool openGame(game_state_t *target)
 {
 	target->wProcHandle = (HANDLE)NULL;
 	DWORD procID = target->processID;
-	HANDLE wProcHandle;
+
 	if (procID != (DWORD)NULL)
 	{
 		HANDLE wProcHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
@@ -67,7 +68,15 @@ bool openGame(game_state_t *target)
 			return true;
 		}
 	}
+
 	return false;
+}
+
+void closeGame(game_state_t *target)
+{
+	ReleaseDC(target->wHandle, target->hdc);
+	CloseHandle(target->wProcHandle);
+	memset(target, 0, sizeof(*target));
 }
 
 void readGameState(game_state_t *target)

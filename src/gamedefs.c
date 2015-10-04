@@ -8,6 +8,7 @@ gamedef_t gamedefs_list[] = {
 	#ifndef NO_KOF_98
 	{
 		.windowTitle = kof98_title,
+		.shortName = "King of Fighters '98UMFE (Steam)",
 		.basicWidth = 320,
 		.basicWidescreenWidth = 398,
 		.basicHeight = 224,
@@ -20,6 +21,7 @@ gamedef_t gamedefs_list[] = {
 	#ifndef NO_KOF_02
 	{
 		.windowTitle = kof02_title,
+		.shortName = "King of Fighters 2002UM (Steam)",
 		.basicWidth = 320,
 		.basicWidescreenWidth = 398,
 		.basicHeight = 224,
