@@ -1,7 +1,6 @@
 CC=mingw32-gcc
 CFLAGS=-std=c99 -w
-LDFLAGS=-lgdi32
-MAIN_C_FILE=main.c
+LDFLAGS=-lgdi32 -ld3d9
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o render.o draw.o gamedefs.o gamestate.o
 HEADERS=playerstruct.h render.h draw.h gamedefs.h gamestate.h

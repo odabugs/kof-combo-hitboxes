@@ -49,10 +49,10 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 				break;
 			default:
 				printf("Encountered invalid aspect mode.");
-				return;
+				exit(EXIT_FAILURE);
 		}
 		dimensions->groundOffset =
-			dblHeight - (int)(dimensions->basicGroundOffset * dimensions->yScale);
+			dblHeight - 1 - (int)(dimensions->basicGroundOffset * dimensions->yScale);
 	}
 }
 
@@ -63,41 +63,54 @@ int calculateScreenOffset(double actual, double baseline, double baselineScale)
 }
 
 // also applies offsetting from the left/top of the screen
-void scaleScreenCoords(screen_dimensions_t *dimensions, screen_coords_t *target)
+void scaleScreenCoords(
+	screen_dimensions_t *dimensions, screen_coords_t *target,
+	coord_options_t options)
 {
-	int newX = dimensions->leftOffset + (int)(target->x * dimensions->xScale);
-	int newY = dimensions->groundOffset - (int)(target->y * dimensions->yScale);
-	newY += dimensions->topOffset;
-	target->x = newX;
-	target->y = newY;
+	int xAdjust = (options & COORD_RIGHT_EDGE)  ? 1 : 0;
+	int yAdjust = (options & COORD_BOTTOM_EDGE) ? 0 : 1;
+	int newX = dimensions->leftOffset;
+	int newY = dimensions->groundOffset + dimensions->topOffset;
+	newX = newX + (int)((target->x + xAdjust) * dimensions->xScale);
+	newY = newY - (int)((target->y + yAdjust) * dimensions->yScale);
+	target->x = newX - xAdjust;
+	target->y = newY + yAdjust;
 }
 
 void translateAbsoluteGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
-	screen_coords_t *target)
+	screen_coords_t *target, coord_options_t options)
 {
 	target->x = source->x;
 	target->y = source->y;
-	scaleScreenCoords(dimensions, target);
+	scaleScreenCoords(dimensions, target, options);
 }
 
 void translateRelativeGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
-	camera_t *camera, screen_coords_t *target)
+	camera_t *camera, screen_coords_t *target, coord_options_t options)
 {
 	player_coords_t adjusted;
 	adjusted.x = source->x - (int)(camera->x.whole);
 	adjusted.y = source->y - (int)(camera->y.whole);
-	translateAbsoluteGameCoords(&adjusted, dimensions, target);
+	translateAbsoluteGameCoords(&adjusted, dimensions, target, options);
 }
 
 void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
-	camera_t *camera, screen_coords_t *target)
+	camera_t *camera, screen_coords_t *target, coord_options_t options)
 {
 	player_coords_t source;
+	worldCoordsFromPlayer(player, &source);
+	translateRelativeGameCoords(&source, dimensions, camera, target, options);
+}
+
+void worldCoordsFromPlayer(player_t *player, player_coords_t *target)
+{
+	// (player structure +01Ch) is an offset that adjusts the player's Y
+	// position both on the screen and in terms of collision detection;
+	// decreasing its value causes the player to "walk on air" raised up
 	int32_t yOffset = baseY.value - player->yOffset.value;
-	source.xComplete.value = player->xPivot.value;
-	source.yComplete.value = player->yPivot.value - yOffset;
-	translateRelativeGameCoords(&source, dimensions, camera, target);
+	target->xComplete.value = player->xPivot.value;
+	target->yComplete.value = player->yPivot.value - yOffset;
 }

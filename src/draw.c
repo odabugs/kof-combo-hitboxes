@@ -8,20 +8,30 @@ void drawPivot(
 	camera_t *camera)
 {
 	screen_coords_t coords;
-	translatePlayerCoords(player, dimensions, camera, &coords);
-	int x = coords.x, y = coords.y;
-	//printf("Drawing to %d, %d\n", x, y);
+	translatePlayerCoords(player, dimensions, camera, &coords, COORD_NORMAL);
+	int topLeftX = coords.x, topLeftY = coords.y;
+	translatePlayerCoords(player, dimensions, camera, &coords, COORD_BOTTOM_RIGHT);
+	int bottomRightX = coords.x, bottomRightY = coords.y;
+	//printf("(%d, %d) to (%d, %d)\n", topLeftX, topLeftY, bottomRightX, bottomRightY);
 
-	SelectObject(hdcArea, GetStockObject(WHITE_BRUSH));
 	Rectangle(hdcArea,
-		x - PIVOTSIZE - PIVOTWIDTH, y - PIVOTWIDTH,
-		x + PIVOTSIZE + PIVOTWIDTH, y + PIVOTWIDTH);
+		topLeftX - PIVOTSIZE,
+		topLeftY,
+		ensureMinThickness(bottomRightX, topLeftX) + PIVOTSIZE,
+		ensureMinThickness(bottomRightY, topLeftY));
 	Rectangle(hdcArea,
-		x - PIVOTWIDTH, y - PIVOTSIZE - PIVOTWIDTH,
-		x + PIVOTWIDTH, y + PIVOTSIZE + PIVOTWIDTH);
+		topLeftX,
+		topLeftY - PIVOTSIZE,
+		ensureMinThickness(bottomRightX, topLeftX),
+		ensureMinThickness(bottomRightY, topLeftY) + PIVOTSIZE);
 }
 
-extern void drawPlayer(game_state_t *source, int which)
+int ensureMinThickness(int goal, int baseline)
+{
+	return max(goal, baseline) + 1;
+}
+
+void drawPlayer(game_state_t *source, int which)
 {
 	drawPivot(source->hdc, &(source->players[which]), &(source->dimensions),
 		&(source->camera));

@@ -59,20 +59,33 @@ typedef struct screen_dimensions
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
 } screen_dimensions_t;
 
+// since one "world pixel" can occupy multiple "screen pixels" at large
+// resolutions, this lets us request a specific "screen pixel edge"
+typedef enum
+{
+	COORD_NORMAL       = 0x00, // top-left
+	COORD_RIGHT_EDGE   = 0x01,
+	COORD_BOTTOM_EDGE  = 0x02,
+	COORD_BOTTOM_RIGHT = 0x03
+} coord_options_t;
+
 extern const player_coord_t baseY;
 
 extern void getGameScreenDimensions(
 	HWND handle, screen_dimensions_t *dimensions);
 extern void scaleScreenCoords(
-	screen_dimensions_t *dimensions, screen_coords_t *target);
+	screen_dimensions_t *dimensions, screen_coords_t *target,
+	coord_options_t options);
 extern void translateAbsoluteGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
-	screen_coords_t *target);
+	screen_coords_t *target, coord_options_t options);
 extern void translateRelativeGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
-	camera_t *camera, screen_coords_t *target);
+	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
-	camera_t *camera, screen_coords_t *target);
+	camera_t *camera, screen_coords_t *target, coord_options_t options);
+extern void worldCoordsFromPlayer(
+	player_t *player, player_coords_t *target);
 
 #endif /* RENDER_H */

@@ -2,6 +2,7 @@
 
 char kof98_title[] = "King of Fighters '98 Ultimate Match Final Edition";
 char kof02_title[] = "King of Fighters 2002 Unlimited Match";
+#define BASIC_GROUND_OFFSET 22.5
 
 gamedef_t gamedefs_list[] = {
 	#ifndef NO_KOF_98
@@ -11,7 +12,7 @@ gamedef_t gamedefs_list[] = {
 		.basicWidescreenWidth = 398,
 		.basicHeight = 224,
 		.aspectMode = AM_PILLARBOX,
-		.groundOffset = 22.5,
+		.groundOffset = BASIC_GROUND_OFFSET,
 		.playerAddresses = { 0x0170D000, 0x0170D200 },
 		.cameraAddress = 0x0180C938
 	},
@@ -23,7 +24,7 @@ gamedef_t gamedefs_list[] = {
 		.basicWidescreenWidth = 398,
 		.basicHeight = 224,
 		.aspectMode = AM_PILLARBOX,
-		.groundOffset = 22.5,
+		.groundOffset = BASIC_GROUND_OFFSET,
 		.playerAddresses = { 0x0167C3A0, 0x0167C5C0 },
 		.cameraAddress = 0x02208BF8
 	},
