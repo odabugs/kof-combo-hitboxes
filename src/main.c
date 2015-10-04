@@ -22,7 +22,7 @@
 
 HWND wHandle, myself;
 DWORD procID;
-HANDLE wProcHandle;
+HANDLE wProcHandle, myStdin;
 HDC hdcArea;
 RECT rect;
 PAINTSTRUCT ps;
@@ -57,8 +57,14 @@ int main(int argc, char **argv)
 		printf("Failed to obtain handle to target process.  Exiting now.\n");
 		exit(EXIT_FAILURE);
 	}
-
 	myself = GetConsoleWindow();
+	myStdin = GetStdHandle(STD_INPUT_HANDLE);
+	if (myself == (HWND)NULL || myStdin == INVALID_HANDLE_VALUE)
+	{
+		printf("Failed to obtain handles to this console window.  Exiting now.\n");
+		exit(EXIT_FAILURE);
+	}
+
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
 	printf("Press Q in this console window to exit the hitbox viewer.\n");
 
@@ -95,9 +101,10 @@ int main(int argc, char **argv)
 		// zeroing out the low bit prevents an issue where pressing the
 		// quit key in another window then switching focus to the hitbox
 		// viewer's console window still causes the viewer to quit
-		SHORT quitKeyPressed = (GetKeyState(QUIT_KEY) & ~1);
+		SHORT quitKeyPressed = (GetAsyncKeyState(QUIT_KEY) & ~1);
 		if (quitKeyPressed && (GetForegroundWindow() == myself))
 		{
+			FlushConsoleInputBuffer(myStdin);
 			running = false;
 		}
 	}
