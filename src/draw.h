@@ -7,6 +7,8 @@
 #include "render.h"
 #include "gamestate.h"
 
+extern void setupDrawing();
+extern void teardownDrawing();
 extern void drawPivot(
 	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera);

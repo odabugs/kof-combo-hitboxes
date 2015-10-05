@@ -29,6 +29,11 @@ void teardownDrawing()
 	}
 }
 
+int ensureMinThickness(int goal, int baseline)
+{
+	return max(goal, baseline) + 1;
+}
+
 void drawPivot(
 	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera)
@@ -50,11 +55,6 @@ void drawPivot(
 		topLeftY - PIVOTSIZE,
 		ensureMinThickness(bottomRightX, topLeftX),
 		ensureMinThickness(bottomRightY, topLeftY) + PIVOTSIZE);
-}
-
-int ensureMinThickness(int goal, int baseline)
-{
-	return max(goal, baseline) + 1;
 }
 
 void drawPlayer(game_state_t *source, int which)

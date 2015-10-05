@@ -1,5 +1,6 @@
 CC=mingw32-gcc
-CFLAGS=-std=c99 -w
+#TODO: add debug build target
+CFLAGS=-std=c99
 LDFLAGS=-lgdi32 -ld3d9
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o render.o draw.o gamedefs.o gamestate.o

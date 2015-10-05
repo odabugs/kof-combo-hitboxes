@@ -23,6 +23,8 @@ typedef struct game_state
 } game_state_t;
 
 extern bool detectGame(game_state_t *target, gamedef_t gamedefs[]);
+extern void establishScreenDimensions(
+	screen_dimensions_t *dims, gamedef_t *source);
 extern bool openGame(game_state_t *target);
 extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);

@@ -3,6 +3,32 @@
 
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 
+int calculateScreenOffset(double actual, double baseline, double baselineScale)
+{
+	double scaled = floor(baseline * baselineScale);
+	return (actual <= scaled) ? 0 : (int)((actual - scaled) / 2.0);
+}
+
+void setScreenOffsetsPillarboxed(
+	screen_dimensions_t *dimensions, double dblWidth, double dblHeight)
+{
+	dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
+	dimensions->xScale = dimensions->yScale;
+	dimensions->leftOffset = calculateScreenOffset(
+		dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
+	dimensions->topOffset = 0;
+}
+
+void setScreenOffsetsLetterboxed(
+	screen_dimensions_t *dimensions, double dblWidth, double dblHeight)
+{
+	dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
+	dimensions->yScale = dimensions->xScale;
+	dimensions->leftOffset = 0;
+	dimensions->topOffset = calculateScreenOffset(
+		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
+}
+
 void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 {
 	int newWidth, newHeight;
@@ -31,21 +57,20 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 				dimensions->topOffset = 0;
 				break;
 			case AM_PILLARBOX:
-				dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
-				dimensions->xScale = dimensions->yScale;
-				dimensions->leftOffset = calculateScreenOffset(
-					dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
-				dimensions->topOffset = 0;
+					setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
 				break;
 			case AM_LETTERBOX:
-				dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
-				dimensions->yScale = dimensions->xScale;
-				dimensions->leftOffset = 0;
-				dimensions->topOffset = calculateScreenOffset(
-					dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
+					setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
 				break;
 			case AM_WINDOW_FRAME:
-				// TODO
+				if (dimensions->aspect < dimensions->basicAspect)
+				{
+					setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
+				}
+				else
+				{
+					setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
+				}
 				break;
 			default:
 				printf("Encountered invalid aspect mode.");
@@ -54,12 +79,6 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 		dimensions->groundOffset =
 			dblHeight - 1 - (int)(dimensions->basicGroundOffset * dimensions->yScale);
 	}
-}
-
-int calculateScreenOffset(double actual, double baseline, double baselineScale)
-{
-	double scaled = floor(baseline * baselineScale);
-	return (actual <= scaled) ? 0 : (int)((actual - scaled) / 2.0);
 }
 
 // also applies offsetting from the left/top of the screen
@@ -75,6 +94,7 @@ void scaleScreenCoords(
 	newY = newY - (int)((target->y + yAdjust) * dimensions->yScale);
 	target->x = newX - xAdjust;
 	target->y = newY + yAdjust;
+	//printf("Drawing to %d, %d\n", target->x, target->y);
 }
 
 void translateAbsoluteGameCoords(
