@@ -11,5 +11,6 @@ extern void drawPivot(
 	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera);
 extern void drawPlayer(game_state_t *source, int which);
+extern void drawScene(game_state_t *source);
 
 #endif /* DRAW_H */
