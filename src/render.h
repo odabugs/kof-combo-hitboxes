@@ -87,5 +87,10 @@ extern void translatePlayerCoords(
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void worldCoordsFromPlayer(
 	player_t *player, player_coords_t *target);
+extern void relativizeWorldCoords(
+	camera_t *camera, player_coords_t *target);
+extern void adjustWorldCoords(player_coords_t *target,
+	int xAdjust, int yAdjust);
+extern void swapYComponents(player_coords_t *left, player_coords_t *right);
 
 #endif /* RENDER_H */

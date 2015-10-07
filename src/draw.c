@@ -2,15 +2,11 @@
 
 #define PEN_COLORS 2
 #define PEN_INTERVAL 20
-#define PIVOTSIZE 10
-#define PIVOTWIDTH 1
+#define PIVOTSIZE 5
 
-HPEN pens[PEN_COLORS];
-HBRUSH brushes[PEN_COLORS];
-PAINTSTRUCT ps;
-RECT rect;
-int nextPen = 0;
-int penSwitchTimer = PEN_INTERVAL;
+static HPEN pens[PEN_COLORS];
+static HBRUSH brushes[PEN_COLORS];
+static int nextPen = 0, penSwitchTimer = PEN_INTERVAL;
 
 void setupDrawing()
 {
@@ -34,27 +30,43 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
+void drawRectangle(
+	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
+	screen_dimensions_t *dimensions, camera_t *camera)
+{
+	screen_coords_t bottomLeftScreen, topRightScreen;
+	translateRelativeGameCoords(
+		bottomLeft, dimensions, camera, &bottomLeftScreen, COORD_BOTTOM_EDGE);
+	translateRelativeGameCoords(
+		topRight, dimensions, camera, &topRightScreen, COORD_RIGHT_EDGE);
+	int leftX = bottomLeftScreen.x;
+	int topY = topRightScreen.y;
+	int rightX = ensureMinThickness(topRightScreen.x, leftX);
+	int bottomY = ensureMinThickness(bottomLeftScreen.y, topY);
+
+	Rectangle(hdcArea, leftX, topY, rightX, bottomY);
+}
+
 void drawPivot(
 	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera)
 {
-	screen_coords_t coords;
-	translatePlayerCoords(player, dimensions, camera, &coords, COORD_NORMAL);
-	int topLeftX = coords.x, topLeftY = coords.y;
-	translatePlayerCoords(player, dimensions, camera, &coords, COORD_BOTTOM_RIGHT);
-	int bottomRightX = coords.x, bottomRightY = coords.y;
-	//printf("(%d, %d) to (%d, %d)\n", topLeftX, topLeftY, bottomRightX, bottomRightY);
+	player_coords_t pivotOriginal, pivotBottomLeft, pivotTopRight;
 
-	Rectangle(hdcArea,
-		topLeftX - PIVOTSIZE,
-		topLeftY,
-		ensureMinThickness(bottomRightX, topLeftX) + PIVOTSIZE,
-		ensureMinThickness(bottomRightY, topLeftY));
-	Rectangle(hdcArea,
-		topLeftX,
-		topLeftY - PIVOTSIZE,
-		ensureMinThickness(bottomRightX, topLeftX),
-		ensureMinThickness(bottomRightY, topLeftY) + PIVOTSIZE);
+	// draw horizontal line of pivot cross
+	worldCoordsFromPlayer(player, &pivotOriginal);
+	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
+	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
+	adjustWorldCoords(&pivotBottomLeft, -PIVOTSIZE, 0);
+	adjustWorldCoords(&pivotTopRight, PIVOTSIZE, 0);
+	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, camera);
+
+	// draw vertical line of pivot cross
+	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
+	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
+	adjustWorldCoords(&pivotBottomLeft, 0, -PIVOTSIZE);
+	adjustWorldCoords(&pivotTopRight, 0, PIVOTSIZE);
+	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, camera);
 }
 
 void drawPlayer(game_state_t *source, int which)
@@ -68,6 +80,9 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
+	PAINTSTRUCT ps;
+	RECT rect;
+
 	BeginPaint(source->wHandle, &ps);
 
 	if (penSwitchTimer-- <= 0)

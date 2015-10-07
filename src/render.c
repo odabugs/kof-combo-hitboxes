@@ -94,7 +94,6 @@ void scaleScreenCoords(
 	newY = newY - (int)((target->y + yAdjust) * dimensions->yScale);
 	target->x = newX - xAdjust;
 	target->y = newY + yAdjust;
-	//printf("Drawing to %d, %d\n", target->x, target->y);
 }
 
 void translateAbsoluteGameCoords(
@@ -111,8 +110,8 @@ void translateRelativeGameCoords(
 	camera_t *camera, screen_coords_t *target, coord_options_t options)
 {
 	player_coords_t adjusted;
-	adjusted.x = source->x - (int)(camera->x.whole);
-	adjusted.y = source->y - (int)(camera->y.whole);
+	memcpy(&adjusted, source, sizeof(*source));
+	relativizeWorldCoords(camera, &adjusted);
 	translateAbsoluteGameCoords(&adjusted, dimensions, target, options);
 }
 
@@ -133,4 +132,23 @@ void worldCoordsFromPlayer(player_t *player, player_coords_t *target)
 	int32_t yOffset = baseY.value - player->yOffset.value;
 	target->xComplete.value = player->xPivot.value;
 	target->yComplete.value = player->yPivot.value - yOffset;
+}
+
+void relativizeWorldCoords(camera_t *camera, player_coords_t *target)
+{
+	target->x -= (int)(camera->x.whole);
+	target->y -= (int)(camera->y.whole);
+}
+
+void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust)
+{
+	target->x += xAdjust;
+	target->y += yAdjust;
+}
+
+void swapYComponents(player_coords_t *left, player_coords_t *right)
+{
+	player_coord_t tmpY = left->yComplete;
+	left->yComplete = right->yComplete;
+	right->yComplete = tmpY;
 }

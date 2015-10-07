@@ -21,6 +21,7 @@ typedef union __attribute__((__packed__)) player_coord
 	int32_t value;
 } player_coord_t;
 
+// positive Y moves upward when dealing with world coords
 typedef struct __attribute__((__packed__)) player_coords
 {
 	union
