@@ -71,7 +71,9 @@ typedef struct __attribute__((__packed__)) player
 	player_coord_t xPivot;    // +018h: X position in world (pivot axis)
 	player_coord_t yOffset;   // +01Ch: Base offset to Y position in world
 	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
-	uint8_t padding02[0x018]; // +024h to +03Ch: unknown
+	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
+	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
+	uint8_t padding02[0x014]; // +028h to +03Ch: unknown
 	uint16_t currentCharID;   // +03Ch: Current(?) character ID
 	uint8_t padding03[0x012]; // +03Eh to +050h: unknown
 	player_coord_t xSpeed;    // +050h: X velocity
