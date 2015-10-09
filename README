@@ -10,11 +10,9 @@ TODO:
   - Possible MinGW-friendly alternative: https://github.com/TsudaKageyu/minhook
     - http://www.codeproject.com/Articles/44326/MinHook-The-Minimalistic-x-x-API-Hooking-Libra
 - Switch to DirectX instead of raw GDI (it's just way too slow)
-- Figure out vertical screen shaking (e.g. on EX Billy's qcf,qcf+BD super)
 - Maybe integrate the Steam Anti-Anti Debugger?
   - http://www.thehackerwithin.com/blog/11-08-07/Steam_s_anti-debugging_code.aspx
 
 Known issues:
 - Sporadic bouts of flickering, sometimes severe.
-- Pivots don't show up on certain stages (China river, USA rail yard).
 - Pivots don't show up in Steam screenshots (probably solved by API hooking).
