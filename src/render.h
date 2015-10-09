@@ -66,7 +66,8 @@ typedef enum
 	COORD_NORMAL       = 0x00, // top-left
 	COORD_RIGHT_EDGE   = 0x01,
 	COORD_BOTTOM_EDGE  = 0x02,
-	COORD_BOTTOM_RIGHT = 0x03
+	COORD_BOTTOM_RIGHT = 0x03, // COORD_RIGHT_EDGE & COORD_BOTTOM_EDGE
+	COORD_ABSOLUTE_Y   = 0x04
 } coord_options_t;
 
 extern const player_coord_t baseY;
@@ -76,16 +77,15 @@ extern void getGameScreenDimensions(
 extern void scaleScreenCoords(
 	screen_dimensions_t *dimensions, screen_coords_t *target,
 	coord_options_t options);
-extern void translateAbsoluteGameCoords(
-	player_coords_t *source, screen_dimensions_t *dimensions,
-	screen_coords_t *target, coord_options_t options);
-extern void translateRelativeGameCoords(
+extern void translateGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void worldCoordsFromPlayer(
+	player_t *player, player_coords_t *target);
+extern void absoluteWorldCoordsFromPlayer(
 	player_t *player, player_coords_t *target);
 extern void relativizeWorldCoords(
 	camera_t *camera, player_coords_t *target);

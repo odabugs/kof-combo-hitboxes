@@ -32,13 +32,14 @@ int ensureMinThickness(int goal, int baseline)
 
 void drawRectangle(
 	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
-	screen_dimensions_t *dimensions, camera_t *camera)
+	screen_dimensions_t *dimensions, camera_t *camera, bool absoluteY)
 {
 	screen_coords_t bottomLeftScreen, topRightScreen;
-	translateRelativeGameCoords(
-		bottomLeft, dimensions, camera, &bottomLeftScreen, COORD_BOTTOM_EDGE);
-	translateRelativeGameCoords(
-		topRight, dimensions, camera, &topRightScreen, COORD_RIGHT_EDGE);
+	coord_options_t options = absoluteY ? COORD_ABSOLUTE_Y : COORD_NORMAL;
+	translateGameCoords(bottomLeft, dimensions, camera,
+		&bottomLeftScreen, options | COORD_BOTTOM_EDGE);
+	translateGameCoords(topRight, dimensions, camera,
+		&topRightScreen, options | COORD_RIGHT_EDGE);
 	int leftX = bottomLeftScreen.x;
 	int topY = topRightScreen.y;
 	int rightX = ensureMinThickness(topRightScreen.x, leftX);
@@ -54,19 +55,19 @@ void drawPivot(
 	player_coords_t pivotOriginal, pivotBottomLeft, pivotTopRight;
 
 	// draw horizontal line of pivot cross
-	worldCoordsFromPlayer(player, &pivotOriginal);
+	absoluteWorldCoordsFromPlayer(player, &pivotOriginal);
 	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
 	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
 	adjustWorldCoords(&pivotBottomLeft, -PIVOTSIZE, 0);
 	adjustWorldCoords(&pivotTopRight, PIVOTSIZE, 0);
-	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, camera);
+	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, NULL, true);
 
 	// draw vertical line of pivot cross
 	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
 	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
-	adjustWorldCoords(&pivotBottomLeft, 0, -PIVOTSIZE);
-	adjustWorldCoords(&pivotTopRight, 0, PIVOTSIZE);
-	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, camera);
+	adjustWorldCoords(&pivotBottomLeft, 0, PIVOTSIZE);
+	adjustWorldCoords(&pivotTopRight, 0, -PIVOTSIZE);
+	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, NULL, true);
 }
 
 void drawPlayer(game_state_t *source, int which)

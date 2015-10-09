@@ -1,6 +1,8 @@
 #include "render.h"
 #include "playerstruct.h"
 
+#define ABSOLUTE_Y_OFFSET 16
+
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 
 int calculateScreenOffset(double actual, double baseline, double baselineScale)
@@ -87,32 +89,44 @@ void scaleScreenCoords(
 	coord_options_t options)
 {
 	int xAdjust = (options & COORD_RIGHT_EDGE)  ? 1 : 0;
-	int yAdjust = (options & COORD_BOTTOM_EDGE) ? 0 : 1;
+	int yAdjust = (options & COORD_BOTTOM_EDGE) ? 1 : 0;
+
 	int newX = dimensions->leftOffset;
-	int newY = dimensions->groundOffset + dimensions->topOffset;
-	newX = newX + (int)((target->x + xAdjust) * dimensions->xScale);
-	newY = newY - (int)((target->y + yAdjust) * dimensions->yScale);
+	newX += (int)((target->x + xAdjust) * dimensions->xScale);
 	target->x = newX - xAdjust;
-	target->y = newY + yAdjust;
+
+	int newY = dimensions->topOffset;
+	if (options & COORD_ABSOLUTE_Y)
+	{
+		newY += (int)((target->y + yAdjust - ABSOLUTE_Y_OFFSET) * dimensions->yScale);
+		newY += 1; // god only knows why this is needed but it works
+		target->y = newY - yAdjust;
+	}
+	else
+	{
+		yAdjust = (yAdjust != 0) ? 0 : 1;
+		newY += dimensions->groundOffset;
+		newY -= (int)((target->y + yAdjust) * dimensions->yScale);
+		target->y = newY + yAdjust;
+	}
 }
 
-void translateAbsoluteGameCoords(
-	player_coords_t *source, screen_dimensions_t *dimensions,
-	screen_coords_t *target, coord_options_t options)
-{
-	target->x = source->x;
-	target->y = source->y;
-	scaleScreenCoords(dimensions, target, options);
-}
-
-void translateRelativeGameCoords(
+// pass a non-NULL camera pointer to make the results relative to that camera
+void translateGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options)
 {
 	player_coords_t adjusted;
-	memcpy(&adjusted, source, sizeof(*source));
-	relativizeWorldCoords(camera, &adjusted);
-	translateAbsoluteGameCoords(&adjusted, dimensions, target, options);
+	player_coords_t *newSource = source;
+	if (camera != NULL)
+	{
+		memcpy(&adjusted, source, sizeof(*source));
+		relativizeWorldCoords(camera, &adjusted);
+		newSource = &adjusted;
+	}
+	target->x = newSource->x;
+	target->y = newSource->y;
+	scaleScreenCoords(dimensions, target, options);
 }
 
 void translatePlayerCoords(
@@ -121,7 +135,7 @@ void translatePlayerCoords(
 {
 	player_coords_t source;
 	worldCoordsFromPlayer(player, &source);
-	translateRelativeGameCoords(&source, dimensions, camera, target, options);
+	translateGameCoords(&source, dimensions, camera, target, options);
 }
 
 void worldCoordsFromPlayer(player_t *player, player_coords_t *target)
@@ -132,6 +146,13 @@ void worldCoordsFromPlayer(player_t *player, player_coords_t *target)
 	int32_t yOffset = baseY.value - player->yOffset.value;
 	target->xComplete.value = player->xPivot.value;
 	target->yComplete.value = player->yPivot.value - yOffset;
+}
+
+void absoluteWorldCoordsFromPlayer(player_t *player, player_coords_t *target)
+{
+	memset(target, 0, sizeof(*target));
+	target->x = player->screenX;
+	target->y = player->screenY;
 }
 
 void relativizeWorldCoords(camera_t *camera, player_coords_t *target)
