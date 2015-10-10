@@ -77,8 +77,11 @@ void drawPlayer(game_state_t *source, int which)
 	int penIndex = (nextPen + which) % PEN_COLORS;
 	SelectObject(source->hdc, pens[penIndex]);
 	SelectObject(source->hdc, brushes[penIndex]);
-	drawPivot(source->hdc, &(source->players[which]),
-		&(source->dimensions), &(source->camera));
+	player_t *player = &(source->players[which]);
+	screen_dimensions_t *dims = &(source->dimensions);
+	camera_t *camera = &(source->camera);
+
+	drawPivot(source->hdc, player, dims, camera);
 }
 
 void drawScene(game_state_t *source)

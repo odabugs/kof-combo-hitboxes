@@ -10,6 +10,12 @@
 
 #define PLAYERS 2
 
+typedef struct character_definition
+{
+	character_id_t charID;
+	char *charName;
+} character_def_t;
+
 typedef struct game_definition
 {
 	char *windowTitle;
@@ -25,6 +31,8 @@ typedef struct game_definition
 	char *extraRecommendations;
 	double groundOffset; // from BOTTOM edge of game screen (at 1:1 scale)
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
+	int rosterSize;
+	character_def_t *roster;
 } gamedef_t;
 
 extern gamedef_t gamedefs_list[];

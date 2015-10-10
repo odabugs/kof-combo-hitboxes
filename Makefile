@@ -23,7 +23,7 @@ render.o: render.c playerstruct.h
 draw.o: draw.c render.h playerstruct.h gamestate.h
 	$(CC) $(CFLAGS) -c $^
 
-gamedefs.o: gamedefs.c gamedefs.h
+gamedefs.o: gamedefs.c gamedefs.h kof98_roster.h kof02_roster.h
 	$(CC) $(CFLAGS) -c $^
 
 gamestate.o: gamestate.c playerstruct.h render.h gamedefs.h

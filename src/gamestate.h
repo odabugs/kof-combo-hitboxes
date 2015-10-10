@@ -28,5 +28,7 @@ extern void establishScreenDimensions(
 extern bool openGame(game_state_t *target);
 extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);
+extern character_def_t *characterForID(game_state_t *source, int charID);
+extern char *characterNameForID(game_state_t *source, int charID);
 
 #endif /* GAMESTATE_H */

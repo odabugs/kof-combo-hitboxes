@@ -10,7 +10,7 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 	LPCTSTR title;
 	bool success = false;
 
-	for (int i = 0; gamedefs[i].windowTitle != NULL; i++)
+	for (int i = 0; gamedefs[i].windowTitle != (char*)NULL; i++)
 	{
 		title = gamedefs[i].windowTitle;
 		wHandle = FindWindow(NULL, title);
@@ -60,7 +60,7 @@ bool openGame(game_state_t *target)
 	if (procID != (DWORD)NULL)
 	{
 		HANDLE wProcHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
-		if (wProcHandle != INVALID_HANDLE_VALUE && wProcHandle != NULL)
+		if (wProcHandle != INVALID_HANDLE_VALUE && wProcHandle != (HANDLE)NULL)
 		{
 			target->wProcHandle = wProcHandle;
 			target->hdc = GetDC(target->wHandle);
@@ -95,4 +95,24 @@ void readGameState(game_state_t *target)
 		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
 		sizeof(camera_t), NULL);
 	getGameScreenDimensions(target->wHandle, &(target->dimensions));
+}
+
+// TODO: if player is using an EX character then this yields the non-EX equivalent
+character_def_t *characterForID(game_state_t *source, int charID)
+{
+	if (source == (game_state_t*)NULL || charID >= source->gamedef.rosterSize)
+	{
+		return (character_def_t*)NULL;
+	}
+	return &(source->gamedef.roster[charID]);
+}
+
+char *characterNameForID(game_state_t *source, int charID)
+{
+	character_def_t *result = characterForID(source, charID);
+	if (result == (character_def_t*)NULL)
+	{
+		return (char*)NULL;
+	}
+	return result->charName;
 }

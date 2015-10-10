@@ -1,4 +1,5 @@
 #ifndef NO_KOF_98
+#define KOF_98_ROSTER_SIZE 0x40
 {
 	.windowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 	.shortName = "King of Fighters '98UMFE (Steam)",
@@ -12,6 +13,8 @@
 		(player_t*)0x0170D000,
 		(player_t*)0x0170D200
 	},
-	.cameraAddress = (camera_t*)0x0180C938
+	.cameraAddress = (camera_t*)0x0180C938,
+	.rosterSize = KOF_98_ROSTER_SIZE,
+	.roster = (character_def_t*)&kof98_roster
 },
 #endif /* NO_KOF_98 */
