@@ -61,6 +61,10 @@ static const costume_t
 	COSTUME_CD = 4, COSTUME_AB = 5, COSTUME_AD = 6, COSTUME_BC = 7;
 
 typedef uint8_t player_input_t;
+// character IDs appear in different byte sizes depending on context
+typedef uint8_t char_id_byte_t;
+typedef uint16_t char_id_short_t;
+typedef uint32_t character_id_t;
 
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
@@ -74,15 +78,15 @@ typedef struct __attribute__((__packed__)) player
 	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
 	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
 	uint8_t padding02[0x014]; // +028h to +03Ch: unknown
-	uint16_t currentCharID;   // +03Ch: Current(?) character ID
+	char_id_short_t currentCharID; // +03Ch: Current(?) character ID
 	uint8_t padding03[0x012]; // +03Eh to +050h: unknown
 	player_coord_t xSpeed;    // +050h: X velocity
 	uint8_t padding04[0x004]; // +054h to +058h: unknown
 	player_coord_t ySpeed;    // +058h: Y velocity
 	uint8_t padding05[0x014]; // +05Ch to +070h: unknown
-	uint16_t currentCharID_alt1; // +070h: Current(?) character ID (alt 1)
+	char_id_short_t currentCharID_alt1; // +070h: Current(?) character ID (alt 1)
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
-	uint16_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
+	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
 	uint8_t padding07[0x002]; // +078h to +080h: unknown
 	facing_t facing;          // +080h: Facing (0 = left, 1 = right)
 	uint8_t padding08[0x030]; // +084h to +0B4h: unknown
@@ -105,7 +109,7 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t stunRecover;      // +145h: Stun recovery timer
 	uint16_t guardGauge;      // +146h: Guard crush gauge
 	uint8_t padding15[0x011]; // +147h to +158h: unknown
-	uint16_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
+	char_id_short_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
 	uint8_t padding16[0x04E]; // +15Ah to +1A8h: unknown
 	struct player_extra *extra; // +1A8h: Pointer to player's "extra" struct
 	uint8_t padding17[0x037]; // +1ACh to +1E3h: unknown
