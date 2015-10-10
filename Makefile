@@ -6,7 +6,7 @@ EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o render.o draw.o gamedefs.o gamestate.o
 HEADERS=playerstruct.h render.h draw.h gamedefs.h gamestate.h
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
-VPATH=src
+VPATH=src src/kof98 src/kof02
 
 default: $(MAIN_AND_OBJECTS)
 	$(CC) -o $(EXE_NAME) $^ $(LDFLAGS) 
@@ -23,7 +23,7 @@ render.o: render.c playerstruct.h
 draw.o: draw.c render.h playerstruct.h gamestate.h
 	$(CC) $(CFLAGS) -c $^
 
-gamedefs.o: gamedefs.c
+gamedefs.o: gamedefs.c gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
 gamestate.o: gamestate.c playerstruct.h render.h gamedefs.h

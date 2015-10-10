@@ -4,6 +4,8 @@
 #define PEN_INTERVAL 20
 #define PIVOTSIZE 5
 
+static PAINTSTRUCT ps;
+static RECT rect;
 static HPEN pens[PEN_COLORS];
 static HBRUSH brushes[PEN_COLORS];
 static int nextPen = 0, penSwitchTimer = PEN_INTERVAL;
@@ -81,9 +83,6 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
-	PAINTSTRUCT ps;
-	RECT rect;
-
 	BeginPaint(source->wHandle, &ps);
 
 	if (penSwitchTimer-- <= 0)
