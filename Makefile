@@ -30,4 +30,7 @@ gamestate.o: gamestate.c playerstruct.h render.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -f $(EXE_NAME) $(MAIN_AND_OBJECTS) src/*.h.gch
+	rm -f $(EXE_NAME) *.o *.h.gch
+	rm -f src/*.o src/*.h.gch
+	rm -f src/kof98/*.o src/kof98/*.h.gch
+	rm -f src/kof02/*.o src/kof02/*.h.gch
