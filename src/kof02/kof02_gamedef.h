@@ -1,3 +1,4 @@
+// Note: this does not compile standalone
 #ifndef NO_KOF_02
 {
 	.windowTitle = "King of Fighters 2002 Unlimited Match",

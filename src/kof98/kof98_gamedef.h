@@ -1,5 +1,5 @@
+// Note: this does not compile standalone
 #ifndef NO_KOF_98
-#define KOF_98_ROSTER_SIZE 0x40
 {
 	.windowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 	.shortName = "King of Fighters '98UMFE (Steam)",
