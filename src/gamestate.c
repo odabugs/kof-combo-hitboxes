@@ -112,7 +112,7 @@ char *characterNameForID(game_state_t *source, int charID)
 	character_def_t *result = characterForID(source, charID);
 	if (result == (character_def_t*)NULL)
 	{
-		return (char*)NULL;
+		return "INVALID";
 	}
 	return result->charName;
 }

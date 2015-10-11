@@ -256,7 +256,7 @@ static character_def_t kof02_roster[KOF_02_ROSTER_SIZE] = {
 		.charName = "Igniz"
 	},
 	{
-		.charID = 0x3F,
+		.charID = 0x3F, // not a valid character ID in KOF '02UM
 		.charName = "INVALID"
 	},
 	{

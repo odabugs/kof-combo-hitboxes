@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
-// all structs defined here (obviously) assume a little endian CPU
-// "+XXXh to YYYh" should be intepreted as XXX inclusive to YYY exclusive
+// all structs defined here assume a little-endian CPU
+// hex numbers in comments (e.g., for noting offsets) are written like +XXXh
+// if you add stuff to structures here without noting the offset, jesus weeps
+// "+XXXh to +YYYh" should be intepreted as +XXXh inclusive to +YYYh exclusive
 
 typedef int16_t game_pixel_t; // whole
 typedef uint16_t game_subpixel_t; // partial
@@ -58,6 +60,7 @@ static const facing_t FACING_LEFT = 0, FACING_RIGHT = 1;
 typedef uint8_t costume_t;
 static const costume_t
 	COSTUME_A  = 0, COSTUME_B  = 1, COSTUME_C  = 2, COSTUME_D  = 3,
+	// the following apply only to '98UM
 	COSTUME_CD = 4, COSTUME_AB = 5, COSTUME_AD = 6, COSTUME_BC = 7;
 
 typedef uint8_t player_input_t;
