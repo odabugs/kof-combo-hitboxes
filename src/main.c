@@ -56,31 +56,40 @@ void mainLoop()
 
 void startupProgram()
 {
+	bool bailout = false;
 	if (!detectGame(&gameState, gamedefs_list))
 	{
-		printf("Failed to detect any supported game running.  Exiting now.\n");
-		exit(EXIT_FAILURE);
+		printf("Failed to detect any supported game running.\n");
+		bailout = true;
 	}
 	if (gameState.processID == (DWORD)NULL)
 	{
-		printf("Could not find target window.  Exiting now.\n");
-		exit(EXIT_FAILURE);
+		printf("Could not find target window.\n");
+		bailout = true;
 	}
 	openGame(&gameState);
 	if (gameState.wProcHandle == INVALID_HANDLE_VALUE)
 	{
-		printf("Failed to obtain handle to target process.  Exiting now.\n");
-		exit(EXIT_FAILURE);
+		printf("Failed to obtain handle to target process.\n");
+		bailout = true;
 	}
 	myself = GetConsoleWindow();
 	myStdin = GetStdHandle(STD_INPUT_HANDLE);
 	if (myself == (HWND)NULL || myStdin == INVALID_HANDLE_VALUE)
 	{
-		printf("Failed to obtain handles to this console window.  Exiting now.\n");
-		exit(EXIT_FAILURE);
+		printf("Failed to obtain handles to this console window.\n");
+		bailout = true;
 	}
 
-	setupDrawing();
+	if (bailout)
+	{
+		printf("Exiting now.\n");
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		setupDrawing();
+	}
 }
 
 void cleanupProgram()
