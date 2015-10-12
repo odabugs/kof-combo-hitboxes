@@ -24,7 +24,7 @@ void startupProgram();
 void cleanupProgram();
 void mainLoop();
 void drawNextFrame();
-bool checkShouldContinueRunning();
+bool checkShouldContinueRunning(char **reason);
 
 int main(int argc, char **argv)
 {
