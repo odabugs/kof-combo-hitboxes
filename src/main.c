@@ -46,11 +46,18 @@ int main(int argc, char **argv)
 void mainLoop()
 {
 	bool running = true;
+	char *quitReason = (char*)NULL;
+
 	while (running)
 	{
 		drawNextFrame();
 		Sleep(SLEEP_TIME);
-		running = checkShouldContinueRunning();
+		running = checkShouldContinueRunning(&quitReason);
+	}
+
+	if (quitReason != (char*)NULL)
+	{
+		printf("%s\n", quitReason);
 	}
 }
 
@@ -105,7 +112,7 @@ void drawNextFrame()
 	drawScene(&gameState);
 }
 
-bool checkShouldContinueRunning()
+bool checkShouldContinueRunning(char **reason)
 {
 	// zeroing out the low bit prevents an issue where pressing the
 	// quit key in another window then switching focus to the hitbox
@@ -114,6 +121,14 @@ bool checkShouldContinueRunning()
 	if (quitKeyPressed && (GetForegroundWindow() == myself))
 	{
 		FlushConsoleInputBuffer(myStdin);
+		*reason = "User closed the hitbox viewer.";
+		return false;
+	}
+	// IsWindow() can potentially return true if the window handle is
+	// recycled, but we're checking it too frequently to worry about that
+	if (!IsWindow(gameState.wHandle))
+	{
+		*reason = "User closed the game as it was running.";
 		return false;
 	}
 	return true;
