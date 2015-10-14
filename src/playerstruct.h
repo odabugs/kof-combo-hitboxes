@@ -80,7 +80,8 @@ typedef struct __attribute__((__packed__)) player
 	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
 	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
 	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
-	uint8_t padding02[0x014]; // +028h to +03Ch: unknown
+	uint8_t padding02[0x010]; // +028h to +038h: unknown
+	facing_t facing;          // +038h: Facing (0 = left, 1 = right)
 	char_id_short_t currentCharID; // +03Ch: Current(?) character ID
 	uint8_t padding03[0x012]; // +03Eh to +050h: unknown
 	player_coord_t xSpeed;    // +050h: X velocity
@@ -90,11 +91,9 @@ typedef struct __attribute__((__packed__)) player
 	char_id_short_t currentCharID_alt1; // +070h: Current(?) character ID (alt 1)
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
 	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
-	uint8_t padding07[0x002]; // +078h to +080h: unknown
-	facing_t facing;          // +080h: Facing (0 = left, 1 = right)
-	uint8_t padding08[0x030]; // +084h to +0B4h: unknown
+	uint8_t padding07[0x03C]; // +078h to +0B4h: unknown
 	struct player *opponent;  // +0B4h: Pointer to opponent's main struct
-	struct player *opponent_alt1; // +0B4h: Opponent main struct (alt 1)
+	struct player *opponent_alt1; // +0B8h: Opponent main struct (alt 1)
 	game_pixel_t xDistance;   // +0BCh: Absolute distance between this
 	                          //        player's X pivot and the opponent's
 	uint8_t padding09[0x017]; // +0BEh to +0D5h: unknown
@@ -111,7 +110,7 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t padding14[0x005]; // +140h to +145h: unknown
 	uint8_t stunRecover;      // +145h: Stun recovery timer
 	uint16_t guardGauge;      // +146h: Guard crush gauge
-	uint8_t padding15[0x011]; // +147h to +158h: unknown
+	uint8_t padding15[0x010]; // +148h to +158h: unknown
 	char_id_short_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
 	uint8_t padding16[0x04E]; // +15Ah to +1A8h: unknown
 	struct player_extra *extra; // +1A8h: Pointer to player's "extra" struct
