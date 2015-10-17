@@ -10,6 +10,8 @@
 #include <math.h>
 #include "playerstruct.h"
 
+#define ABSOLUTE_Y_OFFSET 16
+
 // game world coords get translated into this,
 // for drawing to the game window
 typedef struct screen_coords
@@ -67,7 +69,8 @@ typedef enum
 	COORD_RIGHT_EDGE   = 0x01,
 	COORD_BOTTOM_EDGE  = 0x02,
 	COORD_BOTTOM_RIGHT = 0x03, // COORD_RIGHT_EDGE & COORD_BOTTOM_EDGE
-	COORD_ABSOLUTE_Y   = 0x04
+	COORD_ABSOLUTE_Y   = 0x04,
+	COORD_THICK_BORDER = 0x08
 } coord_options_t;
 
 extern const player_coord_t baseY;

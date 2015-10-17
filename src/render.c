@@ -1,8 +1,6 @@
 #include "render.h"
 #include "playerstruct.h"
 
-#define ABSOLUTE_Y_OFFSET 16
-
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 
 int calculateScreenOffset(double actual, double baseline, double baselineScale)
