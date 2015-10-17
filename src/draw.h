@@ -4,7 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "playerstruct.h"
-#include "render.h"
+#include "coords.h"
 #include "gamestate.h"
 
 extern void setupDrawing();

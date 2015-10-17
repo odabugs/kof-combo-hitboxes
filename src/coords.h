@@ -1,5 +1,5 @@
-#ifndef RENDER_H
-#define RENDER_H
+#ifndef COORDS_H
+#define COORDS_H
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -96,4 +96,4 @@ extern void adjustWorldCoords(player_coords_t *target,
 	int xAdjust, int yAdjust);
 extern void swapYComponents(player_coords_t *left, player_coords_t *right);
 
-#endif /* RENDER_H */
+#endif /* COORDS_H */

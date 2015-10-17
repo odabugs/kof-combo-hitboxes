@@ -3,10 +3,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-//#include <tchar.h>
 #include <stdlib.h>
 #include "playerstruct.h"
-#include "render.h"
+#include "coords.h"
 
 #define PLAYERS 2
 

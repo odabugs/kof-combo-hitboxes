@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "playerstruct.h"
-#include "render.h"
+#include "coords.h"
 #include "draw.h"
 #include "gamedefs.h"
 #include "gamestate.h"

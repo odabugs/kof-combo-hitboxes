@@ -3,8 +3,8 @@ CC=mingw32-gcc
 CFLAGS=-std=c99
 LDFLAGS=-lgdi32 -ld3d9
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=playerstruct.o render.o draw.o gamedefs.o gamestate.o
-HEADERS=playerstruct.h render.h draw.h gamedefs.h gamestate.h
+OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o
+HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
 VPATH=src src/kof98 src/kof02
 
@@ -17,16 +17,16 @@ main.o: main.c $(HEADERS)
 playerstruct.o: playerstruct.c
 	$(CC) $(CFLAGS) -c $^
 
-render.o: render.c playerstruct.h
+coords.o: coords.c playerstruct.h
 	$(CC) $(CFLAGS) -c $^
 
-draw.o: draw.c render.h playerstruct.h gamestate.h
+draw.o: draw.c coords.h playerstruct.h gamestate.h
 	$(CC) $(CFLAGS) -c $^
 
 gamedefs.o: gamedefs.c gamedefs.h kof98_roster.h kof02_roster.h
 	$(CC) $(CFLAGS) -c $^
 
-gamestate.o: gamestate.c playerstruct.h render.h gamedefs.h
+gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
 clean:

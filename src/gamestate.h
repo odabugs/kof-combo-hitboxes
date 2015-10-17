@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "playerstruct.h"
-#include "render.h"
+#include "coords.h"
 #include "gamedefs.h"
 
 typedef struct game_state
