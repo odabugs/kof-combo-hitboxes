@@ -79,22 +79,37 @@ void closeGame(game_state_t *target)
 	memset(target, 0, sizeof(*target));
 }
 
+void readPlayerState(game_state_t *target, int which)
+{
+	HANDLE handle = target->wProcHandle;
+	ReadProcessMemory(
+		handle, (void*)(target->gamedef.playerAddresses[which]),
+		&(target->players[which]), sizeof(player_t), NULL);
+	ReadProcessMemory(
+		handle, (void*)(target->players[which].extra),
+		&(target->playersExtra[which]), sizeof(player_extra_t), NULL);
+	ReadProcessMemory(
+		handle, (void*)(target->gamedef.player2ndExtraAddresses[which]),
+		&(target->players2ndExtra[which]), sizeof(player_2nd_extra_t), NULL);
+}
+
 void readGameState(game_state_t *target)
 {
 	HANDLE handle = target->wProcHandle;
 	for (int i = 0; i < PLAYERS; i++)
 	{
-		ReadProcessMemory(
-			handle, (void*)(target->gamedef.playerAddresses[i]),
-			&(target->players[i]), sizeof(player_t), NULL);
-		ReadProcessMemory(
-			handle, (void*)(target->players[i].extra),
-			&(target->playersExtra[i]), sizeof(player_extra_t), NULL);
+		readPlayerState(target, i);
 	}
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
 		sizeof(camera_t), NULL);
 	getGameScreenDimensions(target->wHandle, &(target->dimensions));
+}
+
+bool shouldDisplayPlayer(game_state_t *target, int which)
+{
+	player_2nd_extra_t *source = &(target->players2ndExtra[which]);
+	return (source->gameplayState & 0x01) == 0;
 }
 
 // TODO: if player is using an EX character then this yields the non-EX equivalent

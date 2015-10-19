@@ -13,6 +13,7 @@ typedef struct game_state
 {
 	player_t players[PLAYERS];
 	player_extra_t playersExtra[PLAYERS];
+	player_2nd_extra_t players2ndExtra[PLAYERS];
 	camera_t camera;
 	screen_dimensions_t dimensions;
 	gamedef_t gamedef;
@@ -28,6 +29,7 @@ extern void establishScreenDimensions(
 extern bool openGame(game_state_t *target);
 extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);
+extern bool shouldDisplayPlayer(game_state_t *target, int which);
 extern character_def_t *characterForID(game_state_t *source, int charID);
 extern char *characterNameForID(game_state_t *source, int charID);
 

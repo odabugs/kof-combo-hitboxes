@@ -150,7 +150,10 @@ void drawScene(game_state_t *source)
 
 	for (int i = 0; i < PLAYERS; i++)
 	{
-		drawPlayer(source, i);
+		if (shouldDisplayPlayer(source, i))
+		{
+			drawPlayer(source, i);
+		}
 	}
 
 	/* // for testing
