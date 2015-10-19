@@ -1,4 +1,5 @@
-CC=mingw32-gcc
+#CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGw
+CC=gcc # for native compilation with MinGW on Windows
 #TODO: add debug build target
 CFLAGS=-std=c99
 LDFLAGS=-lgdi32 -ld3d9
