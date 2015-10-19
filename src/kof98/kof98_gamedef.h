@@ -13,6 +13,14 @@
 		(player_t*)0x0170D000,
 		(player_t*)0x0170D200
 	},
+	.playerExtraAddresses = {
+		(player_extra_t*)0x01715600,
+		(player_extra_t*)0x0171580C
+	},
+	.player2ndExtraAddresses = {
+		(player_2nd_extra_t*)0x01703800,
+		(player_2nd_extra_t*)0x01703A00
+	},
 	.cameraAddress = (camera_t*)0x0180C938,
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster

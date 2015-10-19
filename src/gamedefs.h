@@ -20,6 +20,8 @@ typedef struct game_definition
 	char *windowTitle;
 	char *shortName;
 	void *playerAddresses[PLAYERS];
+	void *playerExtraAddresses[PLAYERS];
+	void *player2ndExtraAddresses[PLAYERS];
 	void *cameraAddress;
 	// should be the width:height closest to 1:1 scale for onscreen objects
 	// (e.g., use 320x224 for kof98/02 even though the smallest resolution

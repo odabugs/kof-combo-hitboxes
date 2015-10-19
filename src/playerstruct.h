@@ -140,4 +140,23 @@ typedef struct __attribute__((__packed__)) player_extra
 	uint16_t frameCounter;    // +06Ch: Frame counter
 } player_extra_t;
 
+typedef struct __attribute__((__packed__)) player_extra_2
+{
+	uint8_t padding01[0x008]; // +000h to +008h: unknown
+	uint16_t miscFlags1;      // +008h: Broad game state? (purpose still unclear)
+	uint8_t padding02[0x008]; // +010h to +018h: unknown
+	player_coord_t xPivot;    // +018h: X position in world (pivot axis)
+	player_coord_t yOffset;   // +01Ch: Base offset to Y position in world
+	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
+	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
+	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
+	uint8_t padding03[0x010]; // +028h to +038h: unknown
+	uint8_t miscFlags2;       // +038h: Facing (at bit 0) and possible other stuff
+	uint8_t padding04[0x001]; // +039h to +03Ah: unknown
+	uint8_t miscFlags3;       // +03Ah: Mystery byte (= FEh during gameplay?)
+	uint8_t gameplayState;    // +03Bh: More flags!! (bit 0 = "in game"/"not in game")
+	uint8_t padding05[0x048]; // +03Ch to +084h: unknown
+	struct player *player;    // +084h: Pointer to main player struct
+} player_2nd_extra_t;
+
 #endif /* PLAYERSTRUCT_H */

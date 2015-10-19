@@ -13,6 +13,16 @@
 		(player_t*)0x0167C3A0,
 		(player_t*)0x0167C5C0
 	},
+	/* // TODO
+	.playerExtraAddresses = {
+		(player_extra_t*)0x
+		(player_extra_t*)0x
+	},
+	.player2ndExtraAddresses = {
+		(player_2nd_extra_t*)0x
+		(player_2nd_extra_t*)0x
+	},
+	//*/
 	.cameraAddress = (camera_t*)0x02208BF8,
 	.rosterSize = KOF_02_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof02_roster
