@@ -69,6 +69,20 @@ typedef uint8_t char_id_byte_t;
 typedef uint16_t char_id_short_t;
 typedef uint32_t character_id_t;
 
+// Hitboxes are defined by their center pivot (xPivot and yPivot), their X radius
+// (width of the box on BOTH sides of the pivot), and Y radius (same principle there).
+// xPivot and yPivot are relative to the player's pivot position.
+// Negative values for yPivot place the box above the player's pivot.
+// Box positions are NOT auto-adjusted to account for the player facing left vs. right.
+typedef struct __attribute__((__packed__)) hitbox
+{
+	uint8_t boxID;            // +000h: Box ID number (determines box function?)
+	int8_t xPivot;            // +001h: Box center X (relative to player pivot X)
+	int8_t yPivot;            // +002h: Box center Y (relative to player pivot Y)
+	uint8_t xRadius;          // +003h: X radius (extends on both sides of pivot)
+	uint8_t yRadius;          // +004h: Y radius (extends on both sides of pivot)
+} hitbox_t;
+
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
 typedef struct __attribute__((__packed__)) player
