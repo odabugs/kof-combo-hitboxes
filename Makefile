@@ -31,7 +31,5 @@ gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm -f $(EXE_NAME) *.o *.h.gch
-	rm -f src/*.o src/*.h.gch
-	rm -f src/kof98/*.o src/kof98/*.h.gch
-	rm -f src/kof02/*.o src/kof02/*.h.gch
+	del "$(EXE_NAME)"
+	del /S *.o *.h.gch
