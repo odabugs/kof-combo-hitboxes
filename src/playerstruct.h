@@ -128,7 +128,9 @@ typedef struct __attribute__((__packed__)) player
 	char_id_short_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
 	uint8_t padding16[0x04E]; // +15Ah to +1A8h: unknown
 	struct player_extra *extra; // +1A8h: Pointer to player's "extra" struct
-	uint8_t padding17[0x037]; // +1ACh to +1E3h: unknown
+	uint8_t padding17[0x004]; // +1ACh to +1B0h: unknown
+	uint8_t comboCounter;     // +1B0h: Combo counter ("belongs to" opponent, not player)
+	uint8_t padding18[0x032]; // +1B1h to +1E3h: unknown
 	uint8_t superStocks;      // +1E3h: Whole super meter stocks
 } player_t;
 
