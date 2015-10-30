@@ -45,15 +45,22 @@ void setGLWindowDimensions(screen_dimensions_t *dimensions)
 
 void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 {
-	int newWidth, newHeight;
+	int newWidth, newHeight, newLeftX, newTopY;
 	double dblWidth, dblHeight;
 	RECT target;
 	GetClientRect(handle, &target);
 	newWidth = (int)target.right;
 	newHeight = (int)target.bottom;
+	GetWindowRect(handle, &target);
+	newLeftX = (int)target.left;
+	newTopY = (int)target.top;
+
+	// TODO: move and resize overlay window to follow changes to the game window
+	dimensions->leftX = newLeftX;
+	dimensions->topY = newTopY;
 
 	// has the game window size changed since we last checked?
-	if (dimensions->width != target.right || dimensions->height != target.bottom)
+	if (dimensions->width != newWidth || dimensions->height != newHeight)
 	{
 		dimensions->width = newWidth;
 		dimensions->height = newHeight;

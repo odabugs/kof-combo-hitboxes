@@ -38,6 +38,17 @@ typedef enum
 
 typedef struct screen_dimensions
 {
+	// location of the overlay window on the desktop
+	union
+	{
+		struct
+		{
+			int leftX;
+			int topY;
+		};
+		screen_coords_t position;
+	};
+	// overlay window size; contrast with the game's "native" resolution
 	union
 	{
 		struct
@@ -54,12 +65,12 @@ typedef struct screen_dimensions
 	int groundOffset; // Y coordinate on screen where ingame Y = 0 ("ground")
 	double aspect; // (window width / window height)
 	int basicWidth; // closest to 1:1 scale resolution
-	int basicHeight; // closest to 1:1 scale resolution (in either aspect)
+	int basicHeight; // closest to 1:1 scale resolution
 	double basicWidthAsDouble;
 	double basicHeightAsDouble;
 	double basicGroundOffset; // closest to 1:1 scale resolution
 	double basicAspect; // closest to 1:1 scale resolution
-	aspect_mode_t aspectMode; // how does the game handle widescreen?
+	aspect_mode_t aspectMode; // how does the game handle different aspect ratios?
 } screen_dimensions_t;
 
 // since one "world pixel" can occupy multiple "screen pixels" at large
