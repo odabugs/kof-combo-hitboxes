@@ -52,6 +52,25 @@ void establishScreenDimensions(
 	dims->aspectMode = source->aspectMode;
 }
 
+#define PFD_SUPPORT_COMPOSITION 0x00008000
+void setupGL(game_state_t *target)
+{
+	PIXELFORMATDESCRIPTOR pfd;
+	//int iPixelFormat = GetPixelFormat(target->hdc);
+	int iPixelFormat = 1;
+	int iMax = DescribePixelFormat(target->hdc, iPixelFormat, sizeof(pfd), &pfd);
+	pfd.dwFlags |= (PFD_SUPPORT_COMPOSITION | PFD_SUPPORT_OPENGL);
+	SetPixelFormat(target->hdc, iPixelFormat, &pfd);
+	target->hglrc = wglCreateContext(target->hdc);
+	wglMakeCurrent(target->hdc, target->hglrc);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(1.0f, 0.0f, 0.0f, 0.0f); // transparent
+}
+
 bool openGame(game_state_t *target)
 {
 	target->wProcHandle = (HANDLE)NULL;
@@ -64,6 +83,7 @@ bool openGame(game_state_t *target)
 		{
 			target->wProcHandle = wProcHandle;
 			target->hdc = GetDC(target->wHandle);
+			setupGL(target);
 			SetBkMode(target->hdc, TRANSPARENT);
 			return true;
 		}
@@ -76,6 +96,8 @@ void closeGame(game_state_t *target)
 {
 	ReleaseDC(target->wHandle, target->hdc);
 	CloseHandle(target->wProcHandle);
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(target->hglrc);
 	memset(target, 0, sizeof(*target));
 }
 

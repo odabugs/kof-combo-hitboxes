@@ -3,6 +3,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <windowsx.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <stdbool.h>
 #include "playerstruct.h"
 #include "coords.h"

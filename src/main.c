@@ -5,6 +5,8 @@
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
 #include <winuser.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "playerstruct.h"
@@ -25,8 +27,10 @@ void cleanupProgram();
 void mainLoop();
 void drawNextFrame();
 bool checkShouldContinueRunning(char **reason);
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int main(int argc, char **argv)
+int WINAPI WinMain(
+    HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
 {
 	startupProgram();
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
@@ -47,9 +51,17 @@ void mainLoop()
 {
 	bool running = true;
 	char *quitReason = (char*)NULL;
+	MSG message;
 
 	while (running)
 	{
+		while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&message);
+			DispatchMessage(&message);
+			printf("hola\n");
+		}
+
 		drawNextFrame();
 		Sleep(SLEEP_TIME);
 		running = checkShouldContinueRunning(&quitReason);
@@ -96,6 +108,7 @@ void startupProgram()
 	else
 	{
 		setupDrawing();
+		printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 	}
 }
 
@@ -132,4 +145,20 @@ bool checkShouldContinueRunning(char **reason)
 		return false;
 	}
 	return true;
+}
+
+LRESULT CALLBACK WindowProc(
+	HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	printf("F\n");
+	switch (message)
+	{
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+
+	return 0;
 }

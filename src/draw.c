@@ -10,6 +10,19 @@ static HPEN pens[PEN_COLORS];
 static HBRUSH brushes[PEN_COLORS];
 static int nextPen = 0, penSwitchTimer = PEN_INTERVAL;
 
+/*
+LPDIRECT3D9 d3d;
+LPDIRECT3DDEVICE9 d3dDevice;
+D3DPRESENT_PARAMETRS d3dPresentParams;
+LPDIRECT3DVERTEXBUFFER9 vertexBuf = NULL;
+
+void initD3D(HWND hwnd)
+{
+	d3d = Direct3DCreate9(D3D_SDK_VERSION);
+	memset(&d3dPresentParams, 0, sizeof(d3dPresentParams));
+}
+//*/
+
 void setupDrawing()
 {
 	pens[0] = CreatePen(PS_SOLID, 1, RGB(255, 0, 0)); // red
@@ -32,6 +45,19 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
+void GLRectangle(int leftX, int rightX, int topY, int bottomY)
+{
+	/*
+	glVertex2i(leftX, topY);
+	glVertex2i(rightX, topY);
+	glVertex2i(leftX, bottomY);
+
+	glVertex2i(rightX, topY);
+	glVertex2i(rightX, bottomY);
+	glVertex2i(leftX, bottomY);
+	//*/
+}
+
 void drawRectangle(
 	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
 	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
@@ -49,7 +75,8 @@ void drawRectangle(
 	rightX  = ensureMinThickness(topRightScreen.x, leftX);
 	bottomY = ensureMinThickness(bottomLeftScreen.y, topY);
 
-	Rectangle(hdcArea, leftX, topY, rightX, bottomY);
+	//Rectangle(hdcArea, leftX, topY, rightX, bottomY);
+	GLRectangle(leftX, topY, rightX, bottomY);
 }
 
 // TODO: fix box drawing with an extra "world pixel" added on the bottom/right
@@ -140,7 +167,12 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
-	BeginPaint(source->wHandle, &ps);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glBegin(GL_TRIANGLES);
+	glColor4ub(255, 0, 0, 65);
+	glVertex2i(-100, 100);
+	glVertex2i(100, 100);
+	glVertex2i(-100, -100);
 
 	if (penSwitchTimer-- <= 0)
 	{
@@ -156,6 +188,10 @@ void drawScene(game_state_t *source)
 		}
 	}
 
+	glEnd();
+	SwapBuffers(source->hdc);
+	glFinish();
+
 	/* // for testing
 	player_coords_t bottomLeft, topRight;
 	memset(&bottomLeft, 0, sizeof(bottomLeft));
@@ -165,6 +201,9 @@ void drawScene(game_state_t *source)
 	drawBox(source->hdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
 	//*/
 
+	//*
+	BeginPaint(source->wHandle, &ps);
 	EndPaint(source->wHandle, &ps);
+	//*/
 	InvalidateRect(source->wHandle, &rect, TRUE);
 }

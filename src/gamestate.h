@@ -3,6 +3,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <wingdi.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "playerstruct.h"
@@ -20,7 +23,8 @@ typedef struct game_state
 	DWORD processID;
 	HWND wHandle;
 	HANDLE wProcHandle;
-	HDC hdc;
+	HDC hdc; // GDI device context
+	HGLRC hglrc; // OpenGL rendering context
 } game_state_t;
 
 extern bool detectGame(game_state_t *target, gamedef_t gamedefs[]);

@@ -1,8 +1,9 @@
 #CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGw
 CC=gcc # for native compilation with MinGW on Windows
 #TODO: add debug build target
-CFLAGS=-std=c99
-LDFLAGS=-lgdi32 -ld3d9
+CFLAGS=-std=c11
+#LDFLAGS=-lgdi32 -ld3d9
+LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o
 HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h

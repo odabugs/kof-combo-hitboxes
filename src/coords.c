@@ -29,6 +29,20 @@ void setScreenOffsetsLetterboxed(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
 }
 
+// TODO: account for letterboxing
+void setGLWindowDimensions(screen_dimensions_t *dimensions)
+{
+	int w = dimensions->width, h = dimensions->height;
+
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//gluOrtho2D(0, w, 0, h);
+	gluOrtho2D(0, w, h, 0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 {
 	int newWidth, newHeight;
@@ -78,6 +92,8 @@ void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
 		}
 		dimensions->groundOffset =
 			dblHeight - 1 - (int)(dimensions->basicGroundOffset * dimensions->yScale);
+
+		setGLWindowDimensions(dimensions);
 	}
 }
 

@@ -3,6 +3,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -20,7 +22,6 @@ typedef struct screen_coords
 	int y;
 } screen_coords_t;
 
-// TODO: implement this shit
 typedef enum
 {
 	// game supports only one aspect and enforces it when window is scaled
