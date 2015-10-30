@@ -156,13 +156,13 @@ void drawPivot(
 void drawPlayer(game_state_t *source, int which)
 {
 	int penIndex = (nextPen + which) % PEN_COLORS;
-	SelectObject(source->hdc, pens[penIndex]);
-	SelectObject(source->hdc, brushes[penIndex]);
+	SelectObject(source->gameHdc, pens[penIndex]);
+	SelectObject(source->gameHdc, brushes[penIndex]);
 	player_t *player = &(source->players[which]);
 	screen_dimensions_t *dims = &(source->dimensions);
 	camera_t *camera = &(source->camera);
 
-	drawPivot(source->hdc, player, dims, camera);
+	drawPivot(source->gameHdc, player, dims, camera);
 }
 
 void drawScene(game_state_t *source)
@@ -189,7 +189,7 @@ void drawScene(game_state_t *source)
 	}
 
 	glEnd();
-	SwapBuffers(source->hdc);
+	SwapBuffers(source->gameHdc);
 	glFinish();
 
 	/* // for testing
@@ -198,12 +198,12 @@ void drawScene(game_state_t *source)
 	memset(&topRight, 0, sizeof(topRight));
 	adjustWorldCoords(&bottomLeft, 10, 20 + ABSOLUTE_Y_OFFSET);
 	adjustWorldCoords(&topRight, 20, 10 + ABSOLUTE_Y_OFFSET);
-	drawBox(source->hdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
+	drawBox(source->gameHdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
 	//*/
 
 	//*
-	BeginPaint(source->wHandle, &ps);
-	EndPaint(source->wHandle, &ps);
+	BeginPaint(source->gameHwnd, &ps);
+	EndPaint(source->gameHwnd, &ps);
 	//*/
-	InvalidateRect(source->wHandle, &rect, TRUE);
+	InvalidateRect(source->gameHwnd, &rect, TRUE);
 }

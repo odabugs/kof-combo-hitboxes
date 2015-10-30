@@ -81,13 +81,13 @@ void startupProgram()
 		printf("Failed to detect any supported game running.\n");
 		bailout = true;
 	}
-	if (gameState.processID == (DWORD)NULL)
+	if (gameState.gameProcessID == (DWORD)NULL)
 	{
 		printf("Could not find target window.\n");
 		bailout = true;
 	}
 	openGame(&gameState);
-	if (gameState.wProcHandle == INVALID_HANDLE_VALUE)
+	if (gameState.gameHandle == INVALID_HANDLE_VALUE)
 	{
 		printf("Failed to obtain handle to target process.\n");
 		bailout = true;
@@ -139,7 +139,7 @@ bool checkShouldContinueRunning(char **reason)
 	}
 	// IsWindow() can potentially return true if the window handle is
 	// recycled, but we're checking it too frequently to worry about that
-	if (!IsWindow(gameState.wHandle))
+	if (!IsWindow(gameState.gameHwnd))
 	{
 		*reason = "User closed the game as it was running.";
 		return false;

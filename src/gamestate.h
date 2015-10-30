@@ -20,10 +20,10 @@ typedef struct game_state
 	camera_t camera;
 	screen_dimensions_t dimensions;
 	gamedef_t gamedef;
-	DWORD processID;
-	HWND wHandle;
-	HANDLE wProcHandle;
-	HDC hdc; // GDI device context
+	DWORD gameProcessID;
+	HWND gameHwnd;
+	HANDLE gameHandle;
+	HDC gameHdc; // GDI device context
 	HGLRC hglrc; // OpenGL rendering context
 } game_state_t;
 

@@ -34,8 +34,8 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 		}
 	}
 
-	target->processID = newProcID;
-	target->wHandle = wHandle;
+	target->gameProcessID = newProcID;
+	target->gameHwnd = wHandle;
 	return success;
 }
 
@@ -56,13 +56,13 @@ void establishScreenDimensions(
 void setupGL(game_state_t *target)
 {
 	PIXELFORMATDESCRIPTOR pfd;
-	//int iPixelFormat = GetPixelFormat(target->hdc);
+	//int iPixelFormat = GetPixelFormat(target->gameHdc);
 	int iPixelFormat = 1;
-	int iMax = DescribePixelFormat(target->hdc, iPixelFormat, sizeof(pfd), &pfd);
+	int iMax = DescribePixelFormat(target->gameHdc, iPixelFormat, sizeof(pfd), &pfd);
 	pfd.dwFlags |= (PFD_SUPPORT_COMPOSITION | PFD_SUPPORT_OPENGL);
-	SetPixelFormat(target->hdc, iPixelFormat, &pfd);
-	target->hglrc = wglCreateContext(target->hdc);
-	wglMakeCurrent(target->hdc, target->hglrc);
+	SetPixelFormat(target->gameHdc, iPixelFormat, &pfd);
+	target->hglrc = wglCreateContext(target->gameHdc);
+	wglMakeCurrent(target->gameHdc, target->hglrc);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -73,18 +73,18 @@ void setupGL(game_state_t *target)
 
 bool openGame(game_state_t *target)
 {
-	target->wProcHandle = (HANDLE)NULL;
-	DWORD procID = target->processID;
+	target->gameHandle = (HANDLE)NULL;
+	DWORD procID = target->gameProcessID;
 
 	if (procID != (DWORD)NULL)
 	{
 		HANDLE wProcHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
 		if (wProcHandle != INVALID_HANDLE_VALUE && wProcHandle != (HANDLE)NULL)
 		{
-			target->wProcHandle = wProcHandle;
-			target->hdc = GetDC(target->wHandle);
+			target->gameHandle = wProcHandle;
+			target->gameHdc = GetDC(target->gameHwnd);
 			setupGL(target);
-			SetBkMode(target->hdc, TRANSPARENT);
+			SetBkMode(target->gameHdc, TRANSPARENT);
 			return true;
 		}
 	}
@@ -94,8 +94,8 @@ bool openGame(game_state_t *target)
 
 void closeGame(game_state_t *target)
 {
-	ReleaseDC(target->wHandle, target->hdc);
-	CloseHandle(target->wProcHandle);
+	ReleaseDC(target->gameHwnd, target->gameHdc);
+	CloseHandle(target->gameHandle);
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(target->hglrc);
 	memset(target, 0, sizeof(*target));
@@ -103,7 +103,7 @@ void closeGame(game_state_t *target)
 
 void readPlayerState(game_state_t *target, int which)
 {
-	HANDLE handle = target->wProcHandle;
+	HANDLE handle = target->gameHandle;
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.playerAddresses[which]),
 		&(target->players[which]), sizeof(player_t), NULL);
@@ -117,7 +117,7 @@ void readPlayerState(game_state_t *target, int which)
 
 void readGameState(game_state_t *target)
 {
-	HANDLE handle = target->wProcHandle;
+	HANDLE handle = target->gameHandle;
 	for (int i = 0; i < PLAYERS; i++)
 	{
 		readPlayerState(target, i);
@@ -125,7 +125,7 @@ void readGameState(game_state_t *target)
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
 		sizeof(camera_t), NULL);
-	getGameScreenDimensions(target->wHandle, &(target->dimensions));
+	getGameScreenDimensions(target->gameHwnd, &(target->dimensions));
 }
 
 bool shouldDisplayPlayer(game_state_t *target, int which)
@@ -137,7 +137,7 @@ bool shouldDisplayPlayer(game_state_t *target, int which)
 // TODO: if player is using an EX character then this yields the non-EX equivalent
 character_def_t *characterForID(game_state_t *source, int charID)
 {
-	if (source == (game_state_t*)NULL || charID >= source->gamedef.rosterSize)
+	if (source == (game_state_t*)NULL || charID < 0 || charID >= source->gamedef.rosterSize)
 	{
 		return (character_def_t*)NULL;
 	}
