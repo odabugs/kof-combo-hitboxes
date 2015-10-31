@@ -45,17 +45,16 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
-void GLRectangle(int leftX, int rightX, int topY, int bottomY)
+void GLRectangle(int leftX, int topY, int rightX, int bottomY)
 {
-	/*
 	glVertex2i(leftX, topY);
 	glVertex2i(rightX, topY);
 	glVertex2i(leftX, bottomY);
 
+	glVertex2i(leftX, bottomY);
 	glVertex2i(rightX, topY);
 	glVertex2i(rightX, bottomY);
-	glVertex2i(leftX, bottomY);
-	//*/
+	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
 }
 
 void drawRectangle(
@@ -155,30 +154,39 @@ void drawPivot(
 
 void drawPlayer(game_state_t *source, int which)
 {
+	HDC hdc = source->overlayHdc;
+	/*
 	int penIndex = (nextPen + which) % PEN_COLORS;
-	SelectObject(source->gameHdc, pens[penIndex]);
-	SelectObject(source->gameHdc, brushes[penIndex]);
+	SelectObject(hdc, pens[penIndex]);
+	SelectObject(hdc, brushes[penIndex]);
+	//*/
 	player_t *player = &(source->players[which]);
 	screen_dimensions_t *dims = &(source->dimensions);
 	camera_t *camera = &(source->camera);
 
-	drawPivot(source->gameHdc, player, dims, camera);
+	drawPivot(hdc, player, dims, camera);
 }
 
 void drawScene(game_state_t *source)
 {
-	//glClear(GL_COLOR_BUFFER_BIT);
+	HWND hwnd = source->overlayHwnd;
+	HDC hdc = source->overlayHdc;
+	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);
-	glColor4ub(255, 0, 0, 65);
+	glColor4ub(255, 0, 0, 255);
+	/*
 	glVertex2i(-100, 100);
 	glVertex2i(100, 100);
 	glVertex2i(-100, -100);
+	//*/
 
+	/*
 	if (penSwitchTimer-- <= 0)
 	{
 		nextPen = (nextPen + 1) % PEN_COLORS;
 		penSwitchTimer = PEN_INTERVAL;
 	}
+	//*/
 
 	for (int i = 0; i < PLAYERS; i++)
 	{
@@ -189,7 +197,7 @@ void drawScene(game_state_t *source)
 	}
 
 	glEnd();
-	SwapBuffers(source->gameHdc);
+	SwapBuffers(hdc);
 	glFinish();
 
 	/* // for testing
@@ -198,12 +206,12 @@ void drawScene(game_state_t *source)
 	memset(&topRight, 0, sizeof(topRight));
 	adjustWorldCoords(&bottomLeft, 10, 20 + ABSOLUTE_Y_OFFSET);
 	adjustWorldCoords(&topRight, 20, 10 + ABSOLUTE_Y_OFFSET);
-	drawBox(source->gameHdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
+	drawBox(hdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
 	//*/
 
-	//*
-	BeginPaint(source->gameHwnd, &ps);
-	EndPaint(source->gameHwnd, &ps);
+	/*
+	BeginPaint(hwnd, &ps);
+	EndPaint(hwnd, &ps);
+	InvalidateRect(hwnd, &rect, TRUE);
 	//*/
-	InvalidateRect(source->gameHwnd, &rect, TRUE);
 }

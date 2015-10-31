@@ -32,9 +32,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 int WINAPI WinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
 {
-	startupProgram();
+	startupProgram(hInstance);
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
-	printf("We recommend setting your game to %s resolution.\n",
+	printf("We recommend setting your game to %s resolution in windowed mode.\n",
 		gameState.gamedef.recommendResolution);
 	if (gameState.gamedef.extraRecommendations != (char*)NULL)
 	{
@@ -55,14 +55,16 @@ void mainLoop()
 
 	while (running)
 	{
+		//*
 		while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&message);
 			DispatchMessage(&message);
-			printf("hola\n");
+			//printf("hola\n");
 		}
 
 		drawNextFrame();
+		//*/
 		Sleep(SLEEP_TIME);
 		running = checkShouldContinueRunning(&quitReason);
 	}
@@ -73,7 +75,7 @@ void mainLoop()
 	}
 }
 
-void startupProgram()
+void startupProgram(HINSTANCE hInstance)
 {
 	bool bailout = false;
 	if (!detectGame(&gameState, gamedefs_list))
@@ -86,7 +88,7 @@ void startupProgram()
 		printf("Could not find target window.\n");
 		bailout = true;
 	}
-	openGame(&gameState);
+	openGame(&gameState, hInstance, WindowProc);
 	if (gameState.gameHandle == INVALID_HANDLE_VALUE)
 	{
 		printf("Failed to obtain handle to target process.\n");
@@ -150,7 +152,6 @@ bool checkShouldContinueRunning(char **reason)
 LRESULT CALLBACK WindowProc(
 	HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	printf("F\n");
 	switch (message)
 	{
 		case WM_DESTROY:

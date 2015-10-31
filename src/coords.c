@@ -43,29 +43,34 @@ void setGLWindowDimensions(screen_dimensions_t *dimensions)
 	glLoadIdentity();
 }
 
-void getGameScreenDimensions(HWND handle, screen_dimensions_t *dimensions)
+void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimensions)
 {
-	int newWidth, newHeight, newLeftX, newTopY;
-	double dblWidth, dblHeight;
-	RECT target;
-	GetClientRect(handle, &target);
-	newWidth = (int)target.right;
-	newHeight = (int)target.bottom;
-	GetWindowRect(handle, &target);
-	newLeftX = (int)target.left;
-	newTopY = (int)target.top;
+	RECT clientRect;
+	POINT clientTopLeft = { .x = 0, .y = 0 };
+	GetClientRect(game, &clientRect);
+	ClientToScreen(game, &clientTopLeft);
+	int newLeftX = (int)clientTopLeft.x;
+	int newTopY = (int)clientTopLeft.y;
+	int newWidth = (int)clientRect.right;
+	int newHeight = (int)clientRect.bottom;
 
-	// TODO: move and resize overlay window to follow changes to the game window
-	dimensions->leftX = newLeftX;
-	dimensions->topY = newTopY;
+	// has the game window position and/or size changed since we last checked?
+	bool changedPosition, changedSize;
+	changedPosition = (dimensions->leftX != newLeftX || dimensions->topY != newTopY);
+	changedSize = (dimensions->width != newWidth || dimensions->height != newHeight);
 
-	// has the game window size changed since we last checked?
-	if (dimensions->width != newWidth || dimensions->height != newHeight)
+	if (changedPosition || changedSize) {
+		MoveWindow(overlay, newLeftX, newTopY, newWidth, newHeight, true);
+		dimensions->leftX = newLeftX;
+		dimensions->topY = newTopY;
+	}
+
+	if (changedSize)
 	{
 		dimensions->width = newWidth;
 		dimensions->height = newHeight;
-		dblWidth = (double)newWidth;
-		dblHeight = (double)newHeight;
+		double dblWidth = (double)newWidth;
+		double dblHeight = (double)newHeight;
 		dimensions->aspect = dblWidth / dblHeight;
 
 		switch (dimensions->aspectMode)

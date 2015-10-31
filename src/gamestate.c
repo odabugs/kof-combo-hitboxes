@@ -55,24 +55,112 @@ void establishScreenDimensions(
 #define PFD_SUPPORT_COMPOSITION 0x00008000
 void setupGL(game_state_t *target)
 {
+	HDC hdc = target->overlayHdc;
 	PIXELFORMATDESCRIPTOR pfd;
-	//int iPixelFormat = GetPixelFormat(target->gameHdc);
 	int iPixelFormat = 1;
+	// the lazy man's way to set up a pixel format descriptor
 	int iMax = DescribePixelFormat(target->gameHdc, iPixelFormat, sizeof(pfd), &pfd);
 	pfd.dwFlags |= (PFD_SUPPORT_COMPOSITION | PFD_SUPPORT_OPENGL);
-	SetPixelFormat(target->gameHdc, iPixelFormat, &pfd);
-	target->hglrc = wglCreateContext(target->gameHdc);
-	wglMakeCurrent(target->gameHdc, target->hglrc);
+	SetPixelFormat(hdc, iPixelFormat, &pfd);
+	target->hglrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, target->hglrc);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_ALPHA_TEST);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(1.0f, 0.0f, 0.0f, 0.0f); // transparent
+	//glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // transparent
 }
 
-bool openGame(game_state_t *target)
+// TODO: real handling of failure conditions
+bool createOverlayWindow(game_state_t *target)
 {
+	printf("-- 1\n");
+	char title[] = "KOF Combo Hitbox Viewer";
+	HWND overlayHwnd;
+	ATOM atom;
+	WNDCLASSEX windowClass;
+	memset(&windowClass, 0, sizeof(WNDCLASSEX));
+	windowClass.style = (CS_HREDRAW | CS_VREDRAW);
+	windowClass.lpfnWndProc = target->wndProc;
+	windowClass.hInstance = target->hInstance;
+	windowClass.lpszMenuName = title;
+	windowClass.lpszClassName = title;
+	windowClass.cbSize = sizeof(WNDCLASSEX);
+	windowClass.cbClsExtra = 0;
+	windowClass.cbWndExtra = 0;
+	windowClass.hIcon = NULL;
+	windowClass.hIconSm = NULL;
+	windowClass.hCursor = NULL;
+	windowClass.hbrBackground = NULL;
+
+	printf("-- 2\n");
+	atom = RegisterClassExA(&windowClass);
+	if (!atom)
+	{
+		return false;
+	}
+
+	printf("-- 3\n");
+	overlayHwnd = CreateWindowExA(
+		(WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED),
+		title,
+		title,
+		WS_POPUP,
+		// overlay window position/size will get updated by the message loop
+		0, 0, 1, 1,
+		NULL,
+		NULL,
+		target->hInstance,
+		NULL);
+	target->overlayHwnd = overlayHwnd;
+	if (overlayHwnd == (HWND)NULL)
+	{
+		return false;
+	}
+
+	printf("-- 4\n");
+	// ensure that window composition is supported
+	target->dwmapi = LoadLibraryA("dwmapi.dll");
+	if (target->dwmapi == (HMODULE)NULL)
+	{
+		return false;
+	}
+	dwm_extend_frame_fn dwmExtendFrame = (dwm_extend_frame_fn)GetProcAddress(
+		target->dwmapi, "DwmExtendFrameIntoClientArea");
+	dwm_comp_enabled_fn dwmCompositionEnabled = (dwm_comp_enabled_fn)GetProcAddress(
+		target->dwmapi, "DwmIsCompositionEnabled");
+	printf("-- 5\n");
+	if ((void*)dwmExtendFrame == NULL || (void*)dwmCompositionEnabled == NULL)
+	{
+		return false;
+	}
+
+	printf("-- 6\n");
+	BOOL compEnabled;
+	dwmCompositionEnabled(&compEnabled);
+	if (compEnabled == FALSE)
+	{
+		return false;
+	}
+
+	printf("-- 7\n");
+	MARGINS margins = {-1, -1, -1, -1};
+	if (dwmExtendFrame(overlayHwnd, &margins) != S_OK)
+	{
+		return false;
+	}
+
+	printf("-- 8\n");
+	ShowWindow(overlayHwnd, SW_SHOWNORMAL);
+	UpdateWindow(overlayHwnd);
+	return true;
+}
+
+bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
+{
+	target->hInstance = hInstance;
+	target->wndProc = wndProc;
 	target->gameHandle = (HANDLE)NULL;
 	DWORD procID = target->gameProcessID;
 
@@ -83,8 +171,10 @@ bool openGame(game_state_t *target)
 		{
 			target->gameHandle = wProcHandle;
 			target->gameHdc = GetDC(target->gameHwnd);
+			createOverlayWindow(target);
+			target->overlayHdc = GetDC(target->overlayHwnd);
 			setupGL(target);
-			SetBkMode(target->gameHdc, TRANSPARENT);
+			SetBkMode(target->overlayHdc, TRANSPARENT);
 			return true;
 		}
 	}
@@ -95,6 +185,7 @@ bool openGame(game_state_t *target)
 void closeGame(game_state_t *target)
 {
 	ReleaseDC(target->gameHwnd, target->gameHdc);
+	ReleaseDC(target->overlayHwnd, target->overlayHdc);
 	CloseHandle(target->gameHandle);
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(target->hglrc);
@@ -125,7 +216,7 @@ void readGameState(game_state_t *target)
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
 		sizeof(camera_t), NULL);
-	getGameScreenDimensions(target->gameHwnd, &(target->dimensions));
+	getGameScreenDimensions(target->gameHwnd, target->overlayHwnd, &(target->dimensions));
 }
 
 bool shouldDisplayPlayer(game_state_t *target, int which)

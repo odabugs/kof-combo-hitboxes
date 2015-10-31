@@ -88,7 +88,7 @@ typedef enum
 extern const player_coord_t baseY;
 
 extern void getGameScreenDimensions(
-	HWND handle, screen_dimensions_t *dimensions);
+	HWND game, HWND overlay, screen_dimensions_t *dimensions);
 extern void scaleScreenCoords(
 	screen_dimensions_t *dimensions, screen_coords_t *target,
 	coord_options_t options);

@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <wingdi.h>
+#include <uxtheme.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
@@ -11,6 +12,16 @@
 #include "playerstruct.h"
 #include "coords.h"
 #include "gamedefs.h"
+
+// why is redefining MARGINS necessary?
+typedef struct _MARGINS {
+	int cxLeftWidth;
+	int cxRightWidth;
+	int cyTopHeight;
+	int cyBottomHeight;
+} MARGINS, *PMARGINS;
+typedef HRESULT (WINAPI *dwm_extend_frame_fn)(HWND, PMARGINS);
+typedef HRESULT (WINAPI *dwm_comp_enabled_fn)(BOOL *);
 
 typedef struct game_state
 {
@@ -24,13 +35,18 @@ typedef struct game_state
 	HWND gameHwnd;
 	HANDLE gameHandle;
 	HDC gameHdc; // GDI device context
+	HINSTANCE hInstance;
+	HWND overlayHwnd;
+	HDC overlayHdc;
+	WNDPROC wndProc; // window message pump
+	HMODULE dwmapi;
 	HGLRC hglrc; // OpenGL rendering context
 } game_state_t;
 
 extern bool detectGame(game_state_t *target, gamedef_t gamedefs[]);
 extern void establishScreenDimensions(
 	screen_dimensions_t *dims, gamedef_t *source);
-extern bool openGame(game_state_t *target);
+extern bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc);
 extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);
 extern bool shouldDisplayPlayer(game_state_t *target, int which);
