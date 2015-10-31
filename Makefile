@@ -1,7 +1,7 @@
 #CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGw
 CC=gcc # for native compilation with MinGW on Windows
 #TODO: add debug build target
-CFLAGS=-std=c11
+CFLAGS=-std=c1x
 #LDFLAGS=-lgdi32 -ld3d9
 LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
