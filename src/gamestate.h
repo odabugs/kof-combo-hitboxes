@@ -2,6 +2,7 @@
 #define GAMESTATE_H
 
 #define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT 0x0501 /* this is silly */
 #include <windows.h>
 #include <wingdi.h>
 #include <uxtheme.h>
@@ -13,13 +14,6 @@
 #include "coords.h"
 #include "gamedefs.h"
 
-// why is redefining MARGINS necessary?
-typedef struct _MARGINS {
-	int cxLeftWidth;
-	int cxRightWidth;
-	int cyTopHeight;
-	int cyBottomHeight;
-} MARGINS, *PMARGINS;
 typedef HRESULT (WINAPI *dwm_extend_frame_fn)(HWND, PMARGINS);
 typedef HRESULT (WINAPI *dwm_comp_enabled_fn)(BOOL *);
 

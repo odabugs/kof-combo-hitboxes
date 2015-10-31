@@ -29,7 +29,7 @@ void setScreenOffsetsLetterboxed(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
 }
 
-// TODO: account for letterboxing
+// TODO: account for letterboxing and window resize (enlarging window breaks it)
 void setGLWindowDimensions(screen_dimensions_t *dimensions)
 {
 	int w = dimensions->width, h = dimensions->height;

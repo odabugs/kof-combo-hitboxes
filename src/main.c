@@ -2,11 +2,9 @@
 // TODO: support Visual Studio
 #define WIN32_LEAN_AND_MEAN
 // required for use of GetConsoleWindow() et al.
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0501
 #include <windows.h>
 #include <winuser.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "playerstruct.h"
@@ -110,7 +108,6 @@ void startupProgram(HINSTANCE hInstance)
 	else
 	{
 		setupDrawing();
-		printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 	}
 }
 
