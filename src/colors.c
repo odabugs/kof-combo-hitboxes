@@ -10,4 +10,4 @@ GLubyte colorset[7][4] = {
 	{ 128, 128, 128, BOX_FILL_ALPHA }, // gray
 	{ 255, 255, 255, BOX_FILL_ALPHA }  // white
 };
-GLubyte pivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };
+GLubyte playerPivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };

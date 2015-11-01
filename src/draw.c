@@ -1,6 +1,7 @@
 #include "draw.h"
 
-#define PIVOTSIZE 5
+#define LARGE_PIVOT_SIZE 5
+#define SMALL_PIVOT_SIZE 2
 
 int ensureMinThickness(int goal, int baseline)
 {
@@ -49,11 +50,8 @@ void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 	GLRectangle(leftX, topY, rightX, bottomY);
 }
 
-// TODO: fix box drawing with an extra "world pixel" added on the bottom/right
-//       (i.e., ask for a 10x10 box in world pixels and you get 11x11 by outer edges)
 // TODO: support "thick" and "thin" box borders (currently supports thick borders only)
 //       (thick borders should "collapse" inward instead of adding thickness evenly)
-// TODO: fill color
 void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 {
 	screen_coords_t outerTopLeft, innerTopLeft;
@@ -92,24 +90,32 @@ void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 	GLRectangle(innerLeftX, innerBottomY, innerRightX, outerBottomY);
 }
 
-void drawPivot(player_t *player)
+void drawPivot(player_coords_t *pivot, int pivotSize)
 {
-	player_coords_t pivotOriginal, pivotTopLeft, pivotBottomRight;
+	player_coords_t pivotTopLeft, pivotBottomRight;
 
 	// draw horizontal line of pivot cross
-	absoluteWorldCoordsFromPlayer(player, &pivotOriginal);
-	memcpy(&pivotTopLeft, &pivotOriginal, sizeof(pivotOriginal));
-	memcpy(&pivotBottomRight, &pivotOriginal, sizeof(pivotOriginal));
-	adjustWorldCoords(&pivotTopLeft, -PIVOTSIZE, 0);
-	adjustWorldCoords(&pivotBottomRight, PIVOTSIZE, 0);
+	memcpy(&pivotTopLeft, pivot, sizeof(*pivot));
+	memcpy(&pivotBottomRight, pivot, sizeof(*pivot));
+	adjustWorldCoords(&pivotTopLeft, -pivotSize, 0);
+	adjustWorldCoords(&pivotBottomRight, pivotSize, 0);
 	drawRectangle(&pivotTopLeft, &pivotBottomRight);
 
 	// draw vertical line of pivot cross
-	memcpy(&pivotTopLeft, &pivotOriginal, sizeof(pivotOriginal));
-	memcpy(&pivotBottomRight, &pivotOriginal, sizeof(pivotOriginal));
-	adjustWorldCoords(&pivotTopLeft, 0, PIVOTSIZE);
-	adjustWorldCoords(&pivotBottomRight, 0, -PIVOTSIZE);
+	memcpy(&pivotTopLeft, pivot, sizeof(*pivot));
+	memcpy(&pivotBottomRight, pivot, sizeof(*pivot));
+	adjustWorldCoords(&pivotTopLeft, 0, -pivotSize);
+	adjustWorldCoords(&pivotBottomRight, 0, pivotSize);
 	drawRectangle(&pivotTopLeft, &pivotBottomRight);
+}
+
+void drawPlayerPivot(player_t *player)
+{
+	player_coords_t pivot;
+	absoluteWorldCoordsFromPlayer(player, &pivot);
+
+	glColor4ubv(playerPivotColor);
+	drawPivot(&pivot, LARGE_PIVOT_SIZE);
 }
 
 void drawHitbox(player_t *player, hitbox_t *hitbox)
@@ -140,7 +146,7 @@ void drawHitbox(player_t *player, hitbox_t *hitbox)
 	player_coords_t boxCenter;
 	memcpy(&boxCenter, &pivot, sizeof(pivot));
 	adjustWorldCoords(&boxCenter, offsetX, offsetY);
-	drawRectangle(&boxCenter, &boxCenter);
+	drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
 	//*/
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
@@ -164,8 +170,7 @@ void drawPlayer(game_state_t *source, int which)
 		glColor3ubv(colorset[i + HBLISTSIZE]);
 		drawHitbox(player, &(player->hitboxes_2nd[i]));
 	}
-	glColor4ubv(pivotColor);
-	drawPivot(player);
+	drawPlayerPivot(player);
 }
 
 void drawScene(game_state_t *source)
