@@ -176,6 +176,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
 			boxTypeMap = target->gamedef.boxTypeMap;
+			screenDims = &(target->dimensions);
 			return true;
 		}
 	}

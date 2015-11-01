@@ -73,6 +73,8 @@ typedef struct screen_dimensions
 	aspect_mode_t aspectMode; // how does the game handle different aspect ratios?
 } screen_dimensions_t;
 
+extern screen_dimensions_t *screenDims;
+
 // since one "world pixel" can occupy multiple "screen pixels" at large
 // resolutions, this lets us request a specific "screen pixel edge"
 typedef enum
@@ -81,8 +83,7 @@ typedef enum
 	COORD_RIGHT_EDGE   = 0x01,
 	COORD_BOTTOM_EDGE  = 0x02,
 	COORD_BOTTOM_RIGHT = 0x03, // COORD_RIGHT_EDGE & COORD_BOTTOM_EDGE
-	COORD_ABSOLUTE_Y   = 0x04,
-	COORD_THICK_BORDER = 0x08
+	COORD_THICK_BORDER = 0x04
 } coord_options_t;
 
 extern const player_coord_t baseY;

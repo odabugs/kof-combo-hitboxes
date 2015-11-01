@@ -7,6 +7,20 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
+void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight)
+{
+	int32_t
+		leftX   = min(topLeft->xComplete.value, bottomRight->xComplete.value),
+		topY    = min(topLeft->yComplete.value, bottomRight->yComplete.value),
+		rightX  = max(topLeft->xComplete.value, bottomRight->xComplete.value),
+		bottomY = max(topLeft->yComplete.value, bottomRight->yComplete.value);
+
+	topLeft->xComplete.value     = leftX;
+	topLeft->yComplete.value     = topY;
+	bottomRight->xComplete.value = rightX;
+	bottomRight->yComplete.value = bottomY;
+}
+
 void GLRectangle(int leftX, int topY, int rightX, int bottomY)
 {
 	glVertex2i(leftX, topY);
@@ -19,22 +33,18 @@ void GLRectangle(int leftX, int topY, int rightX, int bottomY)
 	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
 }
 
-void drawRectangle(
-	player_coords_t *bottomLeft, player_coords_t *topRight,
-	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
+void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 {
-	options = options & COORD_ABSOLUTE_Y;
-	screen_coords_t bottomLeftScreen, topRightScreen;
+	screen_coords_t topLeftScreen, bottomRightScreen;
 	int leftX, topY, rightX, bottomY;
 
-	translateGameCoords(bottomLeft, dimensions, camera,
-		&bottomLeftScreen, options | COORD_BOTTOM_EDGE);
-	translateGameCoords(topRight, dimensions, camera,
-		&topRightScreen, options | COORD_RIGHT_EDGE);
-	leftX   = min(bottomLeftScreen.x, topRightScreen.x);
-	topY    = min(bottomLeftScreen.y, topRightScreen.y);
-	rightX  = ensureMinThickness(topRightScreen.x, leftX);
-	bottomY = ensureMinThickness(bottomLeftScreen.y, topY);
+	ensureCorners(topLeft, bottomRight);
+	translateGameCoords(topLeft, screenDims, NULL, &topLeftScreen, COORD_NORMAL);
+	translateGameCoords(bottomRight, screenDims, NULL, &bottomRightScreen, COORD_BOTTOM_RIGHT);
+	leftX   = topLeftScreen.x;
+	topY    = topLeftScreen.y;
+	rightX  = ensureMinThickness(bottomRightScreen.x, leftX);
+	bottomY = ensureMinThickness(bottomRightScreen.y, topY);
 
 	GLRectangle(leftX, topY, rightX, bottomY);
 }
@@ -44,40 +54,30 @@ void drawRectangle(
 // TODO: support "thick" and "thin" box borders (currently supports thick borders only)
 //       (thick borders should "collapse" inward instead of adding thickness evenly)
 // TODO: fill color
-void drawBox(
-	player_coords_t *bottomLeft, player_coords_t *topRight,
-	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
+void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 {
-	options = options & (COORD_ABSOLUTE_Y | COORD_THICK_BORDER);
-	screen_coords_t outerBottomLeft, innerBottomLeft;
-	screen_coords_t outerTopRight, innerTopRight;
+	screen_coords_t outerTopLeft, innerTopLeft;
+	screen_coords_t outerBottomRight, innerBottomRight;
 	int innerLeftX, innerTopY, innerRightX, innerBottomY;
 	int outerLeftX, outerTopY, outerRightX, outerBottomY;
 
-	translateGameCoords(bottomLeft, dimensions, camera,
-		&outerBottomLeft, options | COORD_BOTTOM_EDGE);
-	translateGameCoords(topRight, dimensions, camera,
-		&outerTopRight, options | COORD_RIGHT_EDGE);
-	translateGameCoords(bottomLeft, dimensions, camera,
-		&innerBottomLeft, options | COORD_RIGHT_EDGE);
-	translateGameCoords(topRight, dimensions, camera,
-		&innerTopRight, options | COORD_BOTTOM_EDGE);
+	ensureCorners(topLeft, bottomRight);
+	translateGameCoords(topLeft, screenDims, NULL, &outerTopLeft, COORD_NORMAL);
+	translateGameCoords(topLeft, screenDims, NULL, &innerTopLeft, COORD_BOTTOM_RIGHT);
+	translateGameCoords(bottomRight, screenDims, NULL, &innerBottomRight, COORD_NORMAL);
+	translateGameCoords(bottomRight, screenDims, NULL, &outerBottomRight, COORD_BOTTOM_RIGHT);
 
 	// handle left/top sides of the box
-	outerLeftX   = min(outerBottomLeft.x, outerTopRight.x);
-	innerRightX  = max(innerBottomLeft.x, innerTopRight.x);
-	outerTopY    = min(outerTopRight.y, outerBottomLeft.y);
-	innerBottomY = max(innerBottomLeft.y, innerTopRight.y);
+	outerLeftX   = outerTopLeft.x;
+	innerRightX  = innerBottomRight.x;
+	outerTopY    = outerTopLeft.y;
+	innerBottomY = innerBottomRight.y;
 
 	// handle right/bottom sides of the box
-	innerLeftX   = ensureMinThickness(
-		min(innerBottomLeft.x, innerTopRight.x), outerLeftX);
-	outerRightX  = ensureMinThickness(
-		max(outerBottomLeft.x, outerTopRight.x), innerRightX);
-	innerTopY    = ensureMinThickness(
-		min(innerBottomLeft.y, innerTopRight.y), outerTopY);
-	outerBottomY = ensureMinThickness(
-		max(outerBottomLeft.y, outerTopRight.y), innerBottomY);
+	innerLeftX   = ensureMinThickness(innerTopLeft.x,     outerLeftX);
+	outerRightX  = ensureMinThickness(outerBottomRight.x, innerRightX);
+	innerTopY    = ensureMinThickness(innerTopLeft.y,     outerTopY);
+	outerBottomY = ensureMinThickness(outerBottomRight.y, innerBottomY);
 
 	// draw box sides in order: left, right, top, bottom
 	/* // for testing
@@ -88,40 +88,37 @@ void drawBox(
 	//*/
 	GLRectangle(outerLeftX, outerTopY, innerLeftX, outerBottomY);
 	GLRectangle(innerRightX, outerTopY, outerRightX, outerBottomY);
-	GLRectangle(outerLeftX, outerTopY, outerRightX, innerTopY);
-	GLRectangle(outerLeftX, innerBottomY, outerRightX, outerBottomY);
+	GLRectangle(innerLeftX, outerTopY, innerRightX, innerTopY);
+	GLRectangle(innerLeftX, innerBottomY, innerRightX, outerBottomY);
 }
 
-void drawPivot(
-	player_t *player, screen_dimensions_t *dimensions, camera_t *camera)
+void drawPivot(player_t *player)
 {
-	player_coords_t pivotOriginal, pivotBottomLeft, pivotTopRight;
+	player_coords_t pivotOriginal, pivotTopLeft, pivotBottomRight;
 
 	// draw horizontal line of pivot cross
 	absoluteWorldCoordsFromPlayer(player, &pivotOriginal);
-	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
-	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
-	adjustWorldCoords(&pivotBottomLeft, -PIVOTSIZE, 0);
-	adjustWorldCoords(&pivotTopRight, PIVOTSIZE, 0);
-	drawRectangle(&pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	memcpy(&pivotTopLeft, &pivotOriginal, sizeof(pivotOriginal));
+	memcpy(&pivotBottomRight, &pivotOriginal, sizeof(pivotOriginal));
+	adjustWorldCoords(&pivotTopLeft, -PIVOTSIZE, 0);
+	adjustWorldCoords(&pivotBottomRight, PIVOTSIZE, 0);
+	drawRectangle(&pivotTopLeft, &pivotBottomRight);
 
 	// draw vertical line of pivot cross
-	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
-	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
-	adjustWorldCoords(&pivotBottomLeft, 0, PIVOTSIZE);
-	adjustWorldCoords(&pivotTopRight, 0, -PIVOTSIZE);
-	drawRectangle(&pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	memcpy(&pivotTopLeft, &pivotOriginal, sizeof(pivotOriginal));
+	memcpy(&pivotBottomRight, &pivotOriginal, sizeof(pivotOriginal));
+	adjustWorldCoords(&pivotTopLeft, 0, PIVOTSIZE);
+	adjustWorldCoords(&pivotBottomRight, 0, -PIVOTSIZE);
+	drawRectangle(&pivotTopLeft, &pivotBottomRight);
 }
 
-void drawHitbox(
-	player_t *player, hitbox_t *hitbox, screen_dimensions_t *dimensions,
-	camera_t *camera)
+void drawHitbox(player_t *player, hitbox_t *hitbox)
 {
 	if (!hitboxIsActive(hitbox))
 	{
 		return;
 	}
-	player_coords_t pivot, boxBottomLeft, boxTopRight;
+	player_coords_t pivot, boxTopLeft, boxBottomRight;
 	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
 	int offsetY = hitbox->yPivot;
 	int xRadius = hitbox->xRadius;
@@ -132,18 +129,18 @@ void drawHitbox(
 	}
 
 	absoluteWorldCoordsFromPlayer(player, &pivot);
-	memcpy(&boxBottomLeft, &pivot, sizeof(pivot));
-	memcpy(&boxTopRight, &pivot, sizeof(pivot));
-	adjustWorldCoords(&boxBottomLeft, (offsetX - xRadius), (offsetY - yRadius));
-	adjustWorldCoords(&boxTopRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
+	memcpy(&boxTopLeft, &pivot, sizeof(pivot));
+	memcpy(&boxBottomRight, &pivot, sizeof(pivot));
+	adjustWorldCoords(&boxTopLeft, (offsetX - xRadius), (offsetY - yRadius));
+	adjustWorldCoords(&boxBottomRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
 
-	drawBox(&boxBottomLeft, &boxTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawBox(&boxTopLeft, &boxBottomRight);
 
 	//*
 	player_coords_t boxCenter;
 	memcpy(&boxCenter, &pivot, sizeof(pivot));
 	adjustWorldCoords(&boxCenter, offsetX, offsetY);
-	drawRectangle(&boxCenter, &boxCenter, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawRectangle(&boxCenter, &boxCenter);
 	//*/
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
@@ -156,21 +153,19 @@ void drawHitbox(
 void drawPlayer(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
-	screen_dimensions_t *dims = &(source->dimensions);
-	camera_t *camera = &(source->camera);
 
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
 		glColor3ubv(colorset[i]);
-		drawHitbox(player, &(player->hitboxes[i]), dims, camera);
+		drawHitbox(player, &(player->hitboxes[i]));
 	}
 	for (int i = 0; i < HBLISTSIZE_2ND; i++)
 	{
 		glColor3ubv(colorset[i + HBLISTSIZE]);
-		drawHitbox(player, &(player->hitboxes_2nd[i]), dims, camera);
+		drawHitbox(player, &(player->hitboxes_2nd[i]));
 	}
 	glColor4ubv(pivotColor);
-	drawPivot(player, dims, camera);
+	drawPivot(player);
 }
 
 void drawScene(game_state_t *source)
@@ -189,13 +184,4 @@ void drawScene(game_state_t *source)
 	glEnd();
 	SwapBuffers(source->overlayHdc);
 	glFinish();
-
-	/* // for testing
-	player_coords_t bottomLeft, topRight;
-	memset(&bottomLeft, 0, sizeof(bottomLeft));
-	memset(&topRight, 0, sizeof(topRight));
-	adjustWorldCoords(&bottomLeft, 10, 20 + ABSOLUTE_Y_OFFSET);
-	adjustWorldCoords(&topRight, 20, 10 + ABSOLUTE_Y_OFFSET);
-	drawBox(&bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
-	//*/
 }

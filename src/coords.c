@@ -1,5 +1,8 @@
 #include "coords.h"
 
+// global, set during game loadup in gamestate.c
+screen_dimensions_t *screenDims;
+
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 
 int calculateScreenOffset(double actual, double baseline, double baselineScale)
@@ -121,19 +124,9 @@ void scaleScreenCoords(
 	target->x = newX - xAdjust;
 
 	int newY = dimensions->topOffset;
-	if (options & COORD_ABSOLUTE_Y)
-	{
-		newY += (int)((target->y + yAdjust - ABSOLUTE_Y_OFFSET) * dimensions->yScale);
-		newY += 1; // god only knows why this is needed but it works
-		target->y = newY - yAdjust;
-	}
-	else
-	{
-		yAdjust = (yAdjust != 0) ? 0 : 1;
-		newY += dimensions->groundOffset;
-		newY -= (int)((target->y + yAdjust) * dimensions->yScale);
-		target->y = newY + yAdjust;
-	}
+	newY += (int)((target->y + yAdjust - ABSOLUTE_Y_OFFSET) * dimensions->yScale);
+	newY += 1; // god only knows why this is needed but it works
+	target->y = newY - yAdjust;
 }
 
 // pass a non-NULL camera pointer to make the results relative to that camera
