@@ -3,14 +3,21 @@
 #define PEN_COLORS 2
 #define PEN_INTERVAL 20
 #define PIVOTSIZE 5
+#define BOX_EDGE_ALPHA 255
+#define BOX_FILL_ALPHA 128
+#define PIVOT_ALPHA 255
 
-GLubyte colorset[HBLISTSIZE][3] = {
-	{ 255,   0,   0 }, // red
-	{   0, 255,   0 }, // green
-	{   0,   0, 255 }, // blue
-	{ 255, 255,   0 }, // yellow
-	{ 255,   0, 255 }  // magenta
+// glColor3ubv will ignore the "alpha" element, while glColor4ubv will read it
+const GLubyte colorset[7][4] = {
+	{ 255,   0,   0, BOX_FILL_ALPHA }, // red
+	{   0, 255,   0, BOX_FILL_ALPHA }, // green
+	{   0,   0, 255, BOX_FILL_ALPHA }, // blue
+	{ 255, 255,   0, BOX_FILL_ALPHA }, // yellow
+	{ 255,   0, 255, BOX_FILL_ALPHA }, // magenta
+	{ 128, 128, 128, BOX_FILL_ALPHA }, // gray
+	{ 255, 255, 255, BOX_FILL_ALPHA }  // white
 };
+const GLubyte pivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };
 
 void setupDrawing()
 {
@@ -133,19 +140,18 @@ void drawPivot(
 }
 
 void drawHitbox(
-	HDC hdcArea, player_t *player, int which, screen_dimensions_t *dimensions,
-	camera_t *camera)
+	HDC hdcArea, player_t *player, hitbox_t *hitbox,
+	screen_dimensions_t *dimensions, camera_t *camera)
 {
-	hitbox_t *source = &(player->hitboxes[which]);
-	if (!hitboxIsActive(source))
+	if (!hitboxIsActive(hitbox))
 	{
 		return;
 	}
 	player_coords_t pivot, boxBottomLeft, boxTopRight;
-	int offsetX = source->xPivot;
-	int offsetY = source->yPivot;
-	int xRadius = source->xRadius;
-	int yRadius = source->yRadius;
+	int offsetX = hitbox->xPivot;
+	int offsetY = hitbox->yPivot;
+	int xRadius = hitbox->xRadius;
+	int yRadius = hitbox->yRadius;
 	if (player->facing == FACING_RIGHT)
 	{
 		offsetX = -offsetX;
@@ -157,7 +163,6 @@ void drawHitbox(
 	adjustWorldCoords(&boxBottomLeft, (offsetX - xRadius), (offsetY - yRadius));
 	adjustWorldCoords(&boxTopRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
 
-	glColor3ubv(colorset[which]);
 	drawBox(hdcArea, &boxBottomLeft, &boxTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
 
 	//*
@@ -168,9 +173,9 @@ void drawHitbox(
 	//*/
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
-		source->boxID,
-		source->xPivot, source->yPivot,
-		source->xRadius, source->yRadius);
+		hitbox->boxID,
+		hitbox->xPivot, hitbox->yPivot,
+		hitbox->xRadius, hitbox->yRadius);
 	//*/
 }
 
@@ -183,9 +188,15 @@ void drawPlayer(game_state_t *source, int which)
 
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
-		drawHitbox(hdc, player, i, dims, camera);
+		glColor3ubv(colorset[i]);
+		drawHitbox(hdc, player, &(player->hitboxes[i]), dims, camera);
 	}
-	glColor4ub(255, 0, 0, 255);
+	for (int i = 0; i < HBLISTSIZE_2ND; i++)
+	{
+		glColor3ubv(colorset[i + HBLISTSIZE]);
+		drawHitbox(hdc, player, &(player->hitboxes_2nd[i]), dims, camera);
+	}
+	glColor4ubv(pivotColor);
 	drawPivot(hdc, player, dims, camera);
 }
 

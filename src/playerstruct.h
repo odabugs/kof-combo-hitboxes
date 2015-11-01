@@ -84,7 +84,8 @@ typedef struct __attribute__((__packed__)) hitbox
 	uint8_t xRadius;          // +003h: X radius (extends on both sides of pivot)
 	uint8_t yRadius;          // +004h: Y radius (extends on both sides of pivot)
 } hitbox_t;
-#define HBLISTSIZE 5
+#define HBLISTSIZE 5 /* for the hitbox list starting at player_t +090h */
+#define HBLISTSIZE_2ND 2 /* for the hitbox list starting at player_t +090h */
 
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
@@ -110,8 +111,20 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
 	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
 	uint8_t padding07[0x018]; // +078h to +090h: unknown
-	hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0A9h: base hitboxes list
-	uint8_t padding19[0x00B]; // +0A9h to +0B4h: unknown
+	union
+	{
+		struct {
+			// "undef" hitboxes can hold varying box types at different times
+			// TODO: implement proper "live" box type determination
+			hitbox_t undefHitbox1;     // +090h
+			hitbox_t undefHitbox2;     // +095h
+			hitbox_t undefHitbox3;     // +09Ah
+			hitbox_t undefHitbox4;     // +09Fh
+			hitbox_t collisionBox;     // +0A4h: pushbox
+		};
+		hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0AAh: 1st base hitboxes list
+	};
+	uint8_t padding19[0x00A]; // +0AAh to +0B4h: unknown
 	struct player *opponent;  // +0B4h: Pointer to opponent's main struct
 	struct player *opponent_alt1; // +0B8h: Opponent main struct (alt 1)
 	game_pixel_t xDistance;   // +0BCh: Absolute distance (whole pixels) between
@@ -132,7 +145,17 @@ typedef struct __attribute__((__packed__)) player
 	uint16_t guardGauge;      // +146h: Guard crush gauge
 	uint8_t padding15[0x010]; // +148h to +158h: unknown
 	char_id_short_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
-	uint8_t padding16[0x04E]; // +15Ah to +1A8h: unknown
+	uint8_t padding16[0x02E]; // +15Ah to +188h: unknown
+	union
+	{
+		struct
+		{
+			hitbox_t throwableBox;     // +188h: "throwable" box
+			hitbox_t throwBox;         // +18Dh: "throwing" box
+		};
+		hitbox_t hitboxes_2nd[HBLISTSIZE_2ND]; // +188h to +193h: 2nd base hitboxes list
+	};
+	uint8_t padding21[0x015]; // +193h to +1A8h: unknown
 	struct player_extra *extra; // +1A8h: Pointer to player's "extra" struct
 	uint8_t padding17[0x004]; // +1ACh to +1B0h: unknown
 	uint8_t comboCounter;     // +1B0h: Combo counter ("belongs to" opponent, not player)

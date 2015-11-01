@@ -4,7 +4,9 @@ To compile with MinGW: make.bat
 Compilation with Visual Studio currently not yet tested.
 
 TODO:
-- Find throwboxes and projectile boxes in memory.
+- Update Makefile to work for both native Windows and Linux cross-compilation with MinGW.
+  - GCC/Cygwin compilation support?
+- Find guard boxes, projectile boxes, and "running throw" boxes in memory.
 - Proper box type determination and coloration with alpha transparent box fills.
 - Find out how to detect and automatically conceal "ghost" leftover hitboxes.
 - Proper hitbox layering based on type.
