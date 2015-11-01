@@ -8,7 +8,7 @@
 #define PIVOT_ALPHA 255
 
 // glColor3ubv will ignore the "alpha" element, while glColor4ubv will read it
-const GLubyte colorset[7][4] = {
+GLubyte colorset[7][4] = {
 	{ 255,   0,   0, BOX_FILL_ALPHA }, // red
 	{   0, 255,   0, BOX_FILL_ALPHA }, // green
 	{   0,   0, 255, BOX_FILL_ALPHA }, // blue
@@ -17,15 +17,7 @@ const GLubyte colorset[7][4] = {
 	{ 128, 128, 128, BOX_FILL_ALPHA }, // gray
 	{ 255, 255, 255, BOX_FILL_ALPHA }  // white
 };
-const GLubyte pivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };
-
-void setupDrawing()
-{
-}
-
-void teardownDrawing()
-{
-}
+GLubyte pivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };
 
 int ensureMinThickness(int goal, int baseline)
 {
@@ -45,7 +37,7 @@ void GLRectangle(int leftX, int topY, int rightX, int bottomY)
 }
 
 void drawRectangle(
-	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
+	player_coords_t *bottomLeft, player_coords_t *topRight,
 	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
 {
 	options = options & COORD_ABSOLUTE_Y;
@@ -70,7 +62,7 @@ void drawRectangle(
 //       (thick borders should "collapse" inward instead of adding thickness evenly)
 // TODO: fill color
 void drawBox(
-	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
+	player_coords_t *bottomLeft, player_coords_t *topRight,
 	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
 {
 	options = options & (COORD_ABSOLUTE_Y | COORD_THICK_BORDER);
@@ -118,8 +110,7 @@ void drawBox(
 }
 
 void drawPivot(
-	HDC hdcArea, player_t *player, screen_dimensions_t *dimensions,
-	camera_t *camera)
+	player_t *player, screen_dimensions_t *dimensions, camera_t *camera)
 {
 	player_coords_t pivotOriginal, pivotBottomLeft, pivotTopRight;
 
@@ -129,19 +120,19 @@ void drawPivot(
 	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
 	adjustWorldCoords(&pivotBottomLeft, -PIVOTSIZE, 0);
 	adjustWorldCoords(&pivotTopRight, PIVOTSIZE, 0);
-	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawRectangle(&pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
 
 	// draw vertical line of pivot cross
 	memcpy(&pivotBottomLeft, &pivotOriginal, sizeof(pivotOriginal));
 	memcpy(&pivotTopRight, &pivotOriginal, sizeof(pivotOriginal));
 	adjustWorldCoords(&pivotBottomLeft, 0, PIVOTSIZE);
 	adjustWorldCoords(&pivotTopRight, 0, -PIVOTSIZE);
-	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawRectangle(&pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
 }
 
 void drawHitbox(
-	HDC hdcArea, player_t *player, hitbox_t *hitbox,
-	screen_dimensions_t *dimensions, camera_t *camera)
+	player_t *player, hitbox_t *hitbox, screen_dimensions_t *dimensions,
+	camera_t *camera)
 {
 	if (!hitboxIsActive(hitbox))
 	{
@@ -163,13 +154,13 @@ void drawHitbox(
 	adjustWorldCoords(&boxBottomLeft, (offsetX - xRadius), (offsetY - yRadius));
 	adjustWorldCoords(&boxTopRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
 
-	drawBox(hdcArea, &boxBottomLeft, &boxTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawBox(&boxBottomLeft, &boxTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
 
 	//*
 	player_coords_t boxCenter;
 	memcpy(&boxCenter, &pivot, sizeof(pivot));
 	adjustWorldCoords(&boxCenter, offsetX, offsetY);
-	drawRectangle(hdcArea, &boxCenter, &boxCenter, dimensions, NULL, COORD_ABSOLUTE_Y);
+	drawRectangle(&boxCenter, &boxCenter, dimensions, NULL, COORD_ABSOLUTE_Y);
 	//*/
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
@@ -181,7 +172,6 @@ void drawHitbox(
 
 void drawPlayer(game_state_t *source, int which)
 {
-	HDC hdc = source->overlayHdc;
 	player_t *player = &(source->players[which]);
 	screen_dimensions_t *dims = &(source->dimensions);
 	camera_t *camera = &(source->camera);
@@ -189,21 +179,19 @@ void drawPlayer(game_state_t *source, int which)
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
 		glColor3ubv(colorset[i]);
-		drawHitbox(hdc, player, &(player->hitboxes[i]), dims, camera);
+		drawHitbox(player, &(player->hitboxes[i]), dims, camera);
 	}
 	for (int i = 0; i < HBLISTSIZE_2ND; i++)
 	{
 		glColor3ubv(colorset[i + HBLISTSIZE]);
-		drawHitbox(hdc, player, &(player->hitboxes_2nd[i]), dims, camera);
+		drawHitbox(player, &(player->hitboxes_2nd[i]), dims, camera);
 	}
 	glColor4ubv(pivotColor);
-	drawPivot(hdc, player, dims, camera);
+	drawPivot(player, dims, camera);
 }
 
 void drawScene(game_state_t *source)
 {
-	HWND hwnd = source->overlayHwnd;
-	HDC hdc = source->overlayHdc;
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);
 
@@ -216,7 +204,7 @@ void drawScene(game_state_t *source)
 	}
 
 	glEnd();
-	SwapBuffers(hdc);
+	SwapBuffers(source->overlayHdc);
 	glFinish();
 
 	/* // for testing
@@ -225,6 +213,6 @@ void drawScene(game_state_t *source)
 	memset(&topRight, 0, sizeof(topRight));
 	adjustWorldCoords(&bottomLeft, 10, 20 + ABSOLUTE_Y_OFFSET);
 	adjustWorldCoords(&topRight, 20, 10 + ABSOLUTE_Y_OFFSET);
-	drawBox(hdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
+	drawBox(&bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
 	//*/
 }

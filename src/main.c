@@ -105,16 +105,11 @@ void startupProgram(HINSTANCE hInstance)
 		printf("Exiting now.\n");
 		exit(EXIT_FAILURE);
 	}
-	else
-	{
-		setupDrawing();
-	}
 }
 
 void cleanupProgram()
 {
 	closeGame(&gameState);
-	teardownDrawing();
 	printf("Exiting now.\n");
 }
 
