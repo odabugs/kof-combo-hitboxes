@@ -122,13 +122,13 @@ void drawHitbox(
 		return;
 	}
 	player_coords_t pivot, boxBottomLeft, boxTopRight;
-	int offsetX = hitbox->xPivot;
+	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
 	int offsetY = hitbox->yPivot;
 	int xRadius = hitbox->xRadius;
 	int yRadius = hitbox->yRadius;
-	if (player->facing == FACING_RIGHT)
+	if (xRadius <= 0 || yRadius <= 0)
 	{
-		offsetX = -offsetX;
+		return;
 	}
 
 	absoluteWorldCoordsFromPlayer(player, &pivot);
