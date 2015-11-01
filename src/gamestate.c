@@ -75,7 +75,6 @@ void setupGL(game_state_t *target)
 // TODO: real handling of failure conditions
 bool createOverlayWindow(game_state_t *target)
 {
-	printf("-- 1\n");
 	char title[] = "KOF Combo Hitbox Viewer";
 	HWND overlayHwnd;
 	ATOM atom;
@@ -94,14 +93,12 @@ bool createOverlayWindow(game_state_t *target)
 	windowClass.hCursor = NULL;
 	windowClass.hbrBackground = NULL;
 
-	printf("-- 2\n");
 	atom = RegisterClassExA(&windowClass);
 	if (!atom)
 	{
 		return false;
 	}
 
-	printf("-- 3\n");
 	overlayHwnd = CreateWindowExA(
 		(WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED),
 		title,
@@ -119,7 +116,6 @@ bool createOverlayWindow(game_state_t *target)
 		return false;
 	}
 
-	printf("-- 4\n");
 	// ensure that window composition is supported
 	target->dwmapi = LoadLibraryA("dwmapi.dll");
 	if (target->dwmapi == (HMODULE)NULL)
@@ -130,13 +126,11 @@ bool createOverlayWindow(game_state_t *target)
 		target->dwmapi, "DwmExtendFrameIntoClientArea");
 	dwm_comp_enabled_fn dwmCompositionEnabled = (dwm_comp_enabled_fn)GetProcAddress(
 		target->dwmapi, "DwmIsCompositionEnabled");
-	printf("-- 5\n");
 	if ((void*)dwmExtendFrame == NULL || (void*)dwmCompositionEnabled == NULL)
 	{
 		return false;
 	}
 
-	printf("-- 6\n");
 	BOOL compEnabled;
 	dwmCompositionEnabled(&compEnabled);
 	if (compEnabled == FALSE)
@@ -144,14 +138,12 @@ bool createOverlayWindow(game_state_t *target)
 		return false;
 	}
 
-	printf("-- 7\n");
 	MARGINS margins = {-1, -1, -1, -1};
 	if (dwmExtendFrame(overlayHwnd, &margins) != S_OK)
 	{
 		return false;
 	}
 
-	printf("-- 8\n");
 	ShowWindow(overlayHwnd, SW_SHOWNORMAL);
 	UpdateWindow(overlayHwnd);
 	return true;
