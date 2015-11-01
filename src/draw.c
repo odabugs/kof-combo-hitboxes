@@ -1,23 +1,6 @@
 #include "draw.h"
 
-#define PEN_COLORS 2
-#define PEN_INTERVAL 20
 #define PIVOTSIZE 5
-#define BOX_EDGE_ALPHA 255
-#define BOX_FILL_ALPHA 128
-#define PIVOT_ALPHA 255
-
-// glColor3ubv will ignore the "alpha" element, while glColor4ubv will read it
-GLubyte colorset[7][4] = {
-	{ 255,   0,   0, BOX_FILL_ALPHA }, // red
-	{   0, 255,   0, BOX_FILL_ALPHA }, // green
-	{   0,   0, 255, BOX_FILL_ALPHA }, // blue
-	{ 255, 255,   0, BOX_FILL_ALPHA }, // yellow
-	{ 255,   0, 255, BOX_FILL_ALPHA }, // magenta
-	{ 128, 128, 128, BOX_FILL_ALPHA }, // gray
-	{ 255, 255, 255, BOX_FILL_ALPHA }  // white
-};
-GLubyte pivotColor[4] = { 255, 0, 0, PIVOT_ALPHA };
 
 int ensureMinThickness(int goal, int baseline)
 {

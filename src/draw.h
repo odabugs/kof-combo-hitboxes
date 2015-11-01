@@ -10,6 +10,7 @@
 #include "playerstruct.h"
 #include "coords.h"
 #include "gamestate.h"
+#include "colors.h"
 
 extern void drawScene(game_state_t *source);
 
