@@ -25,6 +25,7 @@
 	//*/
 	.cameraAddress = (camera_t*)0x02208BF8,
 	.rosterSize = KOF_02_ROSTER_SIZE,
-	.roster = (character_def_t*)&kof02_roster
+	.roster = (character_def_t*)&kof02_roster,
+	.boxTypeMap = (boxtype_t*)&kof02_boxTypeMap
 },
 #endif /* NO_KOF_02 */

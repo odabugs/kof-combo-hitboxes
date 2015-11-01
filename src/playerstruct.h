@@ -2,6 +2,8 @@
 #define PLAYERSTRUCT_H
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "boxtypes.h"
 
 // all structs defined here assume a little-endian CPU
 // hex numbers in comments (e.g., for noting offsets) are written like +XXXh
@@ -54,7 +56,7 @@ typedef struct __attribute__((__packed__)) camera
 } camera_t;
 
 // not using enums for these because we need control over their size in bytes
-typedef uint32_t facing_t;
+typedef uint8_t facing_t;
 static const facing_t FACING_LEFT = 0, FACING_RIGHT = 1;
 
 typedef uint8_t costume_t;
@@ -82,6 +84,7 @@ typedef struct __attribute__((__packed__)) hitbox
 	uint8_t xRadius;          // +003h: X radius (extends on both sides of pivot)
 	uint8_t yRadius;          // +004h: Y radius (extends on both sides of pivot)
 } hitbox_t;
+#define HBLISTSIZE 5
 
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
@@ -96,6 +99,7 @@ typedef struct __attribute__((__packed__)) player
 	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
 	uint8_t padding02[0x010]; // +028h to +038h: unknown
 	facing_t facing;          // +038h: Facing (0 = left, 1 = right)
+	uint8_t padding20[0x003]; // +039h to +03Ch: unknown
 	char_id_short_t currentCharID; // +03Ch: Current(?) character ID
 	uint8_t padding03[0x012]; // +03Eh to +050h: unknown
 	player_coord_t xSpeed;    // +050h: X velocity
@@ -105,11 +109,13 @@ typedef struct __attribute__((__packed__)) player
 	char_id_short_t currentCharID_alt1; // +070h: Current(?) character ID (alt 1)
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
 	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
-	uint8_t padding07[0x03C]; // +078h to +0B4h: unknown
+	uint8_t padding07[0x018]; // +078h to +090h: unknown
+	hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0A9h: base hitboxes list
+	uint8_t padding19[0x00B]; // +0A9h to +0B4h: unknown
 	struct player *opponent;  // +0B4h: Pointer to opponent's main struct
 	struct player *opponent_alt1; // +0B8h: Opponent main struct (alt 1)
-	game_pixel_t xDistance;   // +0BCh: Absolute distance between this
-	                          //        player's X pivot and the opponent's
+	game_pixel_t xDistance;   // +0BCh: Absolute distance (whole pixels) between
+	                          //        this player's X pivot and the opponent's
 	uint8_t padding09[0x017]; // +0BEh to +0D5h: unknown
 	uint8_t playerMode;       // +0D5h: Player mode (ADV, EX, Ultimate)
 	uint8_t padding10[0x007]; // +0D6h to +0DDh: unknown
@@ -151,7 +157,7 @@ typedef struct __attribute__((__packed__)) player_extra
 	uint8_t padding03[0x004]; // +024h to +028h: unknown
 	game_pixel_t backdashUpPush; // +028h: Backdash upward momentum
 	player_coord_t backdashGravity; // +02Ah: Backdash gravity
-	player_input_t inputBuffer[0x03C]; // +023h to 06Bh: Input buffer
+	player_input_t inputBuffer[0x03D]; // +02Eh to 06Bh: Input buffer
 	uint8_t padding04[0x001]; // +06Bh to +06Ch: unknown
 	uint16_t frameCounter;    // +06Ch: Frame counter
 } player_extra_t;
@@ -174,5 +180,8 @@ typedef struct __attribute__((__packed__)) player_extra_2
 	uint8_t padding05[0x048]; // +03Ch to +084h: unknown
 	struct player *player;    // +084h: Pointer to main player struct
 } player_2nd_extra_t;
+
+extern boxtype_t *boxTypeMap;
+extern bool hitboxIsActive(hitbox_t *hitbox);
 
 #endif /* PLAYERSTRUCT_H */

@@ -23,6 +23,7 @@
 	},
 	.cameraAddress = (camera_t*)0x0180C938,
 	.rosterSize = KOF_98_ROSTER_SIZE,
-	.roster = (character_def_t*)&kof98_roster
+	.roster = (character_def_t*)&kof98_roster,
+	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap
 },
 #endif /* NO_KOF_98 */

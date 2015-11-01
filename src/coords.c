@@ -1,5 +1,4 @@
 #include "coords.h"
-#include "playerstruct.h"
 
 const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
 

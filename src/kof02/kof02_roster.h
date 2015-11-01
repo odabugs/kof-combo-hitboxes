@@ -2,7 +2,7 @@
 #include "../gamedefs.h"
 // this number includes the invalid character ID 0x3F
 #define KOF_02_ROSTER_SIZE 0x45
-static character_def_t kof02_roster[KOF_02_ROSTER_SIZE] = {
+character_def_t kof02_roster[KOF_02_ROSTER_SIZE] = {
 	{
 		.charID = 0x00,
 		.charName = "Kyo"

@@ -1,6 +1,8 @@
 #include "gamedefs.h"
 #include "kof98/kof98_roster.h"
 #include "kof02/kof02_roster.h"
+#include "kof98/kof98_boxtypemap.h"
+#include "kof02/kof02_boxtypemap.h"
 
 #define BASIC_GROUND_OFFSET 22.5
 

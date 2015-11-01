@@ -175,6 +175,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			target->overlayHdc = GetDC(target->overlayHwnd);
 			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
+			boxTypeMap = target->gamedef.boxTypeMap;
 			return true;
 		}
 	}

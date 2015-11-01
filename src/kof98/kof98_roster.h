@@ -1,7 +1,7 @@
 #ifndef NO_KOF_98
 #include "../gamedefs.h"
 #define KOF_98_ROSTER_SIZE 0x40
-static character_def_t kof98_roster[KOF_98_ROSTER_SIZE] = {
+character_def_t kof98_roster[KOF_98_ROSTER_SIZE] = {
 	{
 		.charID = 0x00,
 		.charName = "Kyo"

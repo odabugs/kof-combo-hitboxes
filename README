@@ -4,7 +4,11 @@ To compile with MinGW: make.bat
 Compilation with Visual Studio currently not yet tested.
 
 TODO:
-- Figure out where actual hitbox data is located in memory.
+- Find throwboxes and projectile boxes in memory.
+- Proper box type determination and coloration with alpha transparent box fills.
+- Find out how to detect and automatically conceal "ghost" leftover hitboxes.
+- Proper hitbox layering based on type.
+- Configuration options (e.g., box colors, box fill on/off)
 - Look into API hooking.
   - Does Microsoft Detours play well with MinGW?
   - Possible MinGW-friendly alternative: https://github.com/TsudaKageyu/minhook

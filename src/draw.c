@@ -4,40 +4,20 @@
 #define PEN_INTERVAL 20
 #define PIVOTSIZE 5
 
-static PAINTSTRUCT ps;
-static RECT rect;
-static HPEN pens[PEN_COLORS];
-static HBRUSH brushes[PEN_COLORS];
-static int nextPen = 0, penSwitchTimer = PEN_INTERVAL;
-
-/*
-LPDIRECT3D9 d3d;
-LPDIRECT3DDEVICE9 d3dDevice;
-D3DPRESENT_PARAMETRS d3dPresentParams;
-LPDIRECT3DVERTEXBUFFER9 vertexBuf = NULL;
-
-void initD3D(HWND hwnd)
-{
-	d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	memset(&d3dPresentParams, 0, sizeof(d3dPresentParams));
-}
-//*/
+GLubyte colorset[HBLISTSIZE][3] = {
+	{ 255,   0,   0 }, // red
+	{   0, 255,   0 }, // green
+	{   0,   0, 255 }, // blue
+	{ 255, 255,   0 }, // yellow
+	{ 255,   0, 255 }  // magenta
+};
 
 void setupDrawing()
 {
-	pens[0] = CreatePen(PS_SOLID, 1, RGB(255, 0, 0)); // red
-	pens[1] = CreatePen(PS_SOLID, 1, RGB(255, 255, 255)); // white
-	brushes[0] = CreateSolidBrush(RGB(255, 0, 0));
-	brushes[1] = CreateSolidBrush(RGB(255, 255, 255));
 }
 
 void teardownDrawing()
 {
-	for (int i = 0; i < PEN_COLORS; i++)
-	{
-		DeleteObject(pens[i]);
-		DeleteObject(brushes[i]);
-	}
 }
 
 int ensureMinThickness(int goal, int baseline)
@@ -74,7 +54,6 @@ void drawRectangle(
 	rightX  = ensureMinThickness(topRightScreen.x, leftX);
 	bottomY = ensureMinThickness(bottomLeftScreen.y, topY);
 
-	//Rectangle(hdcArea, leftX, topY, rightX, bottomY);
 	GLRectangle(leftX, topY, rightX, bottomY);
 }
 
@@ -82,6 +61,7 @@ void drawRectangle(
 //       (i.e., ask for a 10x10 box in world pixels and you get 11x11 by outer edges)
 // TODO: support "thick" and "thin" box borders (currently supports thick borders only)
 //       (thick borders should "collapse" inward instead of adding thickness evenly)
+// TODO: fill color
 void drawBox(
 	HDC hdcArea, player_coords_t *bottomLeft, player_coords_t *topRight,
 	screen_dimensions_t *dimensions, camera_t *camera, coord_options_t options)
@@ -124,10 +104,10 @@ void drawBox(
 		innerLeftX, innerTopY, innerRightX, innerBottomY
 	);
 	//*/
-	Rectangle(hdcArea, outerLeftX, outerTopY, innerLeftX, outerBottomY);
-	Rectangle(hdcArea, innerRightX, outerTopY, outerRightX, outerBottomY);
-	Rectangle(hdcArea, outerLeftX, outerTopY, outerRightX, innerTopY);
-	Rectangle(hdcArea, outerLeftX, innerBottomY, outerRightX, outerBottomY);
+	GLRectangle(outerLeftX, outerTopY, innerLeftX, outerBottomY);
+	GLRectangle(innerRightX, outerTopY, outerRightX, outerBottomY);
+	GLRectangle(outerLeftX, outerTopY, outerRightX, innerTopY);
+	GLRectangle(outerLeftX, innerBottomY, outerRightX, outerBottomY);
 }
 
 void drawPivot(
@@ -152,18 +132,60 @@ void drawPivot(
 	drawRectangle(hdcArea, &pivotBottomLeft, &pivotTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
 }
 
+void drawHitbox(
+	HDC hdcArea, player_t *player, int which, screen_dimensions_t *dimensions,
+	camera_t *camera)
+{
+	hitbox_t *source = &(player->hitboxes[which]);
+	if (!hitboxIsActive(source))
+	{
+		return;
+	}
+	player_coords_t pivot, boxBottomLeft, boxTopRight;
+	int offsetX = source->xPivot;
+	int offsetY = source->yPivot;
+	int xRadius = source->xRadius;
+	int yRadius = source->yRadius;
+	if (player->facing == FACING_RIGHT)
+	{
+		offsetX = -offsetX;
+	}
+
+	absoluteWorldCoordsFromPlayer(player, &pivot);
+	memcpy(&boxBottomLeft, &pivot, sizeof(pivot));
+	memcpy(&boxTopRight, &pivot, sizeof(pivot));
+	adjustWorldCoords(&boxBottomLeft, (offsetX - xRadius), (offsetY - yRadius));
+	adjustWorldCoords(&boxTopRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
+
+	glColor3ubv(colorset[which]);
+	drawBox(hdcArea, &boxBottomLeft, &boxTopRight, dimensions, NULL, COORD_ABSOLUTE_Y);
+
+	//*
+	player_coords_t boxCenter;
+	memcpy(&boxCenter, &pivot, sizeof(pivot));
+	adjustWorldCoords(&boxCenter, offsetX, offsetY);
+	drawRectangle(hdcArea, &boxCenter, &boxCenter, dimensions, NULL, COORD_ABSOLUTE_Y);
+	//*/
+	/*
+	printf("%02X %02X %02X %02X %02X\n",
+		source->boxID,
+		source->xPivot, source->yPivot,
+		source->xRadius, source->yRadius);
+	//*/
+}
+
 void drawPlayer(game_state_t *source, int which)
 {
 	HDC hdc = source->overlayHdc;
-	/*
-	int penIndex = (nextPen + which) % PEN_COLORS;
-	SelectObject(hdc, pens[penIndex]);
-	SelectObject(hdc, brushes[penIndex]);
-	//*/
 	player_t *player = &(source->players[which]);
 	screen_dimensions_t *dims = &(source->dimensions);
 	camera_t *camera = &(source->camera);
 
+	for (int i = 0; i < HBLISTSIZE; i++)
+	{
+		drawHitbox(hdc, player, i, dims, camera);
+	}
+	glColor4ub(255, 0, 0, 255);
 	drawPivot(hdc, player, dims, camera);
 }
 
@@ -173,20 +195,6 @@ void drawScene(game_state_t *source)
 	HDC hdc = source->overlayHdc;
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);
-	glColor4ub(255, 0, 0, 255);
-	/*
-	glVertex2i(-100, 100);
-	glVertex2i(100, 100);
-	glVertex2i(-100, -100);
-	//*/
-
-	/*
-	if (penSwitchTimer-- <= 0)
-	{
-		nextPen = (nextPen + 1) % PEN_COLORS;
-		penSwitchTimer = PEN_INTERVAL;
-	}
-	//*/
 
 	for (int i = 0; i < PLAYERS; i++)
 	{
@@ -207,11 +215,5 @@ void drawScene(game_state_t *source)
 	adjustWorldCoords(&bottomLeft, 10, 20 + ABSOLUTE_Y_OFFSET);
 	adjustWorldCoords(&topRight, 20, 10 + ABSOLUTE_Y_OFFSET);
 	drawBox(hdc, &bottomLeft, &topRight, &(source->dimensions), NULL, COORD_ABSOLUTE_Y);
-	//*/
-
-	/*
-	BeginPaint(hwnd, &ps);
-	EndPaint(hwnd, &ps);
-	InvalidateRect(hwnd, &rect, TRUE);
 	//*/
 }
