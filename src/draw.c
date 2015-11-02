@@ -3,6 +3,9 @@
 #define LARGE_PIVOT_SIZE 5
 #define SMALL_PIVOT_SIZE 2
 
+// TODO: get proper box coloring/alpha before enabling this
+bool drawBoxFill = false;
+
 int ensureMinThickness(int goal, int baseline)
 {
 	return max(goal, baseline) + 1;
@@ -120,34 +123,26 @@ void drawPlayerPivot(player_t *player)
 
 void drawHitbox(player_t *player, hitbox_t *hitbox)
 {
-	if (!hitboxIsActive(hitbox))
-	{
-		return;
-	}
-	player_coords_t pivot, boxTopLeft, boxBottomRight;
+	player_coords_t pivot, boxCenter, boxTopLeft, boxBottomRight;
 	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
 	int offsetY = hitbox->yPivot;
 	int xRadius = hitbox->xRadius;
 	int yRadius = hitbox->yRadius;
-	if (xRadius <= 0 || yRadius <= 0)
-	{
-		return;
-	}
 
 	absoluteWorldCoordsFromPlayer(player, &pivot);
+	memcpy(&boxCenter, &pivot, sizeof(pivot));
 	memcpy(&boxTopLeft, &pivot, sizeof(pivot));
 	memcpy(&boxBottomRight, &pivot, sizeof(pivot));
+	adjustWorldCoords(&boxCenter, offsetX, offsetY);
 	adjustWorldCoords(&boxTopLeft, (offsetX - xRadius), (offsetY - yRadius));
 	adjustWorldCoords(&boxBottomRight, (offsetX + xRadius - 1), (offsetY + yRadius - 1));
 
+	if (drawBoxFill)
+	{
+		drawRectangle(&boxTopLeft, &boxBottomRight);
+	}
 	drawBox(&boxTopLeft, &boxBottomRight);
-
-	//*
-	player_coords_t boxCenter;
-	memcpy(&boxCenter, &pivot, sizeof(pivot));
-	adjustWorldCoords(&boxCenter, offsetX, offsetY);
 	drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
-	//*/
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
 		hitbox->boxID,
@@ -159,17 +154,32 @@ void drawHitbox(player_t *player, hitbox_t *hitbox)
 void drawPlayer(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
+	hitbox_t *hitbox;
 
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
-		glColor3ubv(colorset[i]);
-		drawHitbox(player, &(player->hitboxes[i]));
+		hitbox = &(player->hitboxes[i]);
+		if (hitboxIsActive(hitbox))
+		{
+			glColor3ubv(colorset[i]);
+			drawHitbox(player, hitbox);
+		}
 	}
-	for (int i = 0; i < HBLISTSIZE_2ND; i++)
-	{
-		glColor3ubv(colorset[i + HBLISTSIZE]);
-		drawHitbox(player, &(player->hitboxes_2nd[i]));
+
+	// draw "throwing" box
+	hitbox = &(player->throwBox);
+	if (throwBoxIsActive(hitbox)) {
+		glColor3ubv(colorset[HBLISTSIZE + 0]);
+		drawHitbox(player, hitbox);
 	}
+
+	// draw "throwable" box
+	hitbox = &(player->throwableBox);
+	if (throwableBoxIsActive(hitbox)) {
+		glColor3ubv(colorset[HBLISTSIZE + 1]);
+		drawHitbox(player, hitbox);
+	}
+
 	drawPlayerPivot(player);
 }
 

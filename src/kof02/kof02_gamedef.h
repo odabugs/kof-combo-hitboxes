@@ -5,7 +5,7 @@
 	.shortName = "King of Fighters 2002UM (Steam)",
 	.basicWidth = 320,
 	.basicHeight = 224,
-	.recommendResolution = "640x448",
+	.recommendResolution = "640x448 or 796x448",
 	.extraRecommendations = "Additionally, please set your game to Type B under Options, Graphics Settings.",
 	.aspectMode = AM_PILLARBOX,
 	.groundOffset = BASIC_GROUND_OFFSET,

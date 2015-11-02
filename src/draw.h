@@ -12,6 +12,8 @@
 #include "gamestate.h"
 #include "colors.h"
 
+extern bool drawBoxFill;
+
 extern void drawScene(game_state_t *source);
 
 #endif /* DRAW_H */

@@ -5,7 +5,7 @@
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.basicWidth = 320,
 	.basicHeight = 224,
-	.recommendResolution = "640x448",
+	.recommendResolution = "640x448 or 796x448",
 	.extraRecommendations = (char*)NULL,
 	.aspectMode = AM_PILLARBOX,
 	.groundOffset = BASIC_GROUND_OFFSET,

@@ -1,6 +1,7 @@
 #ifndef PLAYERSTRUCT_H
 #define PLAYERSTRUCT_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "boxtypes.h"
@@ -150,8 +151,8 @@ typedef struct __attribute__((__packed__)) player
 	{
 		struct
 		{
-			hitbox_t throwableBox;     // +188h: "throwable" box
-			hitbox_t throwBox;         // +18Dh: "throwing" box
+			hitbox_t throwBox;         // +188h: "throwing" box
+			hitbox_t throwableBox;     // +18Dh: "throwable" box
 		};
 		hitbox_t hitboxes_2nd[HBLISTSIZE_2ND]; // +188h to +193h: 2nd base hitboxes list
 	};
@@ -205,6 +206,10 @@ typedef struct __attribute__((__packed__)) player_extra_2
 } player_2nd_extra_t;
 
 extern boxtype_t *boxTypeMap;
+extern bool letThrowBoxesLinger;
+extern int baseThrowBoxLingerTime;
 extern bool hitboxIsActive(hitbox_t *hitbox);
+extern bool throwBoxIsActive(hitbox_t *hitbox);
+extern bool throwableBoxIsActive(hitbox_t *hitbox);
 
 #endif /* PLAYERSTRUCT_H */
