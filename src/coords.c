@@ -1,5 +1,8 @@
 #include "coords.h"
 
+// set to false if you want hitboxes to show over the pillarboxes in widescreen mode
+#define ALLOW_SCISSOR_TEST true
+
 // global, set during game loadup in gamestate.c
 screen_dimensions_t *screenDims;
 
@@ -11,6 +14,24 @@ int calculateScreenOffset(double actual, double baseline, double baselineScale)
 	return (actual <= scaled) ? 0 : (int)((actual - scaled) / 2.0);
 }
 
+void setScissor(screen_dimensions_t *dimensions)
+{
+	int xOffset = dimensions->leftOffset, yOffset = dimensions->topOffset;
+	int w = dimensions->width, h = dimensions->height;
+	int croppedWidth  = max(0, w - (xOffset << 1));
+	int croppedHeight = max(0, h - (yOffset << 1));
+
+	if (ALLOW_SCISSOR_TEST && xOffset <= 0 && yOffset <= 0)
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
+	else
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(max(0, xOffset), max(0, yOffset), croppedWidth, croppedHeight);
+	}
+}
+
 void setScreenOffsetsPillarboxed(
 	screen_dimensions_t *dimensions, double dblWidth, double dblHeight)
 {
@@ -19,6 +40,8 @@ void setScreenOffsetsPillarboxed(
 	dimensions->leftOffset = calculateScreenOffset(
 		dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
 	dimensions->topOffset = 0;
+
+	setScissor(dimensions);
 }
 
 void setScreenOffsetsLetterboxed(
@@ -29,6 +52,8 @@ void setScreenOffsetsLetterboxed(
 	dimensions->leftOffset = 0;
 	dimensions->topOffset = calculateScreenOffset(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
+
+	setScissor(dimensions);
 }
 
 // TODO: account for letterboxing and window resize (enlarging window breaks it)
