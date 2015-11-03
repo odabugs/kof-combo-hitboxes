@@ -40,8 +40,6 @@ void setScreenOffsetsPillarboxed(
 	dimensions->leftOffset = calculateScreenOffset(
 		dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
 	dimensions->topOffset = 0;
-
-	setScissor(dimensions);
 }
 
 void setScreenOffsetsLetterboxed(
@@ -52,8 +50,6 @@ void setScreenOffsetsLetterboxed(
 	dimensions->leftOffset = 0;
 	dimensions->topOffset = calculateScreenOffset(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
-
-	setScissor(dimensions);
 }
 
 // TODO: account for letterboxing and window resize (enlarging window breaks it)
@@ -131,6 +127,7 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 		}
 
 		setGLWindowDimensions(dimensions);
+		setScissor(dimensions);
 	}
 }
 
