@@ -1,6 +1,10 @@
-// Note: this does not compile standalone
 #ifndef NO_KOF_98
-{
+#include "../boxtypes.h"
+#include "../gamedefs.h"
+#include "kof98_roster.h"
+#include "kof98_boxtypemap.h"
+
+gamedef_t kof98_gamedef = {
 	.windowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.basicWidth = 320,
@@ -8,7 +12,6 @@
 	.recommendResolution = "640x448 or 796x448",
 	.extraRecommendations = (char*)NULL,
 	.aspectMode = AM_PILLARBOX,
-	.groundOffset = BASIC_GROUND_OFFSET,
 	.playerAddresses = {
 		(player_t*)0x0170D000,
 		(player_t*)0x0170D200
@@ -25,5 +28,5 @@
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster,
 	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap
-},
+};
 #endif /* NO_KOF_98 */

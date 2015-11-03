@@ -51,9 +51,9 @@ void updateThrowBoxLingerTime(bool isActive)
 bool throwBoxIsActive(hitbox_t *hitbox)
 {
 	if (DRAW_STALE_THROW_BOXES) { return true; }
+	boxSizeCheck(hitbox);
 	bool isActive = (hitbox->boxID != 0);
 	updateThrowBoxLingerTime(isActive);
-	boxSizeCheck(hitbox);
 	bool isLingering = (throwBoxLingerTimeRemaining > 0);
 	bool result = (isActive || (letThrowBoxesLinger && isLingering));
 	if (result) {

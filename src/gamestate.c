@@ -3,16 +3,16 @@
 
 // returns true if we found a running game window that we recognize
 // (if more than one is out there, this stops at the first successful find)
-bool detectGame(game_state_t *target, gamedef_t gamedefs[])
+bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 {
 	DWORD newProcID = (DWORD)NULL;
 	HWND wHandle = (HWND)NULL;
 	LPCTSTR title;
 	bool success = false;
 
-	for (int i = 0; gamedefs[i].windowTitle != (char*)NULL; i++)
+	for (int i = 0; gamedefs[i]->windowTitle != (char*)NULL; i++)
 	{
-		title = gamedefs[i].windowTitle;
+		title = gamedefs[i]->windowTitle;
 		wHandle = FindWindow(NULL, title);
 		if (wHandle != (HWND)NULL)
 		{
@@ -21,7 +21,7 @@ bool detectGame(game_state_t *target, gamedef_t gamedefs[])
 			if (newProcID != (DWORD)NULL)
 			{
 				success = true;
-				gamedef_t *pGamedef = &(gamedefs[i]);
+				gamedef_t *pGamedef = gamedefs[i];
 				memcpy(&(target->gamedef), pGamedef, sizeof(*pGamedef));
 				establishScreenDimensions(&(target->dimensions), pGamedef);
 				break;
@@ -48,7 +48,6 @@ void establishScreenDimensions(
 	dims->basicWidthAsDouble = (double)source->basicWidth;
 	dims->basicHeightAsDouble = (double)source->basicHeight;
 	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
-	dims->basicGroundOffset = source->groundOffset;
 	dims->aspectMode = source->aspectMode;
 }
 

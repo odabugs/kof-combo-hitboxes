@@ -1,18 +1,5 @@
 #ifndef NO_KOF_98
 #include "../boxtypes.h"
-/*
-	box_types = {
-		// 00-0F
-		v,v,v,v,v,v,v,v,v,g,g,a,a,a,a,a,
-		// 10-1F
-		a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,
-		// 20-2F
-		a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,
-		// 30-3E
-		a,a,a,a,a,a,a,g,g,p,p,p,p,p,p
-		a,a,a,a,a,a,a,g,g,p,p,p,p,p,p
-	},
-//*/
 
 boxtype_t kof98_boxTypeMap[256] = {
 	// 00h-07h

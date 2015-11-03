@@ -104,8 +104,6 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 				printf("Encountered invalid aspect mode.");
 				exit(EXIT_FAILURE);
 		}
-		dimensions->groundOffset =
-			dblHeight - 1 - (int)(dimensions->basicGroundOffset * dimensions->yScale);
 
 		setGLWindowDimensions(dimensions);
 	}

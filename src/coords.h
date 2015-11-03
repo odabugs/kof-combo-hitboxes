@@ -62,7 +62,6 @@ typedef struct screen_dimensions
 	double yScale; // scale Y coords onscreen by this amount
 	int leftOffset; // pad X coords rightward from LEFT edge by this amount
 	int topOffset; // pad Y coords downward from TOP of screen by this amount
-	int groundOffset; // Y coordinate on screen where ingame Y = 0 ("ground")
 	double aspect; // (window width / window height)
 	int basicWidth; // closest to 1:1 scale resolution
 	int basicHeight; // closest to 1:1 scale resolution

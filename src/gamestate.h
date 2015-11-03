@@ -37,7 +37,7 @@ typedef struct game_state
 	HGLRC hglrc; // OpenGL rendering context
 } game_state_t;
 
-extern bool detectGame(game_state_t *target, gamedef_t gamedefs[]);
+extern bool detectGame(game_state_t *target, gamedef_t *gamedefs[]);
 extern void establishScreenDimensions(
 	screen_dimensions_t *dims, gamedef_t *source);
 extern bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc);
