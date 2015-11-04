@@ -25,6 +25,7 @@ gamedef_t kof98_gamedef = {
 		(player_2nd_extra_t*)0x01703A00
 	},
 	.cameraAddress = (camera_t*)0x0180C938,
+	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster,
 	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap

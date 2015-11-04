@@ -39,8 +39,7 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	return success;
 }
 
-void establishScreenDimensions(
-	screen_dimensions_t *dims, gamedef_t *source)
+void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *source)
 {
 	memset(dims, 0, sizeof(*dims));
 	dims->basicWidth = source->basicWidth;
@@ -192,7 +191,7 @@ void readPlayerState(game_state_t *target, int which)
 		handle, (void*)(target->gamedef.playerAddresses[which]),
 		&(target->players[which]), sizeof(player_t), NULL);
 	ReadProcessMemory(
-		handle, (void*)(target->players[which].extra),
+		handle, (void*)(target->gamedef.playerExtraAddresses[which]),
 		&(target->playersExtra[which]), sizeof(player_extra_t), NULL);
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.player2ndExtraAddresses[which]),

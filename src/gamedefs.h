@@ -24,6 +24,8 @@ typedef struct game_definition
 	void *playerExtraAddresses[PLAYERS];
 	void *player2ndExtraAddresses[PLAYERS];
 	void *cameraAddress;
+	// since '98 and '02 player_extra_t pointers are at different offsets in player_t
+	int extraStructIndex;
 	// should be the width:height closest to 1:1 scale for onscreen objects
 	// (e.g., use 320x224 for kof98/02 even though the smallest resolution
 	// offered by the steam versions is 640x448 which amounts to 2:1 scale)

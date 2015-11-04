@@ -88,6 +88,47 @@ typedef struct __attribute__((__packed__)) hitbox
 #define HBLISTSIZE 5 /* for the hitbox list starting at player_t +090h */
 #define HBLISTSIZE_2ND 2 /* for the hitbox list starting at player_t +090h */
 
+typedef struct __attribute__((__packed__)) player_extra
+{
+	player_coord_t walkSpeed; // +000h: Walk speed
+	player_coord_t jumpMomentum; // +004h: Jump upward momentum
+	player_coord_t jumpGravity;  // +008h: Jump gravity
+	uint8_t farARange;        // +00Ch: Far A activation range (whole pixels)
+	uint8_t farBRange;        // +00Dh: Far B activation range (whole pixels)
+	uint8_t farCRange;        // +00Eh: Far C activation range (whole pixels)
+	uint8_t farDRange;        // +00Fh: Far D activation range (whole pixels)
+	uint8_t padding01[0x004]; // +010h to +014h: unknown
+	player_coord_t runSpeed;  // +014h: Run speed
+	uint8_t padding02[0x008]; // +018h to +020h: unknown
+	uint16_t backdashPart1;   // +020h: Backdash component 1 (unknown use)
+	uint16_t backdashPart2;   // +022h: Backdash component 2 (unknown use)
+	uint8_t padding03[0x004]; // +024h to +028h: unknown
+	game_pixel_t backdashUpPush; // +028h: Backdash upward momentum
+	player_coord_t backdashGravity; // +02Ah: Backdash gravity
+	player_input_t inputBuffer[0x03D]; // +02Eh to 06Bh: Input buffer
+	uint8_t padding04[0x001]; // +06Bh to +06Ch: unknown
+	uint16_t frameCounter;    // +06Ch: Frame counter
+} player_extra_t;
+
+typedef struct __attribute__((__packed__)) player_extra_2
+{
+	uint8_t padding01[0x008]; // +000h to +008h: unknown
+	uint16_t miscFlags1;      // +008h: Broad game state? (purpose still unclear)
+	uint8_t padding02[0x008]; // +010h to +018h: unknown
+	player_coord_t xPivot;    // +018h: X position in world (pivot axis)
+	player_coord_t yOffset;   // +01Ch: Base offset to Y position in world
+	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
+	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
+	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
+	uint8_t padding03[0x010]; // +028h to +038h: unknown
+	uint8_t miscFlags2;       // +038h: Facing (at bit 0) and possible other stuff
+	uint8_t padding04[0x001]; // +039h to +03Ah: unknown
+	uint8_t miscFlags3;       // +03Ah: Mystery byte (= FEh during gameplay?)
+	uint8_t gameplayState;    // +03Bh: More flags!! (bit 0 = "in game"/"not in game")
+	uint8_t padding05[0x048]; // +03Ch to +084h: unknown
+	struct player *player;    // +084h: Pointer to main player struct
+} player_2nd_extra_t;
+
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
 typedef struct __attribute__((__packed__)) player
@@ -156,54 +197,23 @@ typedef struct __attribute__((__packed__)) player
 		};
 		hitbox_t hitboxes_2nd[HBLISTSIZE_2ND]; // +188h to +193h: 2nd base hitboxes list
 	};
-	uint8_t padding21[0x015]; // +193h to +1A8h: unknown
-	struct player_extra *extra; // +1A8h: Pointer to player's "extra" struct
+	uint8_t padding21[0x011]; // +193h to +1A8h: unknown
+	union
+	{
+		player_extra_t *extras[2];       // +1A4h to +1ACh
+		struct
+		{
+			// these two are applicable only to KOF '02 and KOF '98 respectively
+			// (not a big deal since player_extra_t's live at fixed addresses anyway)
+			player_extra_t *kof02_extra; // +1A4h: Pointer to player's "extra" struct
+			player_extra_t *kof98_extra; // +1A8h: Pointer to player's "extra" struct
+		};
+	};
 	uint8_t padding17[0x004]; // +1ACh to +1B0h: unknown
 	uint8_t comboCounter;     // +1B0h: Combo counter ("belongs to" opponent, not player)
 	uint8_t padding18[0x032]; // +1B1h to +1E3h: unknown
 	uint8_t superStocks;      // +1E3h: Whole super meter stocks
 } player_t;
-
-typedef struct __attribute__((__packed__)) player_extra
-{
-	player_coord_t walkSpeed; // +000h: Walk speed
-	player_coord_t jumpMomentum; // +004h: Jump upward momentum
-	player_coord_t jumpGravity;  // +008h: Jump gravity
-	uint8_t farARange;        // +00Ch: Far A activation range (whole pixels)
-	uint8_t farBRange;        // +00Dh: Far B activation range (whole pixels)
-	uint8_t farCRange;        // +00Eh: Far C activation range (whole pixels)
-	uint8_t farDRange;        // +00Fh: Far D activation range (whole pixels)
-	uint8_t padding01[0x004]; // +010h to +014h: unknown
-	player_coord_t runSpeed;  // +014h: Run speed
-	uint8_t padding02[0x008]; // +018h to +020h: unknown
-	uint16_t backdashPart1;   // +020h: Backdash component 1 (unknown use)
-	uint16_t backdashPart2;   // +022h: Backdash component 2 (unknown use)
-	uint8_t padding03[0x004]; // +024h to +028h: unknown
-	game_pixel_t backdashUpPush; // +028h: Backdash upward momentum
-	player_coord_t backdashGravity; // +02Ah: Backdash gravity
-	player_input_t inputBuffer[0x03D]; // +02Eh to 06Bh: Input buffer
-	uint8_t padding04[0x001]; // +06Bh to +06Ch: unknown
-	uint16_t frameCounter;    // +06Ch: Frame counter
-} player_extra_t;
-
-typedef struct __attribute__((__packed__)) player_extra_2
-{
-	uint8_t padding01[0x008]; // +000h to +008h: unknown
-	uint16_t miscFlags1;      // +008h: Broad game state? (purpose still unclear)
-	uint8_t padding02[0x008]; // +010h to +018h: unknown
-	player_coord_t xPivot;    // +018h: X position in world (pivot axis)
-	player_coord_t yOffset;   // +01Ch: Base offset to Y position in world
-	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
-	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
-	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
-	uint8_t padding03[0x010]; // +028h to +038h: unknown
-	uint8_t miscFlags2;       // +038h: Facing (at bit 0) and possible other stuff
-	uint8_t padding04[0x001]; // +039h to +03Ah: unknown
-	uint8_t miscFlags3;       // +03Ah: Mystery byte (= FEh during gameplay?)
-	uint8_t gameplayState;    // +03Bh: More flags!! (bit 0 = "in game"/"not in game")
-	uint8_t padding05[0x048]; // +03Ch to +084h: unknown
-	struct player *player;    // +084h: Pointer to main player struct
-} player_2nd_extra_t;
 
 extern boxtype_t *boxTypeMap;
 extern bool letThrowBoxesLinger;

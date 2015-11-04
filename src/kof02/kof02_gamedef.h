@@ -16,17 +16,16 @@ gamedef_t kof02_gamedef = {
 		(player_t*)0x0167C3A0,
 		(player_t*)0x0167C5C0
 	},
-	/* // TODO
 	.playerExtraAddresses = {
-		(player_extra_t*)0x
-		(player_extra_t*)0x
+		(player_extra_t*)0x0167EA00,
+		(player_extra_t*)0x01683240
 	},
 	.player2ndExtraAddresses = {
-		(player_2nd_extra_t*)0x
-		(player_2nd_extra_t*)0x
+		(player_2nd_extra_t*)0x0166E260,
+		(player_2nd_extra_t*)0x0166E480
 	},
-	//*/
 	.cameraAddress = (camera_t*)0x02208BF8,
+	.extraStructIndex = 0, // '02 player_extra_t pointer is at player_t +1A4h
 	.rosterSize = KOF_02_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof02_roster,
 	.boxTypeMap = (boxtype_t*)&kof02_boxTypeMap
