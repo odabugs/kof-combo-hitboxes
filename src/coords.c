@@ -21,7 +21,7 @@ void setScissor(screen_dimensions_t *dimensions)
 	int croppedWidth  = max(0, w - (xOffset << 1));
 	int croppedHeight = max(0, h - (yOffset << 1));
 
-	if (ALLOW_SCISSOR_TEST && xOffset <= 0 && yOffset <= 0)
+	if (!ALLOW_SCISSOR_TEST || (xOffset <= 0 && yOffset <= 0))
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
