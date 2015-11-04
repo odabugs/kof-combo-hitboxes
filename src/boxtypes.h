@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 typedef enum {
-	BOX_DUMMY, // inactive boxes (don't render them onscreen)
 	BOX_COLLISION, // pushbox
 	BOX_VULNERABLE,
 	BOX_GUARD,
@@ -13,7 +12,11 @@ typedef enum {
 	BOX_PROJECTILE_ATTACK,
 	BOX_THROWABLE,
 	BOX_THROW,
-	boxTypeCount // THIS MUST COME LAST
+	// this must come immediately after the last valid box type
+	boxTypeCount,
+	// box types not meant for rendering onscreen start here
+	BOX_DUMMY, // inactive boxes (don't render them onscreen)
+	BOX_UNDEFINED // box type needs to be checked before deciding ro render it 
 } boxtype_t;
 
 // shorthand forms for box type mappings
