@@ -12,6 +12,7 @@
 #include "draw.h"
 #include "gamedefs.h"
 #include "gamestate.h"
+#include "controlkey.h"
 
 #define SLEEP_TIME 10 /* ms */
 #define QUIT_KEY 0x51 /* Q key */
@@ -124,8 +125,7 @@ bool checkShouldContinueRunning(char **reason)
 	// zeroing out the low bit prevents an issue where pressing the
 	// quit key in another window then switching focus to the hitbox
 	// viewer's console window still causes the viewer to quit
-	SHORT quitKeyPressed = (GetAsyncKeyState(QUIT_KEY) & ~1);
-	if (quitKeyPressed && (GetForegroundWindow() == myself))
+	if (keyIsPressed(QUIT_KEY) && (GetForegroundWindow() == myself))
 	{
 		FlushConsoleInputBuffer(myStdin);
 		*reason = "User closed the hitbox viewer.";
