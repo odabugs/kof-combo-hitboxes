@@ -64,21 +64,14 @@ bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 	}
 	return result;
 }
-/*
-   ["throwable"] = function(obj, box_entry, box)
-   return any_true({
-   bit.btst(5, rb(obj.base + 0xE3)) > 0,
-   rb(obj.base + 0x1D4) > 0,
-   rbs(obj.base + 0x18D) < 0,
-   bit.band(3, rb(obj.base + 0x7E)) == 1,
-   })
-   end
-//*/
 
 bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
-	bool isActive = true; // TODO
-	return (letThrowBoxesLinger || isActive);
+	if (player->throwableStatus1 & 0x20 != 0) { return false; }
+	if (player->throwableStatus2 & 0x80 != 0) { return false; }
+	if (player->baseStatusFlags[2] & 0x03 == 1) { return false; }
+	if (hitbox->boxID & 0x80 != 0) { return false; }
+	return true;
 }
 
 bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox)

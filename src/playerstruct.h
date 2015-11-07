@@ -167,7 +167,9 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t playerMode;       // +0D5h: Player mode (ADV, EX, Ultimate)
 	uint8_t padding10[0x007]; // +0D6h to +0DDh: unknown
 	costume_t costume;        // +0DDh: Current costume color
-	uint8_t padding11[0x00A]; // +0DEh to +0E8h: unknown
+	uint8_t padding11[0x005]; // +0DEh to +0E3h: unknown
+	uint8_t throwableStatus1; // +0E3h: "Throwable" status flag 1 (and possibly more?)
+	uint8_t padding23[0x004]; // +0E4h to +0E8h: unknown
 	uint16_t superPart;       // +0E8h: Fractional super meter
 	uint16_t maxGauge;        // +0EAh: Max Mode gauge
 	uint8_t padding12[0x04C]; // +0ECh to +138h: unknown
@@ -196,7 +198,9 @@ typedef struct __attribute__((__packed__)) player
 	};
 	uint8_t padding17[0x004]; // +1ACh to +1B0h: unknown
 	uint8_t comboCounter;     // +1B0h: Combo counter ("belongs to" opponent, not player)
-	uint8_t padding18[0x032]; // +1B1h to +1E3h: unknown
+	uint8_t padding18[0x023]; // +1B1h to +1D4h: unknown
+	uint8_t throwableStatus2; // +1D4h: "Throwable" status flag 2 (and possibly more?)
+	uint8_t padding24[0x00E]; // +1D5h to +1E3h: unknown
 	uint8_t superStocks;      // +1E3h: Whole super meter stocks
 } player_t;
 
@@ -206,9 +210,9 @@ extern bool letThrowBoxesLinger;
 extern int baseThrowBoxLingerTime;
 
 extern bool hitboxIsActive(
-	hitbox_t *hitbox, uint8_t hitboxFlags, uint8_t activeMask);
-extern bool throwBoxIsActive(hitbox_t *hitbox);
-extern bool throwableBoxIsActive(hitbox_t *hitbox);
-extern bool collisionBoxIsActive(hitbox_t *hitbox);
+	player_t *player, hitbox_t *hitbox, uint8_t activeMask);
+extern bool throwBoxIsActive(player_t *player, hitbox_t *hitbox);
+extern bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox);
+extern bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox);
 
 #endif /* PLAYERSTRUCT_H */
