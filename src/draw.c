@@ -123,6 +123,10 @@ void drawPlayerPivot(player_t *player)
 
 void drawHitbox(player_t *player, hitbox_t *hitbox)
 {
+	if (hitbox->xRadius == 0 || hitbox->yRadius == 0)
+	{
+		return;
+	}
 	player_coords_t pivot, boxCenter, boxTopLeft, boxBottomRight;
 	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
 	int offsetY = hitbox->yPivot;
@@ -159,24 +163,31 @@ void drawPlayer(game_state_t *source, int which)
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
 		hitbox = &(player->hitboxes[i]);
-		if (hitboxIsActive(hitbox))
+		if (hitboxIsActive(player, hitbox, hitboxActiveMasks[i]))
 		{
 			glColor3ubv(colorset[i]);
 			drawHitbox(player, hitbox);
 		}
 	}
 
+	// draw collision box
+	hitbox = &(player->collisionBox);
+	if (collisionBoxIsActive(player, hitbox)) {
+		glColor3ubv(colorset[HBLISTSIZE + 0]);
+		drawHitbox(player, hitbox);
+	}
+
 	// draw "throwing" box
 	hitbox = &(player->throwBox);
-	if (throwBoxIsActive(hitbox)) {
-		glColor3ubv(colorset[HBLISTSIZE + 0]);
+	if (throwBoxIsActive(player, hitbox)) {
+		glColor3ubv(colorset[HBLISTSIZE + 1]);
 		drawHitbox(player, hitbox);
 	}
 
 	// draw "throwable" box
 	hitbox = &(player->throwableBox);
-	if (throwableBoxIsActive(hitbox)) {
-		glColor3ubv(colorset[HBLISTSIZE + 1]);
+	if (throwableBoxIsActive(player, hitbox)) {
+		glColor3ubv(colorset[HBLISTSIZE + 2]);
 		drawHitbox(player, hitbox);
 	}
 

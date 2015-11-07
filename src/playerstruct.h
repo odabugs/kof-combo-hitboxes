@@ -85,8 +85,7 @@ typedef struct __attribute__((__packed__)) hitbox
 	uint8_t xRadius;          // +003h: X radius (extends on both sides of pivot)
 	uint8_t yRadius;          // +004h: Y radius (extends on both sides of pivot)
 } hitbox_t;
-#define HBLISTSIZE 5 /* for the hitbox list starting at player_t +090h */
-#define HBLISTSIZE_2ND 2 /* for the hitbox list starting at player_t +090h */
+#define HBLISTSIZE 4 /* for the hitbox list starting at player_t +090h */
 
 typedef struct __attribute__((__packed__)) player_extra
 {
@@ -129,6 +128,8 @@ typedef struct __attribute__((__packed__)) player_extra_2
 	struct player *player;    // +084h: Pointer to main player struct
 } player_2nd_extra_t;
 
+#define BASE_STATUS_FLAGS_LEN 3
+
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
 typedef struct __attribute__((__packed__)) player
@@ -152,20 +153,11 @@ typedef struct __attribute__((__packed__)) player
 	char_id_short_t currentCharID_alt1; // +070h: Current(?) character ID (alt 1)
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
 	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
-	uint8_t padding07[0x018]; // +078h to +090h: unknown
-	union
-	{
-		struct {
-			// "undef" hitboxes can hold varying box types at different times
-			// TODO: implement proper "live" box type determination
-			hitbox_t undefHitbox1;     // +090h
-			hitbox_t undefHitbox2;     // +095h
-			hitbox_t undefHitbox3;     // +09Ah
-			hitbox_t undefHitbox4;     // +09Fh
-			hitbox_t collisionBox;     // +0A4h: pushbox
-		};
-		hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0AAh: 1st base hitboxes list
-	};
+	uint8_t padding07[0x004]; // +078h to +07Ch: unknown
+	uint8_t baseStatusFlags[BASE_STATUS_FLAGS_LEN]; // +07Ch to +07Fh: Base status flags?
+	uint8_t padding22[0x011]; // +07Fh to +090h: unknown
+	hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0A4h: 1st base hitboxes list
+	hitbox_t collisionBox;    // +0A4h: Collision box
 	uint8_t padding19[0x00A]; // +0AAh to +0B4h: unknown
 	struct player *opponent;  // +0B4h: Pointer to opponent's main struct
 	struct player *opponent_alt1; // +0B8h: Opponent main struct (alt 1)
@@ -188,15 +180,8 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t padding15[0x010]; // +148h to +158h: unknown
 	char_id_short_t currentCharID_alt3; // +158h: Current(?) character ID (alt 3)
 	uint8_t padding16[0x02E]; // +15Ah to +188h: unknown
-	union
-	{
-		struct
-		{
-			hitbox_t throwBox;         // +188h: "throwing" box
-			hitbox_t throwableBox;     // +18Dh: "throwable" box
-		};
-		hitbox_t hitboxes_2nd[HBLISTSIZE_2ND]; // +188h to +193h: 2nd base hitboxes list
-	};
+	hitbox_t throwBox;        // +188h: "Throwing" box
+	hitbox_t throwableBox;    // +18Dh: "Throwable" box
 	uint8_t padding21[0x011]; // +193h to +1A8h: unknown
 	union
 	{
@@ -216,10 +201,14 @@ typedef struct __attribute__((__packed__)) player
 } player_t;
 
 extern boxtype_t *boxTypeMap;
+extern uint8_t hitboxActiveMasks[HBLISTSIZE];
 extern bool letThrowBoxesLinger;
 extern int baseThrowBoxLingerTime;
-extern bool hitboxIsActive(hitbox_t *hitbox);
+
+extern bool hitboxIsActive(
+	hitbox_t *hitbox, uint8_t hitboxFlags, uint8_t activeMask);
 extern bool throwBoxIsActive(hitbox_t *hitbox);
 extern bool throwableBoxIsActive(hitbox_t *hitbox);
+extern bool collisionBoxIsActive(hitbox_t *hitbox);
 
 #endif /* PLAYERSTRUCT_H */
