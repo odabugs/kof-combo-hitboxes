@@ -1,11 +1,11 @@
-#CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGw
+#CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW
 CC=gcc # for native compilation with MinGW on Windows
 #TODO: add debug build target
-CFLAGS=-std=c1x
+CFLAGS=-std=c1x -g
 LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o colors.o controlkey.o
-HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h colors.h controlkey.h
+OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o colors.o controlkey.o util.o
+HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h colors.h controlkey.h util.h
 KOF98_HEADERS=kof98_roster.h kof98_boxtypemap.h kof98_gamedef.h
 KOF02_HEADERS=kof02_roster.h kof02_boxtypemap.h kof02_gamedef.h
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
@@ -31,6 +31,9 @@ gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADER
 
 gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
+
+colors.o boxtypes.o controlkey.o util.o: %.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
 	del "$(EXE_NAME)"

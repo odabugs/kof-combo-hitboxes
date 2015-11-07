@@ -13,6 +13,7 @@
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "controlkey.h"
+#include "util.h"
 
 #define SLEEP_TIME 10 /* ms */
 #define QUIT_KEY 0x51 /* Q key */
