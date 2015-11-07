@@ -26,6 +26,7 @@ void startupProgram();
 void cleanupProgram();
 void mainLoop();
 void drawNextFrame();
+void printHotkeys();
 bool checkShouldContinueRunning(char **reason);
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -40,6 +41,7 @@ int WINAPI WinMain(
 	{
 		printf("%s\n", gameState.gamedef.extraRecommendations);
 	}
+	printHotkeys();
 	printf("Press Q in this console window to exit the hitbox viewer.\n");
 
 	mainLoop();
@@ -119,6 +121,17 @@ void drawNextFrame()
 {
 	readGameState(&gameState);
 	drawScene(&gameState);
+}
+
+void printHotkeys()
+{
+	printf(
+		"\n"
+		"Hotkeys:\n"
+		"F1 - Toggle close normal range marker (player 1)\n"
+		"F2 - Toggle close normal range marker (player 2)\n"
+		"\n"
+	);
 }
 
 bool checkShouldContinueRunning(char **reason)
