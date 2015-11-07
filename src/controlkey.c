@@ -1,5 +1,8 @@
 #include "controlkey.h"
 
+#define KEY_DOWN (1 << 15)
+#define KEY_TOGGLED 1
+#define KEY_PRESSED (KEY_DOWN | KEY_TOGGLED)
 #define pollKey GetKeyState
 
 bool keyIsDown(int vkCode)

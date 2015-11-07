@@ -6,10 +6,6 @@
 #include <winuser.h>
 #include <stdbool.h>
 
-#define KEY_DOWN (1 << 15)
-#define KEY_TOGGLED 1
-#define KEY_PRESSED (KEY_DOWN | KEY_TOGGLED)
-
 extern bool keyIsDown(int vkCode);
 extern bool keyIsUp(int vkCode);
 extern bool keyIsPressed(int vkCode);
