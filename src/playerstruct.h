@@ -87,15 +87,32 @@ typedef struct __attribute__((__packed__)) hitbox
 } hitbox_t;
 #define HBLISTSIZE 4 /* for the hitbox list starting at player_t +090h */
 
+typedef enum
+{
+	BTN_A,
+	BTN_B,
+	BTN_C,
+	BTN_D,
+	ATTACK_BUTTONS // this must come last
+} atk_button_t;
+#define SHOW_NO_BUTTON_RANGES ATTACK_BUTTONS
+
 typedef struct __attribute__((__packed__)) player_extra
 {
 	player_coord_t walkSpeed; // +000h: Walk speed
 	player_coord_t jumpMomentum; // +004h: Jump upward momentum
 	player_coord_t jumpGravity;  // +008h: Jump gravity
-	uint8_t farARange;        // +00Ch: Far A activation range (whole pixels)
-	uint8_t farBRange;        // +00Dh: Far B activation range (whole pixels)
-	uint8_t farCRange;        // +00Eh: Far C activation range (whole pixels)
-	uint8_t farDRange;        // +00Fh: Far D activation range (whole pixels)
+	union
+	{
+		uint8_t closeRanges[ATTACK_BUTTONS]; // +00Ch to +010h: Close normal active ranges
+		struct
+		{
+			uint8_t closeARange; // +00Ch: close A activation range (whole pixels)
+			uint8_t closeBRange; // +00Dh: close B activation range (whole pixels)
+			uint8_t closeCRange; // +00Eh: close C activation range (whole pixels)
+			uint8_t closeDRange; // +00Fh: close D activation range (whole pixels)
+		};
+	};
 	uint8_t padding01[0x004]; // +010h to +014h: unknown
 	player_coord_t runSpeed;  // +014h: Run speed
 	uint8_t padding02[0x008]; // +018h to +020h: unknown
@@ -208,6 +225,7 @@ extern boxtype_t *boxTypeMap;
 extern uint8_t hitboxActiveMasks[HBLISTSIZE];
 extern bool letThrowBoxesLinger;
 extern int baseThrowBoxLingerTime;
+extern char buttonNames[ATTACK_BUTTONS];
 
 extern bool hitboxIsActive(
 	player_t *player, hitbox_t *hitbox, uint8_t activeMask);

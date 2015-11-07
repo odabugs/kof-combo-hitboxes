@@ -4,6 +4,13 @@
 // throw boxes practically never show up if thread scheduler is left to its own devices
 #define DRAW_STALE_THROW_BOXES true
 
+char buttonNames[ATTACK_BUTTONS] = {
+	'A',
+	'B',
+	'C',
+	'D'
+};
+
 // global, set during game loadup in gamestate.c
 boxtype_t *boxTypeMap;
 bool letThrowBoxesLinger = true;
