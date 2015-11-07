@@ -3,7 +3,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <windowsx.h>
+#include <winuser.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdbool.h>
@@ -11,8 +11,8 @@
 #include "coords.h"
 #include "gamestate.h"
 #include "colors.h"
-
-extern bool drawBoxFill;
+#include "controlkey.h"
+#include "util.h"
 
 extern void drawScene(game_state_t *source);
 

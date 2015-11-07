@@ -5,6 +5,15 @@
 
 // TODO: get proper box coloring/alpha before enabling this
 bool drawBoxFill = false;
+// start off not showing any range markers for players' close standing normals
+atk_button_t showButtonRanges[PLAYERS] = {
+	SHOW_NO_BUTTON_RANGES,
+	SHOW_NO_BUTTON_RANGES
+};
+SHORT showButtonRangeHotkeys[PLAYERS] = {
+	VK_F1,
+	VK_F2
+};
 
 int ensureMinThickness(int goal, int baseline)
 {
@@ -121,6 +130,61 @@ void drawPlayerPivot(player_t *player)
 	drawPivot(&pivot, LARGE_PIVOT_SIZE);
 }
 
+// TODO: factor this out into multiple functions for hotkey check and drawing
+void drawCloseNormalRangeMarker(
+	player_t *player, player_extra_t *playerExtra, int which)
+{
+	atk_button_t showRange = showButtonRanges[which];
+	bool updated = false;
+
+	if (keyIsPressed(showButtonRangeHotkeys[which]))
+	{
+		showRange = ++showRange % (SHOW_NO_BUTTON_RANGES + 1);
+		showButtonRanges[which] = showRange;
+		updated = true;
+	}
+
+	if (showRange == SHOW_NO_BUTTON_RANGES)
+	{
+		if (updated)
+		{
+			timestamp();
+			printf(
+				"Disabled close normal range marker for player %d.\n",
+				(which + 1));
+		}
+		return;
+	}
+
+	// draw close normal activation range marker
+	if (updated)
+	{
+		timestamp();
+		printf(
+			"Showing close standing %c activation range for player %d.\n",
+			buttonNames[showButtonRanges[which]], (which + 1));
+	}
+
+	int facingAdjustment = (player->facing == FACING_RIGHT ? 1 : -1);
+	// subtract 1 because otherwise close normal won't activate unless
+	// the activation line is "behind" the center of the opponent's pivot axis
+	// (i.e., close normal won't activate if the two overlap exactly)
+	int activeRange = playerExtra->closeRanges[showRange] - 1;
+	player_coords_t lineOrigin, lineExtent, barTop, barBottom;
+	absoluteWorldCoordsFromPlayer(player, &lineOrigin);
+	memcpy(&lineExtent, &lineOrigin, sizeof(lineOrigin));
+	adjustWorldCoords(&lineExtent, activeRange * facingAdjustment, 0);
+	memcpy(&barTop, &lineExtent, sizeof(lineExtent));
+	memcpy(&barBottom, &lineExtent, sizeof(lineExtent));
+	barTop.yComplete.value = 0;
+	barBottom.yPart = 0;
+	barBottom.y = (screenDims->basicHeight * 2);
+
+	glColor4ubv(closeNormalRangeColor);
+	drawRectangle(&lineOrigin, &lineExtent);
+	drawRectangle(&barTop, &barBottom);
+}
+
 void drawHitbox(player_t *player, hitbox_t *hitbox)
 {
 	if (hitbox->xRadius == 0 || hitbox->yRadius == 0)
@@ -158,6 +222,7 @@ void drawHitbox(player_t *player, hitbox_t *hitbox)
 void drawPlayer(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
+	player_extra_t *playerExtra = &(source->playersExtra[which]);
 	hitbox_t *hitbox;
 
 	for (int i = 0; i < HBLISTSIZE; i++)
@@ -165,7 +230,7 @@ void drawPlayer(game_state_t *source, int which)
 		hitbox = &(player->hitboxes[i]);
 		if (hitboxIsActive(player, hitbox, hitboxActiveMasks[i]))
 		{
-			glColor3ubv(colorset[i]);
+			glColor4ubv(colorset[i]);
 			drawHitbox(player, hitbox);
 		}
 	}
@@ -173,25 +238,26 @@ void drawPlayer(game_state_t *source, int which)
 	// draw collision box
 	hitbox = &(player->collisionBox);
 	if (collisionBoxIsActive(player, hitbox)) {
-		glColor3ubv(colorset[HBLISTSIZE + 0]);
+		glColor4ubv(colorset[HBLISTSIZE + 0]);
 		drawHitbox(player, hitbox);
 	}
 
 	// draw "throwing" box
 	hitbox = &(player->throwBox);
 	if (throwBoxIsActive(player, hitbox)) {
-		glColor3ubv(colorset[HBLISTSIZE + 1]);
+		glColor4ubv(colorset[HBLISTSIZE + 1]);
 		drawHitbox(player, hitbox);
 	}
 
 	// draw "throwable" box
 	hitbox = &(player->throwableBox);
 	if (throwableBoxIsActive(player, hitbox)) {
-		glColor3ubv(colorset[HBLISTSIZE + 2]);
+		glColor4ubv(colorset[HBLISTSIZE + 2]);
 		drawHitbox(player, hitbox);
 	}
 
 	drawPlayerPivot(player);
+	drawCloseNormalRangeMarker(player, playerExtra, which);
 }
 
 void drawScene(game_state_t *source)
