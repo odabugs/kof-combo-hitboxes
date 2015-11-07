@@ -122,9 +122,6 @@ void drawNextFrame()
 
 bool checkShouldContinueRunning(char **reason)
 {
-	// zeroing out the low bit prevents an issue where pressing the
-	// quit key in another window then switching focus to the hitbox
-	// viewer's console window still causes the viewer to quit
 	if (keyIsPressed(QUIT_KEY) && (GetForegroundWindow() == myself))
 	{
 		FlushConsoleInputBuffer(myStdin);
@@ -132,7 +129,7 @@ bool checkShouldContinueRunning(char **reason)
 		return false;
 	}
 	// IsWindow() can potentially return true if the window handle is
-	// recycled, but we're checking it too frequently to worry about that
+	// recycled, but we're checking it frequently enough to be a non-issue
 	if (!IsWindow(gameState.gameHwnd))
 	{
 		*reason = "User closed the game as it was running.";
