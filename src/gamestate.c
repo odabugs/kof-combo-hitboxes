@@ -165,8 +165,11 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			target->overlayHdc = GetDC(target->overlayHwnd);
 			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
+			currentGame = &(target->gamedef);
 			boxTypeMap = target->gamedef.boxTypeMap;
 			screenDims = &(target->dimensions);
+			int projectilesCount = currentGame->projectilesListSize;
+			target->projectiles = malloc(projectilesCount * sizeof(projectile_t));
 			return true;
 		}
 	}
@@ -181,6 +184,7 @@ void closeGame(game_state_t *target)
 	CloseHandle(target->gameHandle);
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(target->hglrc);
+	free(target->projectiles);
 	memset(target, 0, sizeof(*target));
 }
 
@@ -188,14 +192,30 @@ void readPlayerState(game_state_t *target, int which)
 {
 	HANDLE handle = target->gameHandle;
 	ReadProcessMemory(
-		handle, (void*)(target->gamedef.playerAddresses[which]),
+		handle, target->gamedef.playerAddresses[which],
 		&(target->players[which]), sizeof(player_t), NULL);
 	ReadProcessMemory(
-		handle, (void*)(target->gamedef.playerExtraAddresses[which]),
+		handle, target->gamedef.playerExtraAddresses[which],
 		&(target->playersExtra[which]), sizeof(player_extra_t), NULL);
 	ReadProcessMemory(
-		handle, (void*)(target->gamedef.player2ndExtraAddresses[which]),
+		handle, target->gamedef.player2ndExtraAddresses[which],
 		&(target->players2ndExtra[which]), sizeof(player_2nd_extra_t), NULL);
+}
+
+void readProjectiles(game_state_t *target)
+{
+	HANDLE handle = target->gameHandle;
+	void *current = currentGame->projectilesListStart;
+	int count = currentGame->projectilesListSize;
+	int step = currentGame->projectilesListStep;
+	void *next = (void*)(target->projectiles);
+
+	for (int i = 0; i < count; i++)
+	{
+		ReadProcessMemory(handle, current, next, sizeof(projectile_t), NULL);
+		current += step;
+		next += sizeof(projectile_t);
+	}
 }
 
 void readGameState(game_state_t *target)
@@ -205,6 +225,7 @@ void readGameState(game_state_t *target)
 	{
 		readPlayerState(target, i);
 	}
+	readProjectiles(target);
 	ReadProcessMemory(
 		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
 		sizeof(camera_t), NULL);

@@ -24,6 +24,7 @@ typedef struct game_state
 	player_t players[PLAYERS];
 	player_extra_t playersExtra[PLAYERS];
 	player_2nd_extra_t players2ndExtra[PLAYERS];
+	projectile_t *projectiles; // projectiles array malloc'd during openGame()
 	camera_t camera;
 	screen_dimensions_t dimensions;
 	gamedef_t gamedef;
