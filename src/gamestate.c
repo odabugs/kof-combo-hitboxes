@@ -208,13 +208,13 @@ void readProjectiles(game_state_t *target)
 	void *current = currentGame->projectilesListStart;
 	int count = currentGame->projectilesListSize;
 	int step = currentGame->projectilesListStep;
-	void *next = (void*)(target->projectiles);
+	projectile_t *next = target->projectiles;
 
 	for (int i = 0; i < count; i++)
 	{
 		ReadProcessMemory(handle, current, next, sizeof(projectile_t), NULL);
 		current += step;
-		next += sizeof(projectile_t);
+		next++;
 	}
 }
 
