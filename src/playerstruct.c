@@ -85,3 +85,8 @@ bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
 	return (hitbox->boxID != 0xFF);
 }
+
+bool projectileIsActive(projectile_t *projectile)
+{
+	return (projectile->basicStatus >= 0);
+}

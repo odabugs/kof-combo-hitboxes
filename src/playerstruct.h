@@ -97,6 +97,17 @@ typedef enum
 } atk_button_t;
 #define SHOW_NO_BUTTON_RANGES ATTACK_BUTTONS
 
+typedef struct __attribute__((__packed__)) projectile
+{
+	uint8_t padding01[0x006]; // +000h to +006h: unknown
+	int16_t basicStatus;      // +006h: Basic status (< 0 if projectile is not active)
+	uint8_t padding02[0x01C]; // +008h to +024h: unknown
+	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
+	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
+	uint8_t padding03[0x068]; // +028h to +090h: unknown
+	hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0A4h: 1st base hitboxes list
+} projectile_t;
+
 typedef struct __attribute__((__packed__)) player_extra
 {
 	player_coord_t walkSpeed; // +000h: Walk speed
