@@ -212,9 +212,8 @@ void readProjectiles(game_state_t *target)
 
 	for (int i = 0; i < count; i++)
 	{
-		ReadProcessMemory(handle, current, next, sizeof(projectile_t), NULL);
+		ReadProcessMemory(handle, current, (next + i), sizeof(projectile_t), NULL);
 		current += step;
-		next++;
 	}
 }
 
