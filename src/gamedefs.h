@@ -24,6 +24,9 @@ typedef struct game_definition
 	void *playerExtraAddresses[PLAYERS];
 	void *player2ndExtraAddresses[PLAYERS];
 	void *cameraAddress;
+	void *projectilesListStart;
+	int projectilesListSize;
+	int projectilesListStep;
 	// since '98 and '02 player_extra_t pointers are at different offsets in player_t
 	int extraStructIndex;
 	// should be the width:height closest to 1:1 scale for onscreen objects
@@ -38,6 +41,8 @@ typedef struct game_definition
 	character_def_t *roster;
 	boxtype_t *boxTypeMap;
 } gamedef_t;
+
+extern gamedef_t *currentGame;
 
 extern gamedef_t *gamedefs_list[];
 

@@ -2,6 +2,8 @@
 #include "kof98/kof98_gamedef.h"
 #include "kof02/kof02_gamedef.h"
 
+gamedef_t *currentGame;
+
 // list ender - DO NOT REMOVE THIS
 gamedef_t gamedefSentinel =
 {

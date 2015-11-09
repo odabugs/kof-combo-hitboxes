@@ -13,18 +13,21 @@ gamedef_t kof98_gamedef = {
 	.extraRecommendations = (char*)NULL,
 	.aspectMode = AM_PILLARBOX,
 	.playerAddresses = {
-		(player_t*)0x0170D000,
-		(player_t*)0x0170D200
+		(void*)0x0170D000,
+		(void*)0x0170D200
 	},
 	.playerExtraAddresses = {
-		(player_extra_t*)0x01715600,
-		(player_extra_t*)0x0171580C
+		(void*)0x01715600,
+		(void*)0x0171580C
 	},
 	.player2ndExtraAddresses = {
-		(player_2nd_extra_t*)0x01703800,
-		(player_2nd_extra_t*)0x01703A00
+		(void*)0x01703800,
+		(void*)0x01703A00
 	},
-	.cameraAddress = (camera_t*)0x0180C938,
+	.cameraAddress = (void*)0x0180C938,
+	.projectilesListStart = (void*)0x1703000,
+	.projectilesListSize = 25, // final projectiles list entry starts at 0x1706200
+	.projectilesListStep = 0x200,
 	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster,
