@@ -219,6 +219,22 @@ void drawHitbox(player_t *player, hitbox_t *hitbox)
 	//*/
 }
 
+void drawProjectiles(game_state_t *source)
+{
+	int count = currentGame->projectilesListSize;
+	projectile_t *projs = source->projectiles;
+	projectile_t *current;
+
+	for (int i = 0; i < count; i++)
+	{
+		current = &(projs[i]);
+		for (int j = 0; j < HBLISTSIZE; j++)
+		{
+			drawHitbox((player_t*)current, &(current->hitboxes[j]));
+		}
+	}
+}
+
 void drawPlayer(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
@@ -272,6 +288,7 @@ void drawScene(game_state_t *source)
 			drawPlayer(source, i);
 		}
 	}
+	drawProjectiles(source);
 
 	glEnd();
 	SwapBuffers(source->overlayHdc);

@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "playerstruct.h"
 #include "coords.h"
+#include "gamedefs.h"
 #include "gamestate.h"
 #include "colors.h"
 #include "controlkey.h"
