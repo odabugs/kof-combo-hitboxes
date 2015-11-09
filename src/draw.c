@@ -230,6 +230,7 @@ void drawProjectiles(game_state_t *source)
 		current = &(projs[i]);
 		for (int j = 0; j < HBLISTSIZE; j++)
 		{
+			glColor4ubv(colorset[j]);
 			drawHitbox((player_t*)current, &(current->hitboxes[j]));
 		}
 	}
