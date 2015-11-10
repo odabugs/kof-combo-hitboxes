@@ -226,7 +226,7 @@ void readGameState(game_state_t *target)
 	}
 	readProjectiles(target);
 	ReadProcessMemory(
-		handle, (void*)(target->gamedef.cameraAddress), &(target->camera),
+		handle, target->gamedef.cameraAddress, &(target->camera),
 		sizeof(camera_t), NULL);
 	getGameScreenDimensions(target->gameHwnd, target->overlayHwnd, &(target->dimensions));
 }

@@ -185,11 +185,11 @@ void drawCloseNormalRangeMarker(
 	drawRectangle(&barTop, &barBottom);
 }
 
-void drawHitbox(player_t *player, hitbox_t *hitbox)
+bool drawHitbox(player_t *player, hitbox_t *hitbox)
 {
 	if (hitbox->xRadius == 0 || hitbox->yRadius == 0)
 	{
-		return;
+		return false;
 	}
 	player_coords_t pivot, boxCenter, boxTopLeft, boxBottomRight;
 	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
@@ -211,6 +211,7 @@ void drawHitbox(player_t *player, hitbox_t *hitbox)
 	}
 	drawBox(&boxTopLeft, &boxBottomRight);
 	drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
+	return true;
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
 		hitbox->boxID,
@@ -227,11 +228,18 @@ void drawProjectiles(game_state_t *source)
 
 	for (int i = 0; i < count; i++)
 	{
+		int boxesDrawn = 0; // avoid drawing pivots for background decorations
 		current = &(projs[i]);
 		for (int j = 0; j < HBLISTSIZE; j++)
 		{
 			glColor4ubv(colorset[j]);
-			drawHitbox((player_t*)current, &(current->hitboxes[j]));
+			if (drawHitbox((player_t*)current, &(current->hitboxes[j]))) {
+				boxesDrawn++;
+			}
+		}
+		if (boxesDrawn > 0)
+		{
+			drawPlayerPivot((player_t*)current);
 		}
 	}
 }
