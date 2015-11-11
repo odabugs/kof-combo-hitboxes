@@ -169,7 +169,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			boxTypeMap = target->gamedef.boxTypeMap;
 			screenDims = &(target->dimensions);
 			int projectilesCount = currentGame->projectilesListSize;
-			target->projectiles = malloc(projectilesCount * sizeof(projectile_t));
+			target->projectiles = calloc(projectilesCount, sizeof(projectile_t));
 			return true;
 		}
 	}
