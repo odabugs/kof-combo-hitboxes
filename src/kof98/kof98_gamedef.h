@@ -26,7 +26,7 @@ gamedef_t kof98_gamedef = {
 	},
 	.cameraAddress = (void*)0x0180C938,
 	.projectilesListStart = (void*)0x1703000,
-	.projectilesListSize = 28, // final projectiles list entry starts at 0x01706800
+	.projectilesListSize = 51, // final projectiles list entry starts at 0x01709600
 	.projectilesListStep = 0x200,
 	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
 	.rosterSize = KOF_98_ROSTER_SIZE,
