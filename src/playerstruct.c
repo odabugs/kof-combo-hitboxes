@@ -88,5 +88,5 @@ bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox)
 
 bool projectileIsActive(projectile_t *projectile)
 {
-	return (projectile->basicStatus >= 0);
+	return (projectile->basicStatus > 0);
 }

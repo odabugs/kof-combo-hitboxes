@@ -25,11 +25,9 @@ gamedef_t kof02_gamedef = {
 		(void*)0x0166E480
 	},
 	.cameraAddress = (void*)0x02208BF8,
-	/*
-	.projectilesListStart = (void*)
-	.projectilesListSize = 
-	.projectilesListStep = 
-	//*/
+	.projectilesListStart = (void*)0x0166DE20,
+	.projectilesListSize = 34, // final projectiles list entry starts at 0x01672880(?)
+	.projectilesListStep = 0x220,
 	.extraStructIndex = 0, // '02 player_extra_t pointer is at player_t +1A4h
 	.rosterSize = KOF_02_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof02_roster,
