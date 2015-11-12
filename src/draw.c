@@ -228,8 +228,13 @@ void drawProjectiles(game_state_t *source)
 
 	for (int i = 0; i < count; i++)
 	{
-		int boxesDrawn = 0; // avoid drawing pivots for background decorations
 		current = &(projs[i]);
+		if (!projectileIsActive(current))
+		{
+			continue;
+		}
+
+		int boxesDrawn = 0; // avoid drawing pivots for background decorations
 		for (int j = 0; j < HBLISTSIZE; j++)
 		{
 			glColor4ubv(colorset[j]);

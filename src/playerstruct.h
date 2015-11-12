@@ -243,5 +243,6 @@ extern bool hitboxIsActive(
 extern bool throwBoxIsActive(player_t *player, hitbox_t *hitbox);
 extern bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox);
 extern bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox);
+extern bool projectileIsActive(projectile_t *projectile);
 
 #endif /* PLAYERSTRUCT_H */
