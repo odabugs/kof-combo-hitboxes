@@ -156,14 +156,16 @@ typedef struct __attribute__((__packed__)) player_extra_2
 	struct player *player;    // +084h: Pointer to main player struct
 } player_2nd_extra_t;
 
-#define BASE_STATUS_FLAGS_LEN 3
+#define STATUS_FLAGS_LEN 3
+#define STATUS_FLAGS_LEN_2ND 4
 
 // "primary" player structure, used for state during gameplay
 // some values are duplicated in multiple locations, hence the _altX's in spots
 typedef struct __attribute__((__packed__)) player
 {
 	//uint8_t padding00[0x000]; // +000h to +000h: unknown
-	uint8_t padding01[0x018]; // +000h to +018h: unknown
+	uint32_t statePtr;        // +000h: Code pointer corresponding to current player state
+	uint8_t padding01[0x014]; // +004h to +018h: unknown
 	player_coord_t xPivot;    // +018h: X position in world (pivot axis)
 	player_coord_t yOffset;   // +01Ch: Base offset to Y position in world
 	player_coord_t yPivot;    // +020h: Y position in world (pivot axis)
@@ -182,7 +184,7 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t padding06[0x004]; // +072h to +076h: unknown
 	char_id_short_t currentCharID_alt2; // +076h: Current(?) character ID (alt 2)
 	uint8_t padding07[0x004]; // +078h to +07Ch: unknown
-	uint8_t baseStatusFlags[BASE_STATUS_FLAGS_LEN]; // +07Ch to +07Fh: Base status flags?
+	uint8_t statusFlags[STATUS_FLAGS_LEN]; // +07Ch to +07Fh: Status flags 1
 	uint8_t padding22[0x011]; // +07Fh to +090h: unknown
 	hitbox_t hitboxes[HBLISTSIZE]; // +090h to +0A4h: 1st base hitboxes list
 	hitbox_t collisionBox;    // +0A4h: Collision box
@@ -195,8 +197,8 @@ typedef struct __attribute__((__packed__)) player
 	uint8_t playerMode;       // +0D5h: Player mode (ADV, EX, Ultimate)
 	uint8_t padding10[0x007]; // +0D6h to +0DDh: unknown
 	costume_t costume;        // +0DDh: Current costume color
-	uint8_t padding11[0x005]; // +0DEh to +0E3h: unknown
-	uint8_t throwableStatus1; // +0E3h: "Throwable" status flag 1 (and possibly more?)
+	uint8_t padding11[0x002]; // +0DEh to +0E0h: unknown
+	uint8_t statusFlags2nd[STATUS_FLAGS_LEN_2ND]; // +0E0h to +0E4h: Status flags 2
 	uint8_t padding23[0x004]; // +0E4h to +0E8h: unknown
 	uint16_t superPart;       // +0E8h: Fractional super meter
 	uint16_t maxGauge;        // +0EAh: Max Mode gauge
@@ -238,6 +240,7 @@ extern bool letThrowBoxesLinger;
 extern int baseThrowBoxLingerTime;
 extern char buttonNames[ATTACK_BUTTONS];
 
+extern bool shouldShowRangeMarkerFor(player_t *player);
 extern bool hitboxIsActive(
 	player_t *player, hitbox_t *hitbox, uint8_t activeMask);
 extern bool throwBoxIsActive(player_t *player, hitbox_t *hitbox);

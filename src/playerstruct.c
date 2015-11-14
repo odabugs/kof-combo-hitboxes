@@ -26,6 +26,12 @@ uint8_t hitboxActiveMasks[HBLISTSIZE] = {
 	1 << 3
 };
 
+bool shouldShowRangeMarkerFor(player_t *player)
+{
+	if ((player->statusFlags2nd[1] & 0x02) != 0) { return false; }
+	return true;
+}
+
 boxtype_t hitboxType(hitbox_t *hitbox)
 {
 	boxtype_t result = boxTypeMap[hitbox->boxID];
@@ -36,8 +42,8 @@ boxtype_t hitboxType(hitbox_t *hitbox)
 // TODO: derive a hitbox's type at runtime
 bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
 {
-	uint8_t hitboxFlags = player->baseStatusFlags[0];
-	return (hitboxFlags & activeMask != 0);
+	uint8_t hitboxFlags = player->statusFlags[0];
+	return ((hitboxFlags & activeMask) != 0);
 	//return (hitboxType(hitbox) != BOX_DUMMY);
 }
 
@@ -74,10 +80,10 @@ bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 
 bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
-	if (player->throwableStatus1 & 0x20 != 0) { return false; }
-	if (player->throwableStatus2 & 0x80 != 0) { return false; }
-	if (player->baseStatusFlags[2] & 0x03 == 1) { return false; }
-	if (hitbox->boxID & 0x80 != 0) { return false; }
+	if ((player->statusFlags2nd[3] & 0x20) != 0) { return false; }
+	if ((player->throwableStatus2 & 0x80) != 0) { return false; }
+	if ((player->statusFlags[2] & 0x03) == 1) { return false; }
+	if ((hitbox->boxID & 0x80) != 0) { return false; }
 	return true;
 }
 

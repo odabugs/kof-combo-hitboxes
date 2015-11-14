@@ -130,9 +130,7 @@ void drawPlayerPivot(player_t *player)
 	drawPivot(&pivot, LARGE_PIVOT_SIZE);
 }
 
-// TODO: factor this out into multiple functions for hotkey check and drawing
-void drawCloseNormalRangeMarker(
-	player_t *player, player_extra_t *playerExtra, int which)
+atk_button_t updateRangeMarkerChoice(int which)
 {
 	atk_button_t showRange = showButtonRanges[which];
 	bool updated = false;
@@ -144,25 +142,33 @@ void drawCloseNormalRangeMarker(
 		updated = true;
 	}
 
-	if (showRange == SHOW_NO_BUTTON_RANGES)
+	if (updated)
 	{
-		if (updated)
+		timestamp();
+		if (showRange == SHOW_NO_BUTTON_RANGES)
 		{
-			timestamp();
 			printf(
 				"Disabled close normal range marker for player %d.\n",
 				(which + 1));
 		}
-		return;
+		else
+		{
+			printf(
+				"Showing close standing %c activation range for player %d.\n",
+				buttonNames[showButtonRanges[which]], (which + 1));
+		}
 	}
 
-	// draw close normal activation range marker
-	if (updated)
+	return showRange;
+}
+
+void drawCloseNormalRangeMarker(
+	player_t *player, player_extra_t *playerExtra, int which)
+{
+	atk_button_t showRange = updateRangeMarkerChoice(which);
+	if (showRange == SHOW_NO_BUTTON_RANGES || !shouldShowRangeMarkerFor(player))
 	{
-		timestamp();
-		printf(
-			"Showing close standing %c activation range for player %d.\n",
-			buttonNames[showButtonRanges[which]], (which + 1));
+		return;
 	}
 
 	int facingAdjustment = (player->facing == FACING_RIGHT ? 1 : -1);
