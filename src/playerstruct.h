@@ -101,10 +101,10 @@ struct player;
 typedef struct __attribute__((__packed__)) projectile
 {
 	uint8_t padding01[0x006]; // +000h to +006h: unknown
-	int16_t basicstatus;      // +006h: Basic status (< 0 if projectile is not active)
+	int16_t basicStatus;      // +006h: Basic status (< 0 if projectile is not active)
 	uint8_t padding02[0x01c]; // +008h to +024h: unknown
-	game_pixel_t screenx;     // +024h: X position onscreen (camera adjusted)
-	game_pixel_t screeny;     // +026h: Y position onscreen (camera adjusted)
+	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
+	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
 	uint8_t padding03[0x05C]; // +028h to +084h: unknown
 	struct player *owner;     // +084h: Pointer to player who "owns" this projectile
 	struct projectile *projListStart; // +088h: Pointer to start of projectiles list
