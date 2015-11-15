@@ -78,9 +78,10 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 	int newHeight = (int)clientRect.bottom;
 
 	// has the game window position and/or size changed since we last checked?
-	bool changedPosition, changedSize;
+	bool changedPosition, changedSize, enlarged;
 	changedPosition = (dimensions->leftX != newLeftX || dimensions->topY != newTopY);
 	changedSize = (dimensions->width != newWidth || dimensions->height != newHeight);
+	enlarged = (changedSize && (newWidth > dimensions->width || newHeight > dimensions->height));
 
 	if (changedPosition || changedSize) {
 		MoveWindow(overlay, newLeftX, newTopY, newWidth, newHeight, true);
