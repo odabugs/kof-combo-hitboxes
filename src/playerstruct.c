@@ -81,8 +81,8 @@ bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
 	if ((player->statusFlags2nd[3] & 0x20) != 0) { return false; }
-	if ((player->throwableStatus2 & 0x80) != 0) { return false; }
 	if ((player->statusFlags[2] & 0x03) == 1) { return false; }
+	if (player->throwableStatus2 != 0) { return false; }
 	if ((hitbox->boxID & 0x80) != 0) { return false; }
 	return true;
 }
