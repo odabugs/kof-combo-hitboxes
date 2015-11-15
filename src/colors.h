@@ -9,8 +9,8 @@
 #define BOX_FILL_ALPHA 0x40
 #define PIVOT_ALPHA 0xFF
 
-extern GLubyte boxEdgeColors[boxTypeCount][4];
-extern GLubyte boxFillColors[boxTypeCount][4];
+extern GLubyte boxEdgeColors[totalBoxTypes][4];
+extern GLubyte boxFillColors[totalBoxTypes][4];
 
 extern GLubyte playerPivotColor[4];
 extern GLubyte closeNormalRangeColor[4];
