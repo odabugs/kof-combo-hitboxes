@@ -37,12 +37,17 @@ bool storeBox(int player, boxtype_t type, hitbox_t *hitbox)
 
 // box set accessor functions for a simple drawing loop that asks for
 // layers in sequence, without knowing the contents of boxLayerOrder
+boxtype_t boxTypeForLayer(int layer)
+{
+	return boxLayerOrder[layer];
+}
+
 hitbox_t *playerBoxesInLayer(int player, int layer)
 {
-	return &(boxLayers[player][boxLayerOrder[layer]]);
+	return &(boxLayers[player][boxTypeForLayer(layer)]);
 }
 
 int playerBoxCountInLayer(int player, int layer)
 {
-	return layerBoxesInUse[player][boxLayerOrder[layer]];
+	return layerBoxesInUse[player][boxTypeForLayer(layer)];
 }
