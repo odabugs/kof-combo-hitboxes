@@ -6,10 +6,7 @@ Compilation with Visual Studio currently not yet tested.
 TODO:
 - Update Makefile to work for both native Windows and Linux cross-compilation with MinGW.
   - GCC/Cygwin compilation support?
-- Find guard boxes, projectile boxes, and "running throw" boxes in memory.
-- Proper box type determination and coloration with alpha transparent box fills.
-- Find out how to detect and automatically conceal "ghost" leftover hitboxes.
-- Proper hitbox layering based on type.
+- Identify guard-type boxes and "running throw"-type boxes.
 - Configuration options (e.g., box colors, box fill on/off)
 - Look into API hooking.
   - Does Microsoft Detours play well with MinGW?
@@ -20,4 +17,4 @@ TODO:
 - Support KOF 2002UM's Type A graphics setting (sprites are scaled differently in Type A)
 
 Known issues:
-- Pivots don't show up in Steam screenshots (probably solved by API hooking).
+- Pivots/hitboxes don't show up in Steam screenshots (probably solved by API hooking).

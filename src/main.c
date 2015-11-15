@@ -74,6 +74,7 @@ void mainLoop()
 
 	if (quitReason != (char*)NULL)
 	{
+		timestamp();
 		printf("%s\n", quitReason);
 	}
 }
@@ -116,6 +117,7 @@ void startupProgram(HINSTANCE hInstance)
 void cleanupProgram()
 {
 	closeGame(&gameState);
+	timestamp();
 	printf("Exiting now.\n");
 }
 
@@ -132,6 +134,8 @@ void printHotkeys()
 		"Hotkeys:\n"
 		"F1 - Toggle close normal range marker (player 1)\n"
 		"F2 - Toggle close normal range marker (player 2)\n"
+		"F3 - Toggle box fill\n"
+		"F4 - Toggle drawing \"throwable\"-type boxes\n"
 		"\n"
 	);
 }

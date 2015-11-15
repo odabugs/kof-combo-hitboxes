@@ -3,9 +3,8 @@
 #define LARGE_PIVOT_SIZE 5
 #define SMALL_PIVOT_SIZE 2
 
-// TODO: get proper box coloring/alpha before enabling this
 bool drawBoxFill = true;
-// start off not showing any range markers for players' close standing normals
+bool drawThrowableBoxes = true;
 atk_button_t showButtonRanges[PLAYERS] = {
 	SHOW_NO_BUTTON_RANGES,
 	SHOW_NO_BUTTON_RANGES
@@ -14,6 +13,8 @@ SHORT showButtonRangeHotkeys[PLAYERS] = {
 	VK_F1,
 	VK_F2
 };
+SHORT showBoxFillHotkey = VK_F3;
+SHORT showThrowableBoxesHotkey = VK_F4;
 
 int ensureMinThickness(int goal, int baseline)
 {
@@ -128,6 +129,28 @@ void drawPlayerPivot(player_t *player)
 
 	glColor4ubv(playerPivotColor);
 	drawPivot(&pivot, LARGE_PIVOT_SIZE);
+}
+
+void checkMiscHotkeys()
+{
+	bool oldStatus;
+
+	if (keyIsPressed(showBoxFillHotkey))
+	{
+		oldStatus = drawBoxFill;
+		drawBoxFill = !drawBoxFill;
+		timestamp();
+		printf("%s box fills.\n", (oldStatus ? "Disabled" : "Enabled"));
+	}
+
+	if (keyIsPressed(showThrowableBoxesHotkey))
+	{
+		oldStatus = drawThrowableBoxes;
+		drawThrowableBoxes = !drawThrowableBoxes;
+		timestamp();
+		printf("%s drawing throwable boxes.\n",
+			(oldStatus ? "Disabled" : "Enabled"));
+	}
 }
 
 atk_button_t updateRangeMarkerChoice(int which)
@@ -306,7 +329,7 @@ void capturePlayerData(game_state_t *source, int which)
 
 	// draw "throwable" box
 	hitbox = &(player->throwableBox);
-	if (throwableBoxIsActive(player, hitbox)) {
+	if (drawThrowableBoxes && throwableBoxIsActive(player, hitbox)) {
 		storeBox(which, BOX_THROWABLE, hitbox);
 	}
 }
@@ -338,6 +361,7 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
+	checkMiscHotkeys();
 	clearStoredBoxes();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);
