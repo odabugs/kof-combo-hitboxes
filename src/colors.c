@@ -23,4 +23,5 @@ void initColors()
 	{
 		boxFillColors[i][3] = BOX_FILL_ALPHA;
 	}
+	boxFillColors[BOX_THROWABLE][3] >>= 1; // make throwable box fill less garish
 }
