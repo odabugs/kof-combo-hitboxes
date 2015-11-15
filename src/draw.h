@@ -14,6 +14,8 @@
 #include "colors.h"
 #include "controlkey.h"
 #include "util.h"
+#include "boxtypes.h"
+#include "boxset.h"
 
 extern void drawScene(game_state_t *source);
 

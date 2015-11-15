@@ -1,6 +1,6 @@
 #include "boxset.h"
 
-hitbox_t boxLayers[PLAYERS][boxTypeCount][LAYER_BOXES];
+hitbox_t *boxLayers[PLAYERS][boxTypeCount][LAYER_BOXES];
 int layerBoxesInUse[PLAYERS][boxTypeCount];
 
 // bottom to top drawing order; later entries are drawn over earlier ones
@@ -29,9 +29,8 @@ bool storeBox(int player, boxtype_t type, hitbox_t *hitbox)
 		return false;
 	}
 
-	layerBoxesInUse[player][type] = used++; // don't change this to ++used
-	hitbox_t *target = &(boxLayers[player][type][used]);
-	memcpy(target, hitbox, sizeof(hitbox_t));
+	layerBoxesInUse[player][type]++;
+	boxLayers[player][type][used] = hitbox;
 	return true;
 }
 
@@ -42,9 +41,9 @@ boxtype_t boxTypeForLayer(int layer)
 	return boxLayerOrder[layer];
 }
 
-hitbox_t *playerBoxesInLayer(int player, int layer)
+hitbox_t **playerBoxesInLayer(int player, int layer)
 {
-	return &(boxLayers[player][boxTypeForLayer(layer)]);
+	return boxLayers[player][boxTypeForLayer(layer)];
 }
 
 int playerBoxCountInLayer(int player, int layer)

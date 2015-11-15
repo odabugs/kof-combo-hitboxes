@@ -231,10 +231,12 @@ void drawProjectiles(game_state_t *source)
 	int count = currentGame->projectilesListSize;
 	projectile_t *projs = source->projectiles;
 	projectile_t *current;
+	hitbox_t *hitbox;
+	boxtype_t boxType;
 
 	for (int i = 0; i < count; i++)
 	{
-		current = &(projs[i]);
+		current = projs + i;
 		if (!projectileIsActive(current))
 		{
 			continue;
@@ -243,8 +245,18 @@ void drawProjectiles(game_state_t *source)
 		int boxesDrawn = 0; // avoid drawing pivots for background decorations
 		for (int j = 0; j < HBLISTSIZE; j++)
 		{
-			glColor4ubv(colorset[j]);
-			if (drawHitbox((player_t*)current, &(current->hitboxes[j]))) {
+			hitbox = &(current->hitboxes[j]);
+			boxType = hitboxType(hitbox);
+			// detect and skip over "ghost boxes" that occur in '02UM
+			//*
+			if (boxType == BOX_ATTACK && j == 1)
+			{
+				continue;
+			}
+			//*/
+			boxType = projectileTypeEquivalentFor(boxType);
+			glColor4ubv(boxEdgeColors[boxType]);
+			if (drawHitbox((player_t*)current, hitbox)) {
 				boxesDrawn++;
 			}
 		}
@@ -255,41 +267,69 @@ void drawProjectiles(game_state_t *source)
 	}
 }
 
-void drawPlayer(game_state_t *source, int which)
+void capturePlayerData(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
 	player_extra_t *playerExtra = &(source->playersExtra[which]);
 	hitbox_t *hitbox;
+	boxtype_t boxType;
 
 	for (int i = 0; i < HBLISTSIZE; i++)
 	{
 		hitbox = &(player->hitboxes[i]);
 		if (hitboxIsActive(player, hitbox, hitboxActiveMasks[i]))
 		{
-			glColor4ubv(colorset[i]);
-			drawHitbox(player, hitbox);
+			boxType = hitboxType(hitbox);
+			// detect and skip over "ghost boxes" that occur in '02UM
+			//*
+			if (boxType == BOX_ATTACK && i == 1)
+			{
+				continue;
+			}
+			//*/
+			storeBox(which, boxType, hitbox);
 		}
 	}
 
 	// draw collision box
 	hitbox = &(player->collisionBox);
 	if (collisionBoxIsActive(player, hitbox)) {
-		glColor4ubv(colorset[HBLISTSIZE + 0]);
-		drawHitbox(player, hitbox);
+		storeBox(which, BOX_COLLISION, hitbox);
 	}
 
 	// draw "throwing" box
 	hitbox = &(player->throwBox);
 	if (throwBoxIsActive(player, hitbox)) {
-		glColor4ubv(colorset[HBLISTSIZE + 1]);
-		drawHitbox(player, hitbox);
+		storeBox(which, BOX_THROW, hitbox);
 	}
 
 	// draw "throwable" box
 	hitbox = &(player->throwableBox);
 	if (throwableBoxIsActive(player, hitbox)) {
-		glColor4ubv(colorset[HBLISTSIZE + 2]);
-		drawHitbox(player, hitbox);
+		storeBox(which, BOX_THROWABLE, hitbox);
+	}
+}
+
+void drawPlayer(game_state_t *source, int which)
+{
+	player_t *player = &(source->players[which]);
+	player_extra_t *playerExtra = &(source->playersExtra[which]);
+	hitbox_t **layerBoxes, *currentBox;
+	boxtype_t layerType;
+	int layerBoxCount;
+
+	for (int layer = 0; layer < boxTypeCount; layer++)
+	{
+		layerType = boxTypeForLayer(layer);
+		layerBoxes = playerBoxesInLayer(which, layer);
+		layerBoxCount = playerBoxCountInLayer(which, layer);
+
+		for (int i = 0; i < layerBoxCount; i++)
+		{
+			currentBox = *(layerBoxes + i);
+			glColor4ubv(boxEdgeColors[layerType]);
+			drawHitbox(player, currentBox);
+		}
 	}
 
 	drawPlayerPivot(player);
@@ -298,6 +338,7 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
+	clearStoredBoxes();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);
 
@@ -305,6 +346,7 @@ void drawScene(game_state_t *source)
 	{
 		if (shouldDisplayPlayer(source, i))
 		{
+			capturePlayerData(source, i);
 			drawPlayer(source, i);
 		}
 	}
