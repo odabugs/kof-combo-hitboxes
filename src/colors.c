@@ -15,6 +15,7 @@ GLubyte boxEdgeColors[boxTypeCount][4] = {
 	[BOX_COLLISION]         = { 0x00, 0xFF, 0x00, BOX_EDGE_ALPHA },
 	[BOX_VULNERABLE]        = { 0x77, 0x77, 0xFF, BOX_EDGE_ALPHA },
 	[BOX_GUARD]             = { 0xCC, 0xCC, 0xFF, BOX_EDGE_ALPHA },
+	[BOX_ATTACK]            = { 0xFF, 0x00, 0x00, BOX_EDGE_ALPHA },
 	[BOX_PROJECTILE_VULN]   = { 0x00, 0xFF, 0xFF, BOX_EDGE_ALPHA },
 	[BOX_PROJECTILE_ATTACK] = { 0xFF, 0x66, 0xFF, BOX_EDGE_ALPHA },
 	[BOX_THROWABLE]         = { 0xF0, 0xF0, 0xF0, BOX_EDGE_ALPHA },
