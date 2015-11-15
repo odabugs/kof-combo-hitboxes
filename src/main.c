@@ -14,6 +14,7 @@
 #include "gamestate.h"
 #include "controlkey.h"
 #include "util.h"
+#include "colors.h"
 
 #define SLEEP_TIME 10 /* ms */
 #define QUIT_KEY 0x51 /* Q key */
@@ -109,6 +110,7 @@ void startupProgram(HINSTANCE hInstance)
 		printf("Exiting now.\n");
 		exit(EXIT_FAILURE);
 	}
+	initColors();
 }
 
 void cleanupProgram()
