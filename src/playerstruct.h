@@ -245,6 +245,8 @@ extern int baseThrowBoxLingerTime;
 extern char buttonNames[ATTACK_BUTTONS];
 
 extern bool shouldShowRangeMarkerFor(player_t *player);
+extern boxtype_t hitboxType(hitbox_t *hitbox);
+extern boxtype_t projectileTypeEquivalentFor(boxtype_t original);
 extern bool hitboxIsActive(
 	player_t *player, hitbox_t *hitbox, uint8_t activeMask);
 extern bool throwBoxIsActive(player_t *player, hitbox_t *hitbox);

@@ -11,7 +11,7 @@ char buttonNames[ATTACK_BUTTONS] = {
 	'D'
 };
 
-// global, set during game loadup in gamestate.c
+// global, set during startup in gamestate.c
 boxtype_t *boxTypeMap;
 bool letThrowBoxesLinger = true;
 // throw boxes are active for very short time periods;
@@ -34,17 +34,20 @@ bool shouldShowRangeMarkerFor(player_t *player)
 
 boxtype_t hitboxType(hitbox_t *hitbox)
 {
-	boxtype_t result = boxTypeMap[hitbox->boxID];
-	//printf("Type for %02X is %d\n", hitbox->boxID, (int)result);
-	return result;
+	return boxTypeMap[hitbox->boxID];
 }
 
-// TODO: derive a hitbox's type at runtime
+boxtype_t projectileTypeEquivalentFor(boxtype_t original)
+{
+	if (original == BOX_ATTACK) { return BOX_PROJECTILE_ATTACK; }
+	if (original == BOX_VULNERABLE) { return BOX_PROJECTILE_VULN; }
+	return original;
+}
+
 bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
 {
 	uint8_t hitboxFlags = player->statusFlags[0];
 	return ((hitboxFlags & activeMask) != 0);
-	//return (hitboxType(hitbox) != BOX_DUMMY);
 }
 
 // TODO: make lingering throw boxes work on a per-player basis
