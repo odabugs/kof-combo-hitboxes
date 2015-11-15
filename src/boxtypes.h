@@ -10,11 +10,10 @@ typedef enum {
 	BOX_PROJECTILE_ATTACK,
 	BOX_THROWABLE,
 	BOX_THROW,
-	// this must come immediately after the last valid box type
-	boxTypeCount,
+	boxTypeCount, // this must come immediately after the last valid box type
 	// box types not meant for rendering onscreen start here
 	BOX_DUMMY, // inactive boxes (don't render them onscreen)
-	BOX_UNDEFINED // box type needs to be checked before deciding to render it 
+	totalBoxTypes // this must come last
 } boxtype_t;
 
 // shorthand forms for box type mappings
