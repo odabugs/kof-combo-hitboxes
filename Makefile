@@ -32,7 +32,7 @@ gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADER
 gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
-colors.o boxtypes.o controlkey.o util.o: %.o: %.c
+colors.o boxtypes.o boxset.o controlkey.o util.o: %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:

@@ -1,8 +1,6 @@
 #ifndef BOXTYPES_H
 #define BOXTYPES_H
 
-#include <stdint.h>
-
 typedef enum {
 	BOX_COLLISION, // pushbox
 	BOX_VULNERABLE,

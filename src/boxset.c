@@ -1,0 +1,48 @@
+#include "boxset.h"
+
+hitbox_t[PLAYERS][boxTypeCount][LAYER_BOXES] boxLayers;
+int[PLAYERS][boxTypeCount] layerBoxesInUse;
+
+// bottom to top drawing order; later entries are drawn over earlier ones
+boxtype_t[boxTypeCount] boxLayerOrder = {
+	BOX_COLLISION,
+	BOX_VULNERABLE,
+	BOX_GUARD,
+	BOX_ATTACK,
+	BOX_PROJECTILE_VULN,
+	BOX_PROJECTILE_ATTACK,
+	BOX_THROWABLE,
+	BOX_THROW,
+};
+
+void clearStoredBoxes()
+{
+	memset(layerBoxesInUse, 0, sizeof(layerBoxesInUse));
+}
+
+// returns false if there is no room available to store the box (overflow)
+bool storeBox(int player, boxtype_t type, hitbox_t *hitbox)
+{
+	int used = layerBoxesInUse[player][type];
+	if (used >= LAYER_BOXES)
+	{
+		return false;
+	}
+
+	layerBoxesInUse[player][type] = used++; // don't change this to ++used
+	hitbox_t *target = &(boxLayers[player][type][used]);
+	memcpy(target, hitbox, sizeof(hitbox_t));
+	return true;
+}
+
+// box set accessor functions for a simple drawing loop that asks for
+// layers in sequence, without knowing the contents of boxLayerOrder
+hitbox_t *playerBoxesInLayer(int player, int layer)
+{
+	return &(boxLayers[player][boxLayerOrder[layer]]);
+}
+
+int playerBoxCountInLayer(int player, int layer)
+{
+	return layerBoxesInUse[player][boxLayerOrder[layer]];
+}
