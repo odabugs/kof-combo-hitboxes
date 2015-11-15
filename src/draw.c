@@ -4,7 +4,7 @@
 #define SMALL_PIVOT_SIZE 2
 
 // TODO: get proper box coloring/alpha before enabling this
-bool drawBoxFill = false;
+bool drawBoxFill = true;
 // start off not showing any range markers for players' close standing normals
 atk_button_t showButtonRanges[PLAYERS] = {
 	SHOW_NO_BUTTON_RANGES,
@@ -191,7 +191,7 @@ void drawCloseNormalRangeMarker(
 	drawRectangle(&barTop, &barBottom);
 }
 
-bool drawHitbox(player_t *player, hitbox_t *hitbox)
+bool drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 {
 	if (hitbox->xRadius == 0 || hitbox->yRadius == 0)
 	{
@@ -213,8 +213,10 @@ bool drawHitbox(player_t *player, hitbox_t *hitbox)
 
 	if (drawBoxFill)
 	{
+		glColor4ubv(boxFillColors[boxType]);
 		drawRectangle(&boxTopLeft, &boxBottomRight);
 	}
+	glColor4ubv(boxEdgeColors[boxType]);
 	drawBox(&boxTopLeft, &boxBottomRight);
 	drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
 	return true;
@@ -255,8 +257,7 @@ void drawProjectiles(game_state_t *source)
 			}
 			//*/
 			boxType = projectileTypeEquivalentFor(boxType);
-			glColor4ubv(boxEdgeColors[boxType]);
-			if (drawHitbox((player_t*)current, hitbox)) {
+			if (drawHitbox((player_t*)current, hitbox, boxType)) {
 				boxesDrawn++;
 			}
 		}
@@ -327,8 +328,7 @@ void drawPlayer(game_state_t *source, int which)
 		for (int i = 0; i < layerBoxCount; i++)
 		{
 			currentBox = *(layerBoxes + i);
-			glColor4ubv(boxEdgeColors[layerType]);
-			drawHitbox(player, currentBox);
+			drawHitbox(player, currentBox, layerType);
 		}
 	}
 

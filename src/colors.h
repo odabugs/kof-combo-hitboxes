@@ -5,9 +5,9 @@
 #include <GL/gl.h>
 #include "boxtypes.h"
 
-#define BOX_EDGE_ALPHA 255
-#define BOX_FILL_ALPHA 128
-#define PIVOT_ALPHA 255
+#define BOX_EDGE_ALPHA 0xFF
+#define BOX_FILL_ALPHA 0x40
+#define PIVOT_ALPHA 0xFF
 
 extern GLubyte boxEdgeColors[boxTypeCount][4];
 extern GLubyte boxFillColors[boxTypeCount][4];
