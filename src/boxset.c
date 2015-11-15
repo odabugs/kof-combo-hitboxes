@@ -1,10 +1,10 @@
 #include "boxset.h"
 
-hitbox_t *boxLayers[PLAYERS][boxTypeCount][LAYER_BOXES];
-int layerBoxesInUse[PLAYERS][boxTypeCount];
+hitbox_t *boxLayers[PLAYERS][validBoxTypes][LAYER_BOXES];
+int layerBoxesInUse[PLAYERS][validBoxTypes];
 
 // bottom to top drawing order; later entries are drawn over earlier ones
-boxtype_t boxLayerOrder[boxTypeCount] = {
+boxtype_t boxLayerOrder[validBoxTypes] = {
 	BOX_COLLISION,
 	BOX_VULNERABLE,
 	BOX_GUARD,

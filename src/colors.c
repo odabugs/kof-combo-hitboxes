@@ -10,7 +10,7 @@ GLubyte boxEdgeColors[totalBoxTypes][4] = {
 	[BOX_THROWABLE]         = { 0xF0, 0xF0, 0xF0, BOX_EDGE_ALPHA },
 	[BOX_THROW]             = { 0xFF, 0xFF, 0x00, BOX_EDGE_ALPHA },
 	// invalid box types - don't show boxes of these types onscreen
-	[boxTypeCount]          = { 0x00, 0x00, 0x00, 0x00 }, // just for completeness
+	[validBoxTypes]          = { 0x00, 0x00, 0x00, 0x00 }, // just for completeness
 	[BOX_DUMMY]             = { 0x00, 0x00, 0x00, 0x00 }
 };
 // initialized during startup
@@ -22,7 +22,7 @@ GLubyte closeNormalRangeColor[4] = { 0x00, 0xC0, 0xC0, PIVOT_ALPHA }; // teal
 void initColors()
 {
 	memcpy(boxFillColors, boxEdgeColors, sizeof(boxEdgeColors));
-	for (int i = 0; i < boxTypeCount; i++) // don't use totalBoxTypes here
+	for (int i = 0; i < validBoxTypes; i++) // don't use totalBoxTypes here
 	{
 		boxFillColors[i][3] = BOX_FILL_ALPHA;
 	}

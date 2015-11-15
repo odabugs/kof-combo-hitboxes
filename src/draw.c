@@ -342,7 +342,7 @@ void drawPlayer(game_state_t *source, int which)
 	boxtype_t layerType;
 	int layerBoxCount;
 
-	for (int layer = 0; layer < boxTypeCount; layer++)
+	for (int layer = 0; layer < validBoxTypes; layer++)
 	{
 		layerType = boxTypeForLayer(layer);
 		layerBoxes = playerBoxesInLayer(which, layer);
