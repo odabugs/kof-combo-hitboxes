@@ -9,8 +9,6 @@
 #define BOX_FILL_ALPHA 128
 #define PIVOT_ALPHA 255
 
-// glColor3ubv will ignore the "alpha" element, while glColor4ubv will read it
-extern GLubyte colorset[7][4];
 extern GLubyte boxEdgeColors[boxTypeCount][4];
 extern GLubyte boxFillColors[boxTypeCount][4];
 
