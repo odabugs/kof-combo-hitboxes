@@ -5,6 +5,8 @@
 
 bool drawBoxFill = true;
 bool drawThrowableBoxes = true;
+bool drawThrowBoxes = true;
+bool drawHitboxPivots = true;
 atk_button_t showButtonRanges[PLAYERS] = {
 	SHOW_NO_BUTTON_RANGES,
 	SHOW_NO_BUTTON_RANGES
@@ -14,7 +16,9 @@ SHORT showButtonRangeHotkeys[PLAYERS] = {
 	VK_F2
 };
 SHORT showBoxFillHotkey = VK_F3;
-SHORT showThrowableBoxesHotkey = VK_F4;
+SHORT showHitboxPivotsHotkey = VK_F4;
+SHORT showThrowableBoxesHotkey = VK_F5;
+SHORT showThrowBoxesHotkey = VK_F6;
 
 int ensureMinThickness(int goal, int baseline)
 {
@@ -140,7 +144,9 @@ void checkMiscHotkeys()
 		oldStatus = drawBoxFill;
 		drawBoxFill = !drawBoxFill;
 		timestamp();
-		printf("%s box fills.\n", (oldStatus ? "Disabled" : "Enabled"));
+		printf("%s drawing hitbox fills.\n",
+			(oldStatus ? "Disabled" : "Enabled"));
+		return;
 	}
 
 	if (keyIsPressed(showThrowableBoxesHotkey))
@@ -150,6 +156,27 @@ void checkMiscHotkeys()
 		timestamp();
 		printf("%s drawing throwable boxes.\n",
 			(oldStatus ? "Disabled" : "Enabled"));
+		return;
+	}
+
+	if (keyIsPressed(showThrowBoxesHotkey))
+	{
+		oldStatus = drawThrowBoxes;
+		drawThrowBoxes = !drawThrowBoxes;
+		timestamp();
+		printf("%s drawing throw boxes.\n",
+			(oldStatus ? "Disabled" : "Enabled"));
+		return;
+	}
+
+	if (keyIsPressed(showHitboxPivotsHotkey))
+	{
+		oldStatus = drawHitboxPivots;
+		drawHitboxPivots = !drawHitboxPivots;
+		timestamp();
+		printf("%s drawing hitbox center axes.\n",
+			(oldStatus ? "Disabled" : "Enabled"));
+		return;
 	}
 }
 
@@ -241,7 +268,10 @@ bool drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 	}
 	glColor4ubv(boxEdgeColors[boxType]);
 	drawBox(&boxTopLeft, &boxBottomRight);
-	drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
+	if (drawHitboxPivots)
+	{
+		drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
+	}
 	return true;
 	/*
 	printf("%02X %02X %02X %02X %02X\n",
@@ -323,7 +353,7 @@ void capturePlayerData(game_state_t *source, int which)
 
 	// draw "throwing" box
 	hitbox = &(player->throwBox);
-	if (throwBoxIsActive(player, hitbox)) {
+	if (drawThrowBoxes && throwBoxIsActive(player, hitbox)) {
 		storeBox(which, BOX_THROW, hitbox);
 	}
 

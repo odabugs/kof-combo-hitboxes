@@ -134,8 +134,10 @@ void printHotkeys()
 		"Hotkeys:\n"
 		"F1 - Toggle close normal range marker (player 1)\n"
 		"F2 - Toggle close normal range marker (player 2)\n"
-		"F3 - Toggle box fill\n"
-		"F4 - Toggle drawing \"throwable\"-type boxes\n"
+		"F3 - Toggle drawing hitbox fills\n"
+		"F4 - Toggle drawing hitbox center axes\n"
+		"F5 - Toggle drawing \"throwable\"-type boxes\n"
+		"F6 - Toggle drawing \"throw\"-type boxes\n"
 		"\n"
 	);
 }
