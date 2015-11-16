@@ -16,8 +16,8 @@ GLubyte boxEdgeColors[totalBoxTypes][4] = {
 // initialized during startup
 GLubyte boxFillColors[totalBoxTypes][4];
 
-GLubyte playerPivotColor[4] = { 0xFF, 0x00, 0x00, PIVOT_ALPHA }; // red
-GLubyte closeNormalRangeColor[4] = { 0x00, 0xC0, 0xC0, PIVOT_ALPHA }; // teal
+GLubyte playerPivotColor[4] = { 0xFF, 0xFF, 0xFF, PIVOT_ALPHA };
+GLubyte closeNormalRangeColor[4] = { 0x00, 0xC0, 0xC0, PIVOT_ALPHA };
 
 void initColors()
 {
