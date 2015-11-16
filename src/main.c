@@ -53,23 +53,29 @@ int WINAPI WinMain(
 void mainLoop()
 {
 	bool running = true;
+	bool printedCoords = false;
 	char *quitReason = (char*)NULL;
+	screen_dimensions_t *dims = &(gameState.dimensions);
 	MSG message;
 
 	while (running)
 	{
-		//*
 		while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&message);
 			DispatchMessage(&message);
-			//printf("hola\n");
 		}
 
 		drawNextFrame();
-		//*/
-		Sleep(SLEEP_TIME);
+		if (!printedCoords)
+		{
+			printedCoords = true;
+			//printf("Game's window handle is 0x%08X.\n", gameState.gameHwnd);
+			printf("Game window is located at (%d, %d) and its size is (%d, %d).\n",
+				dims->leftX, dims->topY, dims->width, dims->height);
+		}
 		running = checkShouldContinueRunning(&quitReason);
+		Sleep(SLEEP_TIME);
 	}
 
 	if (quitReason != (char*)NULL)
