@@ -17,7 +17,7 @@ boxtype_t kof98_boxTypeMap[256] = {
 	// 30h-37h
 	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_g,
 	// 38h-3Fh
-	b_g,  b_c,  b_c,  b_c,  b_c,  b_c,  b_c,  b_x,
+	b_g,  b_pv, b_pv, b_pv, b_pv, b_pv, b_pv, b_x,
 	// 40h-47h
 	b_x,  b_x,  b_x,  b_x,  b_x,  b_x,  b_x,  b_x,
 	// 48h-4Fh

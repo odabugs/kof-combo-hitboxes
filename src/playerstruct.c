@@ -39,9 +39,7 @@ boxtype_t hitboxType(hitbox_t *hitbox)
 
 boxtype_t projectileTypeEquivalentFor(boxtype_t original)
 {
-	if (original == BOX_ATTACK) { return BOX_PROJECTILE_ATTACK; }
-	if (original == BOX_VULNERABLE) { return BOX_PROJECTILE_VULN; }
-	return original;
+	return (original == BOX_ATTACK) ? BOX_PROJECTILE_ATTACK : original;
 }
 
 bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
