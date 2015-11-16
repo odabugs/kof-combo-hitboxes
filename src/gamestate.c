@@ -156,7 +156,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 
 	if (procID != (DWORD)NULL)
 	{
-		HANDLE wProcHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
+		HANDLE wProcHandle = OpenProcess(PROCESS_VM_READ, FALSE, procID);
 		if (wProcHandle != INVALID_HANDLE_VALUE && wProcHandle != (HANDLE)NULL)
 		{
 			target->gameHandle = wProcHandle;
