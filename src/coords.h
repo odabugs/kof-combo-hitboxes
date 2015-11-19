@@ -106,6 +106,7 @@ extern void relativizeWorldCoords(
 	camera_t *camera, player_coords_t *target);
 extern void adjustWorldCoords(player_coords_t *target,
 	int xAdjust, int yAdjust);
-extern void swapYComponents(player_coords_t *left, player_coords_t *right);
+extern void ensureCorners(
+	player_coords_t *topLeft, player_coords_t *bottomRight);
 
 #endif /* COORDS_H */

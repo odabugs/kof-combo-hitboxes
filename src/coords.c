@@ -206,9 +206,16 @@ void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust)
 	target->y += yAdjust;
 }
 
-void swapYComponents(player_coords_t *left, player_coords_t *right)
+void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight)
 {
-	player_coord_t tmpY = left->yComplete;
-	left->yComplete = right->yComplete;
-	right->yComplete = tmpY;
+	int32_t
+		leftX   = min(topLeft->xComplete.value, bottomRight->xComplete.value),
+		topY    = min(topLeft->yComplete.value, bottomRight->yComplete.value),
+		rightX  = max(topLeft->xComplete.value, bottomRight->xComplete.value),
+		bottomY = max(topLeft->yComplete.value, bottomRight->yComplete.value);
+
+	topLeft->xComplete.value     = leftX;
+	topLeft->yComplete.value     = topY;
+	bottomRight->xComplete.value = rightX;
+	bottomRight->yComplete.value = bottomY;
 }

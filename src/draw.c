@@ -8,20 +8,6 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
-void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight)
-{
-	int32_t
-		leftX   = min(topLeft->xComplete.value, bottomRight->xComplete.value),
-		topY    = min(topLeft->yComplete.value, bottomRight->yComplete.value),
-		rightX  = max(topLeft->xComplete.value, bottomRight->xComplete.value),
-		bottomY = max(topLeft->yComplete.value, bottomRight->yComplete.value);
-
-	topLeft->xComplete.value     = leftX;
-	topLeft->yComplete.value     = topY;
-	bottomRight->xComplete.value = rightX;
-	bottomRight->yComplete.value = bottomY;
-}
-
 void GLRectangle(int leftX, int topY, int rightX, int bottomY)
 {
 	glVertex2i(leftX, topY);
