@@ -12,7 +12,7 @@
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "colors.h"
-#include "controlkey.h"
+#include "hotkeys.h"
 #include "util.h"
 #include "boxtypes.h"
 #include "boxset.h"
