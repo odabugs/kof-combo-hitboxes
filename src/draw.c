@@ -243,7 +243,7 @@ void drawCloseNormalRangeMarker(
 
 bool drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 {
-	if (hitbox->xRadius == 0 || hitbox->yRadius == 0)
+	if (!boxTypeCheck(boxType) || !boxSizeCheck(hitbox))
 	{
 		return false;
 	}

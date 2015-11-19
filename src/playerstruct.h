@@ -102,7 +102,7 @@ typedef struct __attribute__((__packed__)) projectile
 {
 	uint8_t padding01[0x006]; // +000h to +006h: unknown
 	int16_t basicStatus;      // +006h: Basic status (< 0 if projectile is not active)
-	uint8_t padding02[0x01c]; // +008h to +024h: unknown
+	uint8_t padding02[0x01C]; // +008h to +024h: unknown
 	game_pixel_t screenX;     // +024h: X position onscreen (camera adjusted)
 	game_pixel_t screenY;     // +026h: Y position onscreen (camera adjusted)
 	uint8_t padding03[0x05C]; // +028h to +084h: unknown
@@ -244,6 +244,8 @@ extern bool letThrowBoxesLinger;
 extern int baseThrowBoxLingerTime;
 extern char buttonNames[ATTACK_BUTTONS];
 
+extern bool boxTypeCheck(boxtype_t boxType);
+extern bool boxSizeCheck(hitbox_t *hitbox);
 extern bool shouldShowRangeMarkerFor(player_t *player);
 extern boxtype_t hitboxType(hitbox_t *hitbox);
 extern boxtype_t projectileTypeEquivalentFor(boxtype_t original);

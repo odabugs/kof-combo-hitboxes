@@ -32,6 +32,16 @@ bool shouldShowRangeMarkerFor(player_t *player)
 	return true;
 }
 
+bool boxTypeCheck(boxtype_t boxType)
+{
+	return (boxType >= 0 && boxType < validBoxTypes);
+}
+
+bool boxSizeCheck(hitbox_t *hitbox)
+{
+	return (hitbox->xRadius > 0 && hitbox->yRadius > 0);
+}
+
 boxtype_t hitboxType(hitbox_t *hitbox)
 {
 	return boxTypeMap[hitbox->boxID];
@@ -39,11 +49,14 @@ boxtype_t hitboxType(hitbox_t *hitbox)
 
 boxtype_t projectileTypeEquivalentFor(boxtype_t original)
 {
-	return (original == BOX_ATTACK) ? BOX_PROJECTILE_ATTACK : original;
+	if (original == BOX_ATTACK) { return BOX_PROJECTILE_ATTACK; }
+	if (original == BOX_VULNERABLE) { return BOX_PROJECTILE_VULN; }
+	return original;
 }
 
 bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
 {
+	if (!boxSizeCheck(hitbox)) { return false; }
 	uint8_t hitboxFlags = player->statusFlags[0];
 	return ((hitboxFlags & activeMask) != 0);
 }
@@ -66,6 +79,7 @@ void updateThrowBoxLingerTime(bool isActive)
 
 bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
+	if (!boxSizeCheck(hitbox)) { return false; }
 	if (DRAW_STALE_THROW_BOXES) { return true; }
 	bool isActive = (hitbox->boxID != 0);
 	updateThrowBoxLingerTime(isActive);
@@ -81,6 +95,7 @@ bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 
 bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
+	if (!boxSizeCheck(hitbox)) { return false; }
 	if ((player->statusFlags2nd[3] & 0x20) != 0) { return false; }
 	if ((player->statusFlags[2] & 0x03) == 1) { return false; }
 	if (player->throwableStatus2 != 0) { return false; }
@@ -90,6 +105,7 @@ bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
 
 bool collisionBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
+	if (!boxSizeCheck(hitbox)) { return false; }
 	return (hitbox->boxID != 0xFF);
 }
 
