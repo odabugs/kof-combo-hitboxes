@@ -49,47 +49,29 @@ atk_button_t updateRangeMarkerChoice(int which)
 	return showRange;
 }
 
+void checkToggleHotkey(SHORT vkCode, bool *target, char *message)
+{
+	bool oldStatus = *target;
+	if (keyIsPressed(vkCode))
+	{
+		*target = !oldStatus;
+		timestamp();
+		printf("%s %s.\n", (oldStatus ? "Disabled" : "Enabled"), message);
+	}
+}
+
 void checkMiscHotkeys()
 {
-	bool oldStatus;
-
-	if (keyIsPressed(showBoxFillHotkey))
-	{
-		oldStatus = drawBoxFill;
-		drawBoxFill = !drawBoxFill;
-		timestamp();
-		printf("%s drawing hitbox fills.\n",
-			(oldStatus ? "Disabled" : "Enabled"));
-		return;
-	}
-
-	if (keyIsPressed(showThrowableBoxesHotkey))
-	{
-		oldStatus = drawThrowableBoxes;
-		drawThrowableBoxes = !drawThrowableBoxes;
-		timestamp();
-		printf("%s drawing throwable boxes.\n",
-			(oldStatus ? "Disabled" : "Enabled"));
-		return;
-	}
-
-	if (keyIsPressed(showThrowBoxesHotkey))
-	{
-		oldStatus = drawThrowBoxes;
-		drawThrowBoxes = !drawThrowBoxes;
-		timestamp();
-		printf("%s drawing throw boxes.\n",
-			(oldStatus ? "Disabled" : "Enabled"));
-		return;
-	}
-
-	if (keyIsPressed(showHitboxPivotsHotkey))
-	{
-		oldStatus = drawHitboxPivots;
-		drawHitboxPivots = !drawHitboxPivots;
-		timestamp();
-		printf("%s drawing hitbox center axes.\n",
-			(oldStatus ? "Disabled" : "Enabled"));
-		return;
-	}
+	checkToggleHotkey(
+		showBoxFillHotkey, &drawBoxFill,
+		"drawing hitbox fills");
+	checkToggleHotkey(
+		showThrowableBoxesHotkey, &drawThrowableBoxes,
+		"drawing throwable boxes");
+	checkToggleHotkey(
+		showThrowBoxesHotkey, &drawThrowBoxes,
+		"drawing throw boxes");
+	checkToggleHotkey(
+		showHitboxPivotsHotkey, &drawHitboxPivots,
+		"drawing hitbox center axes");
 }

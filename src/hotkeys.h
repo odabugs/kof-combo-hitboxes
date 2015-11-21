@@ -8,6 +8,7 @@
 #include "playerstruct.h"
 #include "gamedefs.h"
 #include "controlkey.h"
+#include "util.h"
 
 extern bool drawBoxFill;
 extern bool drawThrowableBoxes;
