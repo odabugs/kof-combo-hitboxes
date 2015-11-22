@@ -6,7 +6,7 @@ boxtype_t kof02_boxTypeMap[0x100] = {
 //	+00h  +01h  +02h  +03h  +04h  +05h  +06h  +07h
 	b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  // 00h-07h
 	b_v,  b_g,  b_g,  b_g,  b_a,  b_a,  b_a,  b_a,  // 08h-0Fh
-	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_v,  b_v,  // 10h-17h
+	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_v,  // 10h-17h
 	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  // 18h-1Fh
 	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  // 20h-27h
 	b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  b_a,  // 28h-2Fh
