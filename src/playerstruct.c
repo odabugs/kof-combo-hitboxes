@@ -56,6 +56,7 @@ boxtype_t projectileTypeEquivalentFor(boxtype_t original)
 
 bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
 {
+	if (!boxTypeCheck(hitboxType(hitbox))) { return false; }
 	if (!boxSizeCheck(hitbox)) { return false; }
 	uint8_t hitboxFlags = player->statusFlags[0];
 	return ((hitboxFlags & activeMask) != 0);
