@@ -107,7 +107,7 @@ void drawPlayerPivot(player_t *player)
 void drawCloseNormalRangeMarker(
 	player_t *player, player_extra_t *playerExtra, int which)
 {
-	atk_button_t showRange = updateRangeMarkerChoice(which);
+	atk_button_t showRange = showButtonRanges[which];
 	if (showRange == SHOW_NO_BUTTON_RANGES || !shouldShowRangeMarkerFor(player))
 	{
 		return;
@@ -283,7 +283,7 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
-	checkMiscHotkeys();
+	checkHotkeys();
 	clearStoredBoxes();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_TRIANGLES);

@@ -1,7 +1,6 @@
 #ifndef NO_KOF_02
 #include "../boxtypes.h"
 
-// differs from the '98 box type map at 16h
 boxtype_t kof02_boxTypeMap[0x100] = {
 //	+00h  +01h  +02h  +03h  +04h  +05h  +06h  +07h
 	b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  b_v,  // 00h-07h

@@ -17,20 +17,15 @@ SHORT showHitboxPivotsHotkey = VK_F4;
 SHORT showThrowableBoxesHotkey = VK_F5;
 SHORT showThrowBoxesHotkey = VK_F6;
 
-atk_button_t updateRangeMarkerChoice(int which)
+void checkRangeMarkerHotkey(int which)
 {
 	atk_button_t showRange = showButtonRanges[which];
-	bool updated = false;
 
 	if (keyIsPressed(showButtonRangeHotkeys[which]))
 	{
 		showRange = ++showRange % (SHOW_NO_BUTTON_RANGES + 1);
 		showButtonRanges[which] = showRange;
-		updated = true;
-	}
 
-	if (updated)
-	{
 		timestamp();
 		if (showRange == SHOW_NO_BUTTON_RANGES)
 		{
@@ -45,8 +40,6 @@ atk_button_t updateRangeMarkerChoice(int which)
 				buttonNames[showButtonRanges[which]], (which + 1));
 		}
 	}
-
-	return showRange;
 }
 
 void checkToggleHotkey(SHORT vkCode, bool *target, char *message)
@@ -60,7 +53,7 @@ void checkToggleHotkey(SHORT vkCode, bool *target, char *message)
 	}
 }
 
-void checkMiscHotkeys()
+void checkHotkeys()
 {
 	checkToggleHotkey(
 		showBoxFillHotkey, &drawBoxFill,
@@ -74,4 +67,9 @@ void checkMiscHotkeys()
 	checkToggleHotkey(
 		showHitboxPivotsHotkey, &drawHitboxPivots,
 		"drawing hitbox center axes");
+
+	for (int which = 0; which < PLAYERS; which++)
+	{
+		checkRangeMarkerHotkey(which);
+	}
 }

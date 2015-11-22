@@ -16,7 +16,6 @@ extern bool drawThrowBoxes;
 extern bool drawHitboxPivots;
 extern atk_button_t showButtonRanges[PLAYERS];
 
-extern atk_button_t updateRangeMarkerChoice(int which);
-extern void checkMiscHotkeys();
+extern void checkHotkeys();
 
 #endif /* HOTKEYS_H */
