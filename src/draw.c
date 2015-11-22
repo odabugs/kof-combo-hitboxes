@@ -133,11 +133,11 @@ void drawCloseNormalRangeMarker(
 	drawRectangle(&barTop, &barBottom);
 }
 
-bool drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
+void drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 {
 	if (!boxTypeCheck(boxType) || !boxSizeCheck(hitbox))
 	{
-		return false;
+		return;
 	}
 	player_coords_t pivot, boxCenter, boxTopLeft, boxBottomRight;
 	int offsetX = hitbox->xPivot * (player->facing == FACING_RIGHT ? -1 : 1);
@@ -164,26 +164,17 @@ bool drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 	{
 		drawPivot(&boxCenter, SMALL_PIVOT_SIZE);
 	}
-	return true;
-	/*
-	printf("%02X %02X %02X %02X %02X\n",
-		hitbox->boxID,
-		hitbox->xPivot, hitbox->yPivot,
-		hitbox->xRadius, hitbox->yRadius);
-	//*/
 }
 
 void drawProjectiles(game_state_t *source)
 {
 	int count = currentGame->projectilesListSize;
 	projectile_t *projs = source->projectiles;
-	projectile_t *current;
-	hitbox_t *hitbox;
-	boxtype_t boxType;
 
 	for (int i = 0; i < count; i++)
 	{
-		current = projs + i;
+		projectile_t *current = projs + i;
+		player_t *asPlayer = (player_t*)current;
 		if (!projectileIsActive(current))
 		{
 			continue;
@@ -192,23 +183,25 @@ void drawProjectiles(game_state_t *source)
 		int boxesDrawn = 0; // avoid drawing pivots for background decorations
 		for (int j = 0; j < HBLISTSIZE; j++)
 		{
-			hitbox = &(current->hitboxes[j]);
-			boxType = hitboxType(hitbox);
+			hitbox_t *hitbox = &(current->hitboxes[j]);
+			boxtype_t boxType = hitboxType(hitbox);
+
 			// detect and skip over "ghost boxes" that occur in '02UM
-			//*
 			if (boxType == BOX_ATTACK && j == 1)
 			{
 				continue;
 			}
-			//*/
-			boxType = projectileTypeEquivalentFor(boxType);
-			if (drawHitbox((player_t*)current, hitbox, boxType)) {
+
+			if (hitboxIsActive(asPlayer, hitbox, hitboxActiveMasks[j]))
+			{
+				boxType = projectileTypeEquivalentFor(boxType);
+				drawHitbox(asPlayer, hitbox, boxType);
 				boxesDrawn++;
 			}
 		}
 		if (boxesDrawn > 0)
 		{
-			drawPlayerPivot((player_t*)current);
+			drawPlayerPivot(asPlayer);
 		}
 	}
 }
@@ -227,12 +220,11 @@ void capturePlayerData(game_state_t *source, int which)
 		{
 			boxType = hitboxType(hitbox);
 			// detect and skip over "ghost boxes" that occur in '02UM
-			//*
 			if (boxType == BOX_ATTACK && i == 1)
 			{
 				continue;
 			}
-			//*/
+
 			storeBox(which, boxType, hitbox);
 		}
 	}
