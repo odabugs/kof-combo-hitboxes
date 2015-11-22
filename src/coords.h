@@ -92,18 +92,15 @@ extern void getGameScreenDimensions(
 extern void scaleScreenCoords(
 	screen_dimensions_t *dimensions, screen_coords_t *target,
 	coord_options_t options);
-extern void translateGameCoords(
+extern void translateRelativeGameCoords(
 	player_coords_t *source, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
+extern void translateGameCoords(
+	player_coords_t *source, screen_coords_t *target, coord_options_t options);
 extern void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
-extern void worldCoordsFromPlayer(
-	player_t *player, player_coords_t *target);
-extern void absoluteWorldCoordsFromPlayer(
-	player_t *player, player_coords_t *target);
-extern void relativizeWorldCoords(
-	camera_t *camera, player_coords_t *target);
+extern void worldCoordsFromPlayer(player_t *player, player_coords_t *target);
 extern void adjustWorldCoords(player_coords_t *target,
 	int xAdjust, int yAdjust);
 extern void ensureCorners(

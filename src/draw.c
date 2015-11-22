@@ -26,8 +26,8 @@ void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 	int leftX, topY, rightX, bottomY;
 
 	ensureCorners(topLeft, bottomRight);
-	translateGameCoords(topLeft, screenDims, NULL, &topLeftScreen, COORD_NORMAL);
-	translateGameCoords(bottomRight, screenDims, NULL, &bottomRightScreen, COORD_BOTTOM_RIGHT);
+	translateGameCoords(topLeft, &topLeftScreen, COORD_NORMAL);
+	translateGameCoords(bottomRight, &bottomRightScreen, COORD_BOTTOM_RIGHT);
 	leftX   = topLeftScreen.x;
 	topY    = topLeftScreen.y;
 	rightX  = ensureMinThickness(bottomRightScreen.x, leftX);
@@ -46,10 +46,10 @@ void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 	int outerLeftX, outerTopY, outerRightX, outerBottomY;
 
 	ensureCorners(topLeft, bottomRight);
-	translateGameCoords(topLeft, screenDims, NULL, &outerTopLeft, COORD_NORMAL);
-	translateGameCoords(topLeft, screenDims, NULL, &innerTopLeft, COORD_BOTTOM_RIGHT);
-	translateGameCoords(bottomRight, screenDims, NULL, &innerBottomRight, COORD_NORMAL);
-	translateGameCoords(bottomRight, screenDims, NULL, &outerBottomRight, COORD_BOTTOM_RIGHT);
+	translateGameCoords(topLeft, &outerTopLeft, COORD_NORMAL);
+	translateGameCoords(topLeft, &innerTopLeft, COORD_BOTTOM_RIGHT);
+	translateGameCoords(bottomRight, &innerBottomRight, COORD_NORMAL);
+	translateGameCoords(bottomRight, &outerBottomRight, COORD_BOTTOM_RIGHT);
 
 	// handle left/top sides of the box
 	outerLeftX   = outerTopLeft.x;
@@ -64,12 +64,6 @@ void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 	outerBottomY = ensureMinThickness(outerBottomRight.y, innerBottomY);
 
 	// draw box sides in order: left, right, top, bottom
-	/* // for testing
-	printf("Outer: (%d, %d, %d, %d) - Inner: (%d, %d, %d, %d)\n",
-		outerLeftX, outerTopY, outerRightX, outerBottomY,
-		innerLeftX, innerTopY, innerRightX, innerBottomY
-	);
-	//*/
 	GLRectangle(outerLeftX, outerTopY, innerLeftX, outerBottomY);
 	GLRectangle(innerRightX, outerTopY, outerRightX, outerBottomY);
 	GLRectangle(innerLeftX, outerTopY, innerRightX, innerTopY);
@@ -98,7 +92,7 @@ void drawPivot(player_coords_t *pivot, int pivotSize)
 void drawPlayerPivot(player_t *player)
 {
 	player_coords_t pivot;
-	absoluteWorldCoordsFromPlayer(player, &pivot);
+	worldCoordsFromPlayer(player, &pivot);
 
 	glColor4ubv(playerPivotColor);
 	drawPivot(&pivot, LARGE_PIVOT_SIZE);
@@ -119,7 +113,7 @@ void drawCloseNormalRangeMarker(
 	// (i.e., close normal won't activate if the two overlap exactly)
 	int activeRange = playerExtra->closeRanges[showRange] - 1;
 	player_coords_t lineOrigin, lineExtent, barTop, barBottom;
-	absoluteWorldCoordsFromPlayer(player, &lineOrigin);
+	worldCoordsFromPlayer(player, &lineOrigin);
 	memcpy(&lineExtent, &lineOrigin, sizeof(lineOrigin));
 	adjustWorldCoords(&lineExtent, activeRange * facingAdjustment, 0);
 	memcpy(&barTop, &lineExtent, sizeof(lineExtent));
@@ -145,7 +139,7 @@ void drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 	int xRadius = hitbox->xRadius;
 	int yRadius = hitbox->yRadius;
 
-	absoluteWorldCoordsFromPlayer(player, &pivot);
+	worldCoordsFromPlayer(player, &pivot);
 	memcpy(&boxCenter, &pivot, sizeof(pivot));
 	memcpy(&boxTopLeft, &pivot, sizeof(pivot));
 	memcpy(&boxBottomRight, &pivot, sizeof(pivot));
