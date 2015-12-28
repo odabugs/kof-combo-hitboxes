@@ -94,7 +94,7 @@ void drawPlayerPivot(player_t *player)
 	player_coords_t pivot;
 	worldCoordsFromPlayer(player, &pivot);
 
-	glColor4ubv(playerPivotColor);
+	glColor4ubv(playerPivotColor.value);
 	drawPivot(&pivot, LARGE_PIVOT_SIZE);
 }
 
@@ -122,7 +122,7 @@ void drawCloseNormalRangeMarker(
 	barBottom.yPart = 0;
 	barBottom.y = (screenDims->basicHeight * 2);
 
-	glColor4ubv(closeNormalRangeColor);
+	glColor4ubv(closeNormalRangeColor.value);
 	drawRectangle(&lineOrigin, &lineExtent);
 	drawRectangle(&barTop, &barBottom);
 }
@@ -149,10 +149,10 @@ void drawHitbox(player_t *player, hitbox_t *hitbox, boxtype_t boxType)
 
 	if (drawBoxFill)
 	{
-		glColor4ubv(boxFillColors[boxType]);
+		selectFillColor(boxType);
 		drawRectangle(&boxTopLeft, &boxBottomRight);
 	}
-	glColor4ubv(boxEdgeColors[boxType]);
+	selectEdgeColor(boxType);
 	drawBox(&boxTopLeft, &boxBottomRight);
 	if (drawHitboxPivots)
 	{

@@ -9,12 +9,26 @@
 #define BOX_FILL_ALPHA 0x40
 #define PIVOT_ALPHA 0xFF
 
-extern GLubyte boxEdgeColors[totalBoxTypes][4];
-extern GLubyte boxFillColors[totalBoxTypes][4];
+typedef union draw_color
+{
+	struct
+	{
+		GLubyte r;
+		GLubyte g;
+		GLubyte b;
+		GLubyte a;
+	};
+	GLubyte value[4];
+} draw_color_t;
 
-extern GLubyte playerPivotColor[4];
-extern GLubyte closeNormalRangeColor[4];
+extern draw_color_t boxEdgeColors[totalBoxTypes];
+extern draw_color_t boxFillColors[totalBoxTypes];
+
+extern draw_color_t playerPivotColor;
+extern draw_color_t closeNormalRangeColor;
 
 extern void initColors();
+extern void selectEdgeColor(boxtype_t boxType);
+extern void selectFillColor(boxtype_t boxType);
 
 #endif /* COLORS_H */
