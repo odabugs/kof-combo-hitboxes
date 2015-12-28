@@ -28,6 +28,7 @@ extern draw_color_t playerPivotColor;
 extern draw_color_t closeNormalRangeColor;
 
 extern void initColors();
+extern void selectColor(draw_color_t color);
 extern void selectEdgeColor(boxtype_t boxType);
 extern void selectFillColor(boxtype_t boxType);
 
