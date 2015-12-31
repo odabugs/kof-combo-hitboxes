@@ -5,6 +5,8 @@ Compilation with Visual Studio currently not yet tested.
 
 TODO:
 - Support loading settings (e.g., box colors) from a config file.
+- Make box layer drawing order configurable (currently hardcoded).
+- Figure out proximity detection for moves like Kyo hcb+K or Clark run grab.
 - Look into API hooking.
   - Does Microsoft Detours play well with MinGW?
   - Possible MinGW-friendly alternative: https://github.com/TsudaKageyu/minhook
