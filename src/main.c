@@ -15,13 +15,19 @@
 #include "process.h"
 #include "colors.h"
 
+#define TITLE "King of Fighters 2-in-1 Hitbox Viewer"
+#define VERSION "0.0.1"
+#define HOMEPAGE "https://github.com/odabugs/kof-combo-hitboxes"
+
 #define SLEEP_TIME 10 /* ms */
 
 void mainLoop();
+void printHeader();
 
 int WINAPI WinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
 {
+	printHeader();
 	startupProgram(hInstance);
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
 	printf("We recommend setting your game to %s resolution in windowed mode.\n",
@@ -31,11 +37,17 @@ int WINAPI WinMain(
 		printf("%s\n", gameState.gamedef.extraRecommendations);
 	}
 	printHotkeys();
-	printf("Press Q in this console window to exit the hitbox viewer.\n");
 
 	mainLoop();
 	cleanupProgram();
 	return 0;
+}
+
+void printHeader()
+{
+	printf("%s, version %s\n", TITLE, VERSION);
+	printf("<%s>\n", HOMEPAGE);
+	printf("\n");
 }
 
 void mainLoop()
