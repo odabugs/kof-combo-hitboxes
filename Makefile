@@ -1,7 +1,7 @@
 #CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW
 CC=gcc # for native compilation with MinGW on Windows
 #TODO: add debug build target
-CFLAGS=-std=c1x -g
+CFLAGS=-std=c11 -g
 LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o
@@ -41,6 +41,7 @@ process.o: process.c gamestate.h
 colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+.PHONY: clean
 clean:
 	del "$(EXE_NAME)"
 	del /S *.o *.h.gch
