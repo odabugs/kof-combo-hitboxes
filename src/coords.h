@@ -85,8 +85,6 @@ typedef enum
 	COORD_THICK_BORDER = 0x04
 } coord_options_t;
 
-extern const player_coord_t baseY;
-
 extern void getGameScreenDimensions(
 	HWND game, HWND overlay, screen_dimensions_t *dimensions);
 extern void scaleScreenCoords(

@@ -3,6 +3,17 @@
 // global, set by startupProgram() in main.c
 game_state_t gameState;
 
+void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *source)
+{
+	memset(dims, 0, sizeof(*dims));
+	dims->basicWidth = source->basicWidth;
+	dims->basicHeight = source->basicHeight;
+	dims->basicWidthAsDouble = (double)source->basicWidth;
+	dims->basicHeightAsDouble = (double)source->basicHeight;
+	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
+	dims->aspectMode = source->aspectMode;
+}
+
 void readPlayerState(game_state_t *target, int which)
 {
 	HANDLE handle = target->gameHandle;

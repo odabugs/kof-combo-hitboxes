@@ -1,5 +1,66 @@
 #include "process.h"
 
+HWND myself;
+HANDLE myStdin;
+SHORT quitKey = 0x51; // Q key
+
+LRESULT CALLBACK WindowProc(
+	HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+
+	return 0;
+}
+
+void startupProgram(HINSTANCE hInstance)
+{
+	bool bailout = false;
+	if (!detectGame(&gameState, gamedefs_list))
+	{
+		printf("Failed to detect any supported game running.\n");
+		bailout = true;
+	}
+	if (gameState.gameProcessID == (DWORD)NULL)
+	{
+		printf("Could not find target window.\n");
+		bailout = true;
+	}
+	openGame(&gameState, hInstance, WindowProc);
+	if (gameState.gameHandle == INVALID_HANDLE_VALUE)
+	{
+		printf("Failed to obtain handle to target process.\n");
+		bailout = true;
+	}
+	myself = GetConsoleWindow();
+	myStdin = GetStdHandle(STD_INPUT_HANDLE);
+	if (myself == (HWND)NULL || myStdin == INVALID_HANDLE_VALUE)
+	{
+		printf("Failed to obtain handles to this console window.\n");
+		bailout = true;
+	}
+
+	if (bailout)
+	{
+		printf("Exiting now.\n");
+		exit(EXIT_FAILURE);
+	}
+	initColors();
+}
+
+void cleanupProgram()
+{
+	closeGame(&gameState);
+	timestamp();
+	printf("Exiting now.\n");
+}
+
 // returns true if we found a running game window that we recognize
 // (if more than one is out there, this stops at the first successful find)
 bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
@@ -36,17 +97,6 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	target->gameProcessID = newProcID;
 	target->gameHwnd = wHandle;
 	return success;
-}
-
-void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *source)
-{
-	memset(dims, 0, sizeof(*dims));
-	dims->basicWidth = source->basicWidth;
-	dims->basicHeight = source->basicHeight;
-	dims->basicWidthAsDouble = (double)source->basicWidth;
-	dims->basicHeightAsDouble = (double)source->basicHeight;
-	dims->basicAspect = dims->basicWidthAsDouble / dims->basicHeightAsDouble;
-	dims->aspectMode = source->aspectMode;
 }
 
 #define PFD_SUPPORT_COMPOSITION 0x00008000
@@ -185,4 +235,22 @@ void closeGame(game_state_t *target)
 	wglDeleteContext(target->hglrc);
 	free(target->projectiles);
 	memset(target, 0, sizeof(*target));
+}
+
+bool checkShouldContinueRunning(char **reason)
+{
+	if (keyIsPressed(quitKey) && (GetForegroundWindow() == myself))
+	{
+		FlushConsoleInputBuffer(myStdin);
+		*reason = "User closed the hitbox viewer.";
+		return false;
+	}
+	// IsWindow() can potentially return true if the window handle is
+	// recycled, but we're checking it frequently enough to be a non-issue
+	if (!IsWindow(gameState.gameHwnd))
+	{
+		*reason = "User closed the game as it was running.";
+		return false;
+	}
+	return true;
 }

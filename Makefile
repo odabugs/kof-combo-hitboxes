@@ -30,7 +30,7 @@ coords.o: coords.c playerstruct.h
 boxset.o: boxset.c playerstruct.h boxtypes.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
-draw.o: draw.c coords.h playerstruct.h gamestate.h boxtypes.h boxset.h hotkeys.h primitives.h
+draw.o: draw.c coords.h playerstruct.h gamestate.h boxtypes.h boxset.h hotkeys.h colors.h primitives.h
 	$(CC) $(CFLAGS) -c $^
 
 gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADERS)
@@ -39,7 +39,7 @@ gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADER
 gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
 	$(CC) $(CFLAGS) -c $^
 
-process.o: process.c gamestate.h
+process.o: process.c gamestate.h controlkey.h util.h colors.h
 	$(CC) $(CFLAGS) -c $^
 
 colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c

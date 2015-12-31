@@ -13,23 +13,11 @@
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "process.h"
-#include "controlkey.h"
-#include "util.h"
 #include "colors.h"
 
 #define SLEEP_TIME 10 /* ms */
-#define QUIT_KEY 0x51 /* Q key */
 
-HWND myself;
-HANDLE myStdin;
-
-void startupProgram();
-void cleanupProgram();
 void mainLoop();
-void drawNextFrame();
-void printHotkeys();
-bool checkShouldContinueRunning(char **reason);
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
@@ -70,7 +58,6 @@ void mainLoop()
 		if (!printedCoords)
 		{
 			printedCoords = true;
-			//printf("Game's window handle is 0x%08X.\n", gameState.gameHwnd);
 			printf("Game window is located at (%d, %d) and its size is (%d, %d).\n",
 				dims->leftX, dims->topY, dims->width, dims->height);
 		}
@@ -83,100 +70,4 @@ void mainLoop()
 		timestamp();
 		printf("%s\n", quitReason);
 	}
-}
-
-void startupProgram(HINSTANCE hInstance)
-{
-	bool bailout = false;
-	if (!detectGame(&gameState, gamedefs_list))
-	{
-		printf("Failed to detect any supported game running.\n");
-		bailout = true;
-	}
-	if (gameState.gameProcessID == (DWORD)NULL)
-	{
-		printf("Could not find target window.\n");
-		bailout = true;
-	}
-	openGame(&gameState, hInstance, WindowProc);
-	if (gameState.gameHandle == INVALID_HANDLE_VALUE)
-	{
-		printf("Failed to obtain handle to target process.\n");
-		bailout = true;
-	}
-	myself = GetConsoleWindow();
-	myStdin = GetStdHandle(STD_INPUT_HANDLE);
-	if (myself == (HWND)NULL || myStdin == INVALID_HANDLE_VALUE)
-	{
-		printf("Failed to obtain handles to this console window.\n");
-		bailout = true;
-	}
-
-	if (bailout)
-	{
-		printf("Exiting now.\n");
-		exit(EXIT_FAILURE);
-	}
-	initColors();
-}
-
-void cleanupProgram()
-{
-	closeGame(&gameState);
-	timestamp();
-	printf("Exiting now.\n");
-}
-
-void drawNextFrame()
-{
-	readGameState(&gameState);
-	drawScene(&gameState);
-}
-
-void printHotkeys()
-{
-	printf(
-		"\n"
-		"Hotkeys:\n"
-		"F1 - Toggle close normal range marker (player 1)\n"
-		"F2 - Toggle close normal range marker (player 2)\n"
-		"F3 - Toggle drawing hitbox fills\n"
-		"F4 - Toggle drawing hitbox center axes\n"
-		"F5 - Toggle drawing \"throwable\"-type boxes\n"
-		"F6 - Toggle drawing \"throw\"-type boxes\n"
-		"\n"
-	);
-}
-
-bool checkShouldContinueRunning(char **reason)
-{
-	if (keyIsPressed(QUIT_KEY) && (GetForegroundWindow() == myself))
-	{
-		FlushConsoleInputBuffer(myStdin);
-		*reason = "User closed the hitbox viewer.";
-		return false;
-	}
-	// IsWindow() can potentially return true if the window handle is
-	// recycled, but we're checking it frequently enough to be a non-issue
-	if (!IsWindow(gameState.gameHwnd))
-	{
-		*reason = "User closed the game as it was running.";
-		return false;
-	}
-	return true;
-}
-
-LRESULT CALLBACK WindowProc(
-	HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hwnd, message, wParam, lParam);
-	}
-
-	return 0;
 }

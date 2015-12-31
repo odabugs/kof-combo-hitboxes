@@ -32,6 +32,7 @@ typedef struct game_state
 
 extern game_state_t gameState;
 
+extern void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *source);
 extern void readGameState(game_state_t *target);
 extern bool shouldDisplayPlayer(game_state_t *target, int which);
 

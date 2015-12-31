@@ -18,5 +18,6 @@
 #include "primitives.h"
 
 extern void drawScene(game_state_t *source);
+extern void drawNextFrame();
 
 #endif /* DRAW_H */

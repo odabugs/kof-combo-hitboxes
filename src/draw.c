@@ -202,3 +202,9 @@ void drawScene(game_state_t *source)
 	SwapBuffers(source->overlayHdc);
 	glFinish();
 }
+
+void drawNextFrame()
+{
+	readGameState(&gameState);
+	drawScene(&gameState);
+}

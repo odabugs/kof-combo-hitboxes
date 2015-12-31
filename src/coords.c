@@ -6,8 +6,6 @@
 // global, set during game loadup in gamestate.c
 screen_dimensions_t *screenDims;
 
-const player_coord_t baseY = { .whole = 0x02E8, .part = 0 };
-
 int calculateScreenOffset(double actual, double baseline, double baselineScale)
 {
 	double scaled = floor(baseline * baselineScale);

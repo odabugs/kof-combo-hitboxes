@@ -17,5 +17,6 @@ extern bool drawHitboxPivots;
 extern atk_button_t showButtonRanges[PLAYERS];
 
 extern void checkHotkeys();
+extern void printHotkeys();
 
 #endif /* HOTKEYS_H */
