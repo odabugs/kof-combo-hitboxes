@@ -86,5 +86,6 @@ void printHotkeys()
 		"F5 - Toggle drawing \"throwable\"-type boxes\n"
 		"F6 - Toggle drawing \"throw\"-type boxes\n"
 		"\n"
+		"Press Q in this console window to exit the hitbox viewer.\n"
 	);
 }
