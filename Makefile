@@ -4,8 +4,8 @@ CC=gcc # for native compilation with MinGW on Windows
 CFLAGS=-std=c1x -g
 LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o
-HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h
+OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o
+HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h process.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h
 KOF98_HEADERS=kof98_roster.h kof98_boxtypemap.h kof98_gamedef.h
 KOF02_HEADERS=kof02_roster.h kof02_boxtypemap.h kof02_gamedef.h
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
@@ -33,6 +33,9 @@ gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADER
 	$(CC) $(CFLAGS) -c $^
 
 gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
+	$(CC) $(CFLAGS) -c $^
+
+process.o: process.c gamestate.h
 	$(CC) $(CFLAGS) -c $^
 
 colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c

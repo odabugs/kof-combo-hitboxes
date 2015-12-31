@@ -12,6 +12,7 @@
 #include "draw.h"
 #include "gamedefs.h"
 #include "gamestate.h"
+#include "process.h"
 #include "controlkey.h"
 #include "util.h"
 #include "colors.h"
@@ -21,7 +22,6 @@
 
 HWND myself;
 HANDLE myStdin;
-game_state_t gameState;
 
 void startupProgram();
 void cleanupProgram();
