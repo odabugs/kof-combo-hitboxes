@@ -1,5 +1,6 @@
 #include "process.h"
 
+// used for detecting which window is currently in focus when users presses hotkey
 HWND myself;
 HANDLE myStdin;
 SHORT quitKey = 0x51; // Q key
@@ -21,37 +22,36 @@ LRESULT CALLBACK WindowProc(
 
 void startupProgram(HINSTANCE hInstance)
 {
-	bool bailout = false;
 	if (!detectGame(&gameState, gamedefs_list))
 	{
 		printf("Failed to detect any supported game running.\n");
-		bailout = true;
+		goto bailout;
 	}
 	if (gameState.gameProcessID == (DWORD)NULL)
 	{
 		printf("Could not find target window.\n");
-		bailout = true;
+		goto bailout;
 	}
 	openGame(&gameState, hInstance, WindowProc);
 	if (gameState.gameHandle == INVALID_HANDLE_VALUE)
 	{
 		printf("Failed to obtain handle to target process.\n");
-		bailout = true;
+		goto bailout;
 	}
 	myself = GetConsoleWindow();
 	myStdin = GetStdHandle(STD_INPUT_HANDLE);
 	if (myself == (HWND)NULL || myStdin == INVALID_HANDLE_VALUE)
 	{
 		printf("Failed to obtain handles to this console window.\n");
-		bailout = true;
+		goto bailout;
 	}
 
-	if (bailout)
-	{
-		printf("Exiting now.\n");
-		exit(EXIT_FAILURE);
-	}
 	initColors();
+	return;
+
+	bailout:
+	printf("Exiting now.\n");
+	exit(EXIT_FAILURE);
 }
 
 void cleanupProgram()
