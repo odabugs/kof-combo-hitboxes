@@ -13,9 +13,9 @@
 #include "gamestate.h"
 #include "colors.h"
 #include "hotkeys.h"
-#include "util.h"
 #include "boxtypes.h"
 #include "boxset.h"
+#include "primitives.h"
 
 extern void drawScene(game_state_t *source);
 
