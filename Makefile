@@ -1,6 +1,10 @@
-#CC=mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW
+ifeq ($(USING_BATCH_FILE),true)
 CC=gcc # for native compilation with MinGW on Windows
+else
+CC=i686-pc-mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW (or native with Cygwin)
+endif
 #TODO: add debug build target
+
 CFLAGS=-std=c11 -g
 LDFLAGS=-lgdi32 -lopengl32 -lglu32
 EXE_NAME=kof-hitboxes.exe
@@ -43,5 +47,11 @@ colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c
 
 .PHONY: clean
 clean:
+ifeq ($(USING_BATCH_FILE),true)
 	del "$(EXE_NAME)"
 	del /S *.o *.h.gch
+else
+	rm -f "$(EXE_NAME)"
+	rm -f ./*.o src/*.o src/kof98/*.o src/kof02/*.o
+	rm -f ./*.gch src/*.gch src/kof98/*.gch src/kof02/*.gch
+endif
