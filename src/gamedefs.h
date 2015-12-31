@@ -43,7 +43,9 @@ typedef struct game_definition
 } gamedef_t;
 
 extern gamedef_t *currentGame;
-
 extern gamedef_t *gamedefs_list[];
+
+extern character_def_t *characterForID(int charID);
+extern char *characterNameForID(int charID);
 
 #endif /* GAMEDEFS_H */

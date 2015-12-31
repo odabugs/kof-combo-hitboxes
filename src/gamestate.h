@@ -46,7 +46,5 @@ extern bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 extern void closeGame(game_state_t *target);
 extern void readGameState(game_state_t *target);
 extern bool shouldDisplayPlayer(game_state_t *target, int which);
-extern character_def_t *characterForID(game_state_t *source, int charID);
-extern char *characterNameForID(game_state_t *source, int charID);
 
 #endif /* GAMESTATE_H */

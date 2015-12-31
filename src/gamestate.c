@@ -236,23 +236,3 @@ bool shouldDisplayPlayer(game_state_t *target, int which)
 	player_2nd_extra_t *source = &(target->players2ndExtra[which]);
 	return (source->gameplayState & 0x01) == 0;
 }
-
-// TODO: if player is using an EX character then this yields the non-EX equivalent
-character_def_t *characterForID(game_state_t *source, int charID)
-{
-	if (source == (game_state_t*)NULL || charID < 0 || charID >= source->gamedef.rosterSize)
-	{
-		return (character_def_t*)NULL;
-	}
-	return &(source->gamedef.roster[charID]);
-}
-
-char *characterNameForID(game_state_t *source, int charID)
-{
-	character_def_t *result = characterForID(source, charID);
-	if (result == (character_def_t*)NULL)
-	{
-		return "INVALID";
-	}
-	return result->charName;
-}
