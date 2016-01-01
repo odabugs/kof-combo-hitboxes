@@ -7,7 +7,7 @@ gamedef_t *currentGame;
 // list ender - DO NOT REMOVE THIS
 gamedef_t gamedefSentinel =
 {
-	.windowTitle = (char*)NULL
+	.windowClassName = (LPCTSTR)NULL
 };
 
 gamedef_t *gamedefs_list[] = {

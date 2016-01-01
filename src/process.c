@@ -70,10 +70,10 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	LPCTSTR title;
 	bool success = false;
 
-	for (int i = 0; gamedefs[i]->windowTitle != (char*)NULL; i++)
+	for (int i = 0; gamedefs[i]->windowClassName != (LPCTSTR)NULL; i++)
 	{
-		title = gamedefs[i]->windowTitle;
-		wHandle = FindWindow(NULL, title);
+		title = gamedefs[i]->windowClassName;
+		wHandle = FindWindow(title, (LPCTSTR)NULL);
 		if (wHandle != (HWND)NULL)
 		{
 			newProcID = (DWORD)NULL;

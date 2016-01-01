@@ -5,7 +5,7 @@
 #include "kof98_boxtypemap.h"
 
 gamedef_t kof98_gamedef = {
-	.windowTitle = "King of Fighters '98 Ultimate Match Final Edition",
+	.windowClassName = "King of Fighters '98 Ultimate Match Final Edition",
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.basicWidth = 320,
 	.basicHeight = 224,

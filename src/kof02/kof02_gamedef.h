@@ -5,7 +5,7 @@
 #include "kof02_boxtypemap.h"
 
 gamedef_t kof02_gamedef = {
-	.windowTitle = "King of Fighters 2002 Unlimited Match",
+	.windowClassName = "King of Fighters 2002 Unlimited Match",
 	.shortName = "King of Fighters 2002UM (Steam)",
 	.basicWidth = 320,
 	.basicHeight = 224,

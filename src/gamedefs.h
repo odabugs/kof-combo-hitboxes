@@ -18,7 +18,7 @@ typedef struct character_definition
 
 typedef struct game_definition
 {
-	char *windowTitle;
+	LPCTSTR windowClassName;
 	char *shortName;
 	void *playerAddresses[PLAYERS];
 	void *playerExtraAddresses[PLAYERS];
