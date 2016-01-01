@@ -28,5 +28,6 @@ extern void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *sour
 extern bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc);
 extern void closeGame(game_state_t *target);
 extern bool checkShouldContinueRunning(char **reason);
+extern bool checkShouldRenderScene();
 
 #endif /* PROCESS_H */

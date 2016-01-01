@@ -183,11 +183,6 @@ void drawPlayer(game_state_t *source, int which)
 
 void drawScene(game_state_t *source)
 {
-	checkHotkeys();
-	clearStoredBoxes();
-	glClear(GL_COLOR_BUFFER_BIT);
-	glBegin(GL_TRIANGLES);
-
 	for (int i = 0; i < PLAYERS; i++)
 	{
 		if (shouldDisplayPlayer(source, i))
@@ -197,14 +192,26 @@ void drawScene(game_state_t *source)
 		}
 	}
 	drawProjectiles(source);
+}
 
-	glEnd();
-	SwapBuffers(source->overlayHdc);
-	glFinish();
+void eraseScene()
+{
+	checkHotkeys();
+	clearStoredBoxes();
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void drawNextFrame()
 {
 	readGameState(&gameState);
-	drawScene(&gameState);
+	eraseScene();
+
+	glBegin(GL_TRIANGLES);
+	if (checkShouldRenderScene())
+	{
+		drawScene(&gameState);
+	}
+	glEnd();
+	SwapBuffers(gameState.overlayHdc);
+	glFinish();
 }

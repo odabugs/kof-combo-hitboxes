@@ -254,3 +254,13 @@ bool checkShouldContinueRunning(char **reason)
 	}
 	return true;
 }
+
+// don't draw boxes if the game or viewer console window aren't in focus
+bool checkShouldRenderScene()
+{
+	HWND currentWindow = GetForegroundWindow();
+	if (currentWindow == gameState.gameHwnd) { return true; }
+	if (currentWindow == gameState.overlayHwnd) { return true; }
+	if (currentWindow == myself) { return true; }
+	return false;
+}
