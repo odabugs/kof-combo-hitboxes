@@ -63,16 +63,21 @@ typedef struct screen_dimensions
 	int leftOffset; // pad X coords rightward from LEFT edge by this amount
 	int topOffset; // pad Y coords downward from TOP of screen by this amount
 	double aspect; // (window width / window height)
-	int basicWidth; // closest to 1:1 scale resolution
-	int basicHeight; // closest to 1:1 scale resolution
+	union
+	{
+		struct
+		{
+			int basicWidth; // closest to 1:1 scale resolution
+			int basicHeight; // closest to 1:1 scale resolution
+		};
+		screen_coords_t basicSize;
+	};
 	double basicWidthAsDouble;
 	double basicHeightAsDouble;
 	double basicGroundOffset; // closest to 1:1 scale resolution
 	double basicAspect; // closest to 1:1 scale resolution
 	aspect_mode_t aspectMode; // how does the game handle different aspect ratios?
 } screen_dimensions_t;
-
-extern screen_dimensions_t *screenDims;
 
 // since one "world pixel" can occupy multiple "screen pixels" at large
 // resolutions, this lets us request a specific "screen pixel edge"
@@ -84,6 +89,8 @@ typedef enum
 	COORD_BOTTOM_RIGHT = 0x03, // COORD_RIGHT_EDGE & COORD_BOTTOM_EDGE
 	COORD_THICK_BORDER = 0x04
 } coord_options_t;
+
+extern screen_dimensions_t *screenDims;
 
 extern void getGameScreenDimensions(
 	HWND game, HWND overlay, screen_dimensions_t *dimensions);
@@ -99,9 +106,7 @@ extern void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void worldCoordsFromPlayer(player_t *player, player_coords_t *target);
-extern void adjustWorldCoords(player_coords_t *target,
-	int xAdjust, int yAdjust);
-extern void ensureCorners(
-	player_coords_t *topLeft, player_coords_t *bottomRight);
+extern void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust);
+extern void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight);
 
 #endif /* COORDS_H */

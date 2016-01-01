@@ -32,8 +32,15 @@ typedef struct game_definition
 	// should be the width:height closest to 1:1 scale for onscreen objects
 	// (e.g., use 320x224 for kof98/02 even though the smallest resolution
 	// offered by the steam versions is 640x448 which amounts to 2:1 scale)
-	int basicWidth;
-	int basicHeight;
+	union
+	{
+		struct
+		{
+			int basicWidth;
+			int basicHeight;
+		};
+		screen_coords_t basicSize;
+	};
 	char *recommendResolution;
 	char *extraRecommendations;
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
