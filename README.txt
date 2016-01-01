@@ -1,4 +1,5 @@
 King of Fighters '98UMFE and 2002UM hitbox viewer
+https://github.com/odabugs/kof-combo-hitboxes
 
 To compile with MinGW: make.bat
 Compilation with Visual Studio currently not yet tested.
@@ -6,7 +7,7 @@ Compilation with Visual Studio currently not yet tested.
 TODO:
 - Support loading settings (e.g., box colors) from a config file.
 - Make box layer drawing order configurable (currently hardcoded).
-- Figure out proximity detection for moves like Kyo hcb+K or Clark run grab.
+- Figure out proximity detection for moves like Kyo hcb+K or Clark running grab.
 - Look into API hooking.
   - Does Microsoft Detours play well with MinGW?
   - Possible MinGW-friendly alternative: https://github.com/TsudaKageyu/minhook
