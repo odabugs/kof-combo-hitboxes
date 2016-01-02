@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include "playerstruct.h"
+#include "util.h"
 
 #define ABSOLUTE_Y_OFFSET 16
 
@@ -120,9 +121,16 @@ extern void translatePlayerCoords(
 	player_t *player, screen_dimensions_t *dimensions,
 	camera_t *camera, screen_coords_t *target, coord_options_t options);
 extern void worldCoordsFromPlayer(player_t *player, player_coords_t *target);
-extern void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust);
+extern void adjustWorldCoords(
+	player_coords_t *target, game_pixel_t xAdjust, game_pixel_t yAdjust);
 extern void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight);
 extern void getScreenEdgeInWorldCoords(
 	player_coords_t *target, screen_horz_edge_t hEdge, screen_vert_edge_t vEdge);
+extern void flipXOnAxis(player_coords_t *target, player_coords_t *axis);
+extern void swapXComponents(player_coords_t *one, player_coords_t *two);
+extern void copyAndAdjust(
+	player_coords_t *target, player_coords_t *source, player_coords_t *adjustment);
+extern void copyAndAdjustByValues(
+	player_coords_t *target, player_coords_t *source, int32_t xAdjust, int32_t yAdjust);
 
 #endif /* COORDS_H */

@@ -132,8 +132,7 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 
 // also applies offsetting from the left/top of the screen
 void scaleScreenCoords(
-	screen_dimensions_t *dimensions, screen_coords_t *target,
-	coord_options_t options)
+	screen_dimensions_t *dimensions, screen_coords_t *target, coord_options_t options)
 {
 	int xAdjust = (options & COORD_RIGHT_EDGE)  ? 1 : 0;
 	int yAdjust = (options & COORD_BOTTOM_EDGE) ? 1 : 0;
@@ -180,7 +179,8 @@ void worldCoordsFromPlayer(player_t *player, player_coords_t *target)
 	target->y = player->screenY;
 }
 
-void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust)
+void adjustWorldCoords(
+	player_coords_t *target, game_pixel_t xAdjust, game_pixel_t yAdjust)
 {
 	target->x += xAdjust;
 	target->y += yAdjust;
@@ -209,7 +209,7 @@ void getScreenEdgeInWorldCoords(
 		rightEdge >> 1,
 		rightEdge - 1
 	};
-	// TODO: Looks perfect at 320x224 but the bottom edge
+	// TODO: Looks perfect at 1:1 scale but the bottom edge
 	//       is positioned slightly off at larger resolutions
 	game_pixel_t vEdges[3] = {
 		ABSOLUTE_Y_OFFSET,
@@ -220,4 +220,40 @@ void getScreenEdgeInWorldCoords(
 	memset(target, 0, sizeof(*target));
 	target->x = hEdges[hEdge];
 	target->y = vEdges[vEdge];
+}
+
+void flipXOnAxis(player_coords_t *target, player_coords_t *axis)
+{
+	game_pixel_t xDifference = axis->x - target->x;
+	target->x += (xDifference * 2);
+}
+
+void swapXComponents(player_coords_t *one, player_coords_t *two)
+{
+	if (one != two)
+	{
+		int32_t temp = one->xComplete.value;
+		one->xComplete.value = two->xComplete.value;
+		two->xComplete.value = temp;
+	}
+}
+
+void copyAndAdjust(
+	player_coords_t *target, player_coords_t *source, player_coords_t *adjustment)
+{
+	if (target != source)
+	{
+		memcpy(target, source, sizeof(*target));
+	}
+	target->xComplete.value += adjustment->xComplete.value;
+	target->yComplete.value += adjustment->yComplete.value;
+}
+
+void copyAndAdjustByValues(
+	player_coords_t *target, player_coords_t *source, int32_t xAdjust, int32_t yAdjust)
+{
+	player_coords_t adjustment;
+	adjustment.xComplete.value = xAdjust;
+	adjustment.yComplete.value = yAdjust;
+	copyAndAdjust(target, source, &adjustment);
 }
