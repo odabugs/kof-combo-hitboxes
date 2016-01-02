@@ -90,6 +90,20 @@ typedef enum
 	COORD_THICK_BORDER = 0x04
 } coord_options_t;
 
+typedef enum
+{
+	HORZ_LEFT_EDGE,
+	HORZ_CENTER,
+	HORZ_RIGHT_EDGE
+} screen_horz_edge_t;
+
+typedef enum
+{
+	VERT_TOP_EDGE,
+	VERT_CENTER,
+	VERT_BOTTOM_EDGE
+} screen_vert_edge_t;
+
 extern screen_dimensions_t *screenDims;
 
 extern void getGameScreenDimensions(
@@ -108,5 +122,7 @@ extern void translatePlayerCoords(
 extern void worldCoordsFromPlayer(player_t *player, player_coords_t *target);
 extern void adjustWorldCoords(player_coords_t *target, int xAdjust, int yAdjust);
 extern void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight);
+extern void getScreenEdgeInWorldCoords(
+	player_coords_t *target, screen_horz_edge_t hEdge, screen_vert_edge_t vEdge);
 
 #endif /* COORDS_H */

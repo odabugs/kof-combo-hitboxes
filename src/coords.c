@@ -199,3 +199,25 @@ void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight)
 	bottomRight->xComplete.value = rightX;
 	bottomRight->yComplete.value = bottomY;
 }
+
+void getScreenEdgeInWorldCoords(
+	player_coords_t *target, screen_horz_edge_t hEdge, screen_vert_edge_t vEdge)
+{
+	int rightEdge = screenDims->basicWidth, bottomEdge = screenDims->basicHeight;
+	game_pixel_t hEdges[3] = {
+		0,
+		rightEdge >> 1,
+		rightEdge - 1
+	};
+	// TODO: Looks perfect at 320x224 but the bottom edge
+	//       is positioned slightly off at larger resolutions
+	game_pixel_t vEdges[3] = {
+		ABSOLUTE_Y_OFFSET,
+		ABSOLUTE_Y_OFFSET + (bottomEdge >> 1),
+		ABSOLUTE_Y_OFFSET + (bottomEdge - 1),
+	};
+
+	memset(target, 0, sizeof(*target));
+	target->x = hEdges[hEdge];
+	target->y = vEdges[vEdge];
+}
