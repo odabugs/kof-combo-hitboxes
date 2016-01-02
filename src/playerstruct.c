@@ -11,7 +11,7 @@ char buttonNames[ATTACK_BUTTONS] = {
 	'D'
 };
 
-// global, set during startup in gamestate.c
+// global, set during startup in process.c
 boxtype_t *boxTypeMap;
 bool letThrowBoxesLinger = true;
 // throw boxes are active for very short time periods;
