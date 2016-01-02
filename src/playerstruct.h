@@ -196,8 +196,8 @@ typedef struct __attribute__((__packed__)) player
 	struct player *opponent_alt1; // +0B8h: Opponent main struct (alt 1)
 	game_pixel_t xDistance;   // +0BCh: Absolute distance (whole pixels) between
 	                          //        this player's X pivot and the opponent's
-	uint8_t padding09[0x017]; // +0BEh to +0D5h: unknown
-	uint8_t playerMode;       // +0D5h: Player mode (ADV, EX, Ultimate)
+	uint8_t padding09[0x016]; // +0BEh to +0D4h: unknown
+	int16_t hitstun;          // +0D4h: Hit stun remaining (also used for dizzy state)
 	uint8_t padding10[0x007]; // +0D6h to +0DDh: unknown
 	costume_t costume;        // +0DDh: Current costume color
 	uint8_t padding11[0x002]; // +0DEh to +0E0h: unknown
