@@ -5,10 +5,6 @@
 #include <GL/gl.h>
 #include "boxtypes.h"
 
-#define BOX_EDGE_ALPHA 0xFF
-#define BOX_FILL_ALPHA 0x40
-#define PIVOT_ALPHA 0xFF
-
 typedef union draw_color
 {
 	struct
@@ -24,8 +20,11 @@ typedef union draw_color
 extern draw_color_t boxEdgeColors[totalBoxTypes];
 extern draw_color_t boxFillColors[totalBoxTypes];
 
-extern draw_color_t playerPivotColor;
-extern draw_color_t closeNormalRangeColor;
+extern draw_color_t
+	playerPivotColor,
+	closeNormalRangeColor,
+	gaugeBorderColor,
+	stunGaugeFillColor;
 
 extern void initColors();
 extern void selectColor(draw_color_t color);
