@@ -33,6 +33,11 @@ void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 	GLRectangle(leftX, topY, rightX, bottomY);
 }
 
+void drawDot(player_coords_t *location)
+{
+	drawRectangle(location, location);
+}
+
 // TODO: support "thick" and "thin" box borders (currently supports thick borders only)
 //       (thick borders should "collapse" inward instead of adding thickness evenly)
 void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
