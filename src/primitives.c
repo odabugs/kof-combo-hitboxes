@@ -33,6 +33,17 @@ void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 	GLRectangle(leftX, topY, rightX, bottomY);
 }
 
+// used for unscaled drawing, e.g. for the fill portion of onscreen gauges
+void drawScreenRectangle(screen_coords_t *topLeft, screen_coords_t *bottomRight)
+{
+	GLRectangle(
+		min(topLeft->x, bottomRight->x),
+		min(topLeft->y, bottomRight->y),
+		max(topLeft->x, bottomRight->x),
+		max(topLeft->y, bottomRight->y)
+	);
+}
+
 void drawDot(player_coords_t *location)
 {
 	drawRectangle(location, location);
