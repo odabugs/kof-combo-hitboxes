@@ -20,11 +20,11 @@ typedef union draw_color
 extern draw_color_t boxEdgeColors[totalBoxTypes];
 extern draw_color_t boxFillColors[totalBoxTypes];
 
-extern draw_color_t
-	playerPivotColor,
-	closeNormalRangeColor,
-	gaugeBorderColor,
-	stunGaugeFillColor;
+extern draw_color_t playerPivotColor;
+extern draw_color_t closeNormalRangeColor;
+extern draw_color_t gaugeBorderColor;
+extern draw_color_t stunGaugeFillColor;
+extern draw_color_t stunRecoverGaugeFillColor;
 
 extern void initColors();
 extern void selectColor(draw_color_t color);
