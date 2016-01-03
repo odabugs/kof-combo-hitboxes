@@ -31,6 +31,27 @@ gamedef_t kof98_gamedef = {
 	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster,
-	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap
+	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap,
+	.showStunGauge = true,
+	.showGuardGauge = true,
+	.stunGaugeInfo = {
+		.gaugeMax = 0x77,
+		.gaugeOffset = {
+			.x = 20,
+			.y = 36
+		},
+		.gaugeSize = {
+			.x = 130,
+			.y = 4
+		}
+	},
+	// partial, since some information is copied from .stunGaugeInfo at runtime
+	.stunRecoverGaugeInfo = {
+		.gaugeMax = 0xF0
+	},
+	// ditto for this
+	.guardGaugeInfo = {
+		.gaugeMax = 0x77
+	}
 };
 #endif /* NO_KOF_98 */

@@ -31,6 +31,23 @@ gamedef_t kof02_gamedef = {
 	.extraStructIndex = 0, // '02 player_extra_t pointer is at player_t +1A4h
 	.rosterSize = KOF_02_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof02_roster,
-	.boxTypeMap = (boxtype_t*)&kof02_boxTypeMap
+	.boxTypeMap = (boxtype_t*)&kof02_boxTypeMap,
+	.showStunGauge = false,
+	.showGuardGauge = false,
+	.stunGaugeInfo = {
+		.gaugeMax = 0x78,
+		.gaugeOffset = {
+			.x = 15,
+			.y = 32
+		},
+		.gaugeSize = {
+			.x = 130,
+			.y = 4
+		}
+	},
+	// partial, since some information is copied from .stunGaugeInfo at runtime
+	.stunRecoverGaugeInfo = {
+		.gaugeMax = 0xF0
+	}
 };
 #endif /* NO_KOF_02 */
