@@ -48,6 +48,7 @@ void printHeader()
 	printf("%s, version %s\n", TITLE, VERSION);
 	printf("<%s>\n", HOMEPAGE);
 	printf("Note: This tool requires Windows Vista or newer with Windows Aero enabled.\n");
+	printf("Additionally, please ensure that the Desktop Window Manager service is enabled.\n");
 	printf("\n");
 }
 
