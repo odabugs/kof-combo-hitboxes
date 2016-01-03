@@ -1,8 +1,14 @@
 King of Fighters '98UMFE and 2002UM hitbox viewer
 https://github.com/odabugs/kof-combo-hitboxes
 
-To compile with MinGW: make.bat
-Compilation with Visual Studio currently not yet tested.
+To compile with MinGW: make.bat (native), ./make (Linux + MinGW or Cygwin)
+Compilation with Visual Studio currently not supported.
+
+Usage notes:
+- Requires Windows Vista or newer, with Windows Aero and Desktop Window
+  Manager (DWM) enabled.
+- Start either KOF '98UMFE or KOF 2002UM, then start the viewer .exe.
+- Additional instructions and hotkeys are presented upon program startup.
 
 TODO:
 - Support loading settings (e.g., box colors) from a config file.
@@ -22,3 +28,5 @@ Known issues:
   - This makes displaying throw boxes at the right time so unreliable that
     we just display whatever data is in the throwbox slot for now
     (works good enough for wiki data-collecting purposes).
+- Stun recovery gauge can appear inaccurate for a brief time if the stunned
+  player mashes to recover from dizzy state faster.
