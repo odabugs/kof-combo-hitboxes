@@ -114,6 +114,57 @@ void drawProjectiles(game_state_t *source)
 	}
 }
 
+// controls whether to show the regular stun gauge or the dizzy recovery gauge
+bool shouldShowStunRecoverGauge(player_t *player)
+{
+	bool stunMeterFrozen = (player->statusFlags2nd[0] & 0x01);
+	bool dizzyState = (player->statusFlags2nd[3] & 0x10);
+	if (!dizzyState || !stunMeterFrozen) { return false; }
+	return (player->hitstun > 0 && player->stunRecover > 0);
+}
+
+void drawStunGauges(game_state_t *source, int which)
+{
+	player_t *player = &(source->players[which]);
+	gauge_info_t *gauge;
+
+	if (shouldShowStunRecoverGauge(player))
+	{
+		gauge = &(currentGame->stunRecoverGauges[which]);
+		drawGauge(gauge, (player->stunRecover & 0xFF));
+	}
+	else
+	{
+		gauge = &(currentGame->stunGauges[which]);
+		if (currentGame->showStunGauge && (player->stunGauge & 0x8000) == 0)
+		{
+			drawGauge(gauge, (player->stunGauge & 0xFF));
+		}
+		else
+		{
+			drawGauge(gauge, 0);
+		}
+	}
+}
+
+void drawGuardGauges(game_state_t *source, int which)
+{
+	player_t *player = &(source->players[which]);
+	gauge_info_t *gauge = &(currentGame->guardGauges[which]);
+	drawGauge(gauge, (player->guardGauge & 0xFF));
+}
+
+void drawPlayerGauges(game_state_t *source, int which)
+{
+	drawStunGauges(source, which);
+	if (currentGame->showGuardGauge)
+	{
+		drawGuardGauges(source, which);
+	}
+}
+
+
+// TODO: separate capturing hitbox data and drawing it into distinct phases
 void capturePlayerData(game_state_t *source, int which)
 {
 	player_t *player = &(source->players[which]);
@@ -179,6 +230,10 @@ void drawPlayer(game_state_t *source, int which)
 
 	drawPlayerPivot(player);
 	drawCloseNormalRangeMarker(player, playerExtra, which);
+	if (drawGauges)
+	{
+		drawPlayerGauges(source, which);
+	}
 }
 
 void drawScene(game_state_t *source)
