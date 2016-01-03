@@ -25,6 +25,7 @@ extern draw_color_t closeNormalRangeColor;
 extern draw_color_t gaugeBorderColor;
 extern draw_color_t stunGaugeFillColor;
 extern draw_color_t stunRecoverGaugeFillColor;
+extern draw_color_t guardGaugeFillColor;
 
 extern void initColors();
 extern void selectColor(draw_color_t color);

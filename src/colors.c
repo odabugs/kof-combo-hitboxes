@@ -29,7 +29,8 @@ draw_color_t
 draw_color_t
 	gaugeBorderColor      = { .value = { 0x00, 0x00, 0x00, GAUGE_BORDER_ALPHA } },
 	stunGaugeFillColor    = { .value = { 0xE0, 0xB0, 0x90, GAUGE_FILL_ALPHA } },
-	stunRecoverGaugeFillColor = { .value = { 0xFF, 0x00, 0x00, GAUGE_FILL_ALPHA } };
+	stunRecoverGaugeFillColor = { .value = { 0xFF, 0x00, 0x00, GAUGE_FILL_ALPHA } },
+	guardGaugeFillColor = { .value = { 0xA0, 0xC0, 0xE0, GAUGE_FILL_ALPHA } };
 
 void initColors()
 {
