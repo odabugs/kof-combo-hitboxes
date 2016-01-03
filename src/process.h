@@ -13,6 +13,7 @@
 #include <GL/glu.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "gamedefs.h"
 #include "gamestate.h"
 #include "controlkey.h"
 #include "util.h"

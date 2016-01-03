@@ -67,13 +67,13 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 {
 	DWORD newProcID = (DWORD)NULL;
 	HWND wHandle = (HWND)NULL;
-	LPCTSTR title;
 	bool success = false;
+	gamedef_t *pGamedef;
 
 	for (int i = 0; gamedefs[i]->windowClassName != (LPCTSTR)NULL; i++)
 	{
-		title = gamedefs[i]->windowClassName;
-		wHandle = FindWindow(title, (LPCTSTR)NULL);
+		pGamedef = gamedefs[i];
+		wHandle = FindWindow(pGamedef->windowClassName, (LPCTSTR)NULL);
 		if (wHandle != (HWND)NULL)
 		{
 			newProcID = (DWORD)NULL;
@@ -81,7 +81,6 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 			if (newProcID != (DWORD)NULL)
 			{
 				success = true;
-				gamedef_t *pGamedef = gamedefs[i];
 				memcpy(&(target->gamedef), pGamedef, sizeof(*pGamedef));
 				establishScreenDimensions(&(target->dimensions), pGamedef);
 				break;
@@ -94,8 +93,11 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 		}
 	}
 
-	target->gameProcessID = newProcID;
-	target->gameHwnd = wHandle;
+	if (success)
+	{
+		target->gameProcessID = newProcID;
+		target->gameHwnd = wHandle;
+	}
 	return success;
 }
 
@@ -219,6 +221,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			screenDims = &(target->dimensions);
 			int projectilesCount = currentGame->projectilesListSize;
 			target->projectiles = calloc(projectilesCount, sizeof(projectile_t));
+			setupGamedef(currentGame);
 			return true;
 		}
 	}
