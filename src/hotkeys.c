@@ -4,6 +4,7 @@ bool drawBoxFill = true;
 bool drawThrowableBoxes = true;
 bool drawThrowBoxes = true;
 bool drawHitboxPivots = true;
+bool drawGauges = true;
 atk_button_t showButtonRanges[PLAYERS] = {
 	SHOW_NO_BUTTON_RANGES,
 	SHOW_NO_BUTTON_RANGES
@@ -16,6 +17,7 @@ SHORT showBoxFillHotkey = VK_F3;
 SHORT showHitboxPivotsHotkey = VK_F4;
 SHORT showThrowableBoxesHotkey = VK_F5;
 SHORT showThrowBoxesHotkey = VK_F6;
+SHORT showGaugesHotkey = VK_F7;
 
 void checkRangeMarkerHotkey(int which)
 {
@@ -67,6 +69,9 @@ void checkHotkeys()
 	checkToggleHotkey(
 		showHitboxPivotsHotkey, &drawHitboxPivots,
 		"drawing hitbox center axes");
+	checkToggleHotkey(
+		showGaugesHotkey, &drawGauges,
+		"gauge overlays");
 
 	for (int which = 0; which < PLAYERS; which++)
 	{
@@ -85,6 +90,7 @@ void printHotkeys()
 		"F4 - Toggle drawing hitbox center axes\n"
 		"F5 - Toggle drawing \"throwable\"-type boxes\n"
 		"F6 - Toggle drawing \"throw\"-type boxes\n"
+		"F7 - Toggle gauge overlays\n"
 		"\n"
 		"Press Q in this console window to exit the hitbox viewer.\n"
 	);
