@@ -101,3 +101,69 @@ void drawPivot(player_coords_t *pivot, int pivotSize)
 	adjustWorldCoords(&pivotBottomRight, 0, pivotSize);
 	drawRectangle(&pivotTopLeft, &pivotBottomRight);
 }
+
+void fillGauge(gauge_info_t *gauge, double value)
+{
+	int maxFillSize, actualFillSize;
+	screen_coords_t topLeft, bottomRight;
+	translateGameCoords(&(gauge->fillTopLeft), &topLeft, COORD_NORMAL);
+	translateGameCoords(&(gauge->fillBottomRight), &bottomRight, COORD_BOTTOM_RIGHT);
+	if (gauge->isVertical) { maxFillSize = bottomRight.y - topLeft.y; }
+	else { maxFillSize = bottomRight.x - topLeft.x; }
+
+	double maxFillSizeDbl = (double)maxFillSize;
+	double minValue = gauge->minValueDbl, maxValue = gauge->maxValueDbl;
+	// move value range so it starts at 0
+	value -= minValue;
+	maxValue -= minValue;
+	double fillPercent = (value / maxValue);
+	actualFillSize = maxFillSize - (int)(fillPercent * maxFillSizeDbl);
+
+	if (gauge->isVertical)
+	{
+		if (gauge->fillFromBottomUp)
+		{
+			topLeft.y += actualFillSize;
+		}
+		else
+		{
+			bottomRight.y -= actualFillSize;
+		}
+	}
+	else
+	{
+		if (gauge->fillFromRightToLeft)
+		{
+			topLeft.x += actualFillSize;
+		}
+		else
+		{
+			bottomRight.x -= actualFillSize;
+		}
+	}
+	drawScreenRectangle(&topLeft, &bottomRight);
+}
+
+void drawGauge(gauge_info_t *gauge, int value)
+{
+	// TODO: support vertical gauges
+	selectColor(gauge->fillColor);
+
+	// draw gauge empty if value < min value
+	if (value >= gauge->minValue)
+	{
+		// draw gauge full if value >= max value
+		if (value >= gauge->maxValue)
+		{
+			drawRectangle(&(gauge->fillTopLeft), &(gauge->fillBottomRight));
+		}
+		else
+		{
+			fillGauge(gauge, (double)value);
+		}
+	}
+
+	// draw gauge border
+	selectColor(gauge->borderColor);
+	drawBox(&(gauge->borderTopLeft), &(gauge->borderBottomRight));
+}
