@@ -1,7 +1,7 @@
 King of Fighters '98UMFE and 2002UM hitbox viewer
 https://github.com/odabugs/kof-combo-hitboxes
 
-To compile with MinGW: make.bat (native), ./make (Linux + MinGW or Cygwin)
+To compile with MinGW: make.bat (native), make (Linux + MinGW or Cygwin)
 Compilation with Visual Studio currently not supported.
 
 Usage notes:
