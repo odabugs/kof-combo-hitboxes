@@ -49,9 +49,10 @@ colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c
 clean:
 ifeq ($(USING_BATCH_FILE),true)
 	del "$(EXE_NAME)"
-	del /S *.o *.h.gch
+	del /S *.o
+	del /S *.h.gch
 else
 	rm -f "$(EXE_NAME)"
 	rm -f ./*.o src/*.o src/kof98/*.o src/kof02/*.o
-	rm -f ./*.gch src/*.gch src/kof98/*.gch src/kof02/*.gch
+	rm -f ./*.h.gch src/*.h.gch src/kof98/*.h.gch src/kof02/*.h.gch
 endif
