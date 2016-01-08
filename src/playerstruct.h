@@ -239,8 +239,6 @@ typedef struct __attribute__((__packed__)) player
 
 extern boxtype_t *boxTypeMap;
 extern uint8_t hitboxActiveMasks[HBLISTSIZE];
-extern bool letThrowBoxesLinger;
-extern int baseThrowBoxLingerTime;
 extern char buttonNames[ATTACK_BUTTONS];
 
 extern bool boxTypeCheck(boxtype_t boxType);

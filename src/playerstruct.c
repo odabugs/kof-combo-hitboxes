@@ -1,9 +1,5 @@
 #include "playerstruct.h"
 
-// stop-gap fix for the fact that the viewer isn't yet hooked into the game;
-// throw boxes practically never show up if thread scheduler is left to its own devices
-#define DRAW_STALE_THROW_BOXES true
-
 char buttonNames[ATTACK_BUTTONS] = {
 	'A',
 	'B',
@@ -13,11 +9,6 @@ char buttonNames[ATTACK_BUTTONS] = {
 
 // global, set during startup in process.c
 boxtype_t *boxTypeMap;
-bool letThrowBoxesLinger = true;
-// throw boxes are active for very short time periods;
-// making them briefly linger onscreen afterward improves visibility
-int baseThrowBoxLingerTime = 60; // frames
-int throwBoxLingerTimeRemaining = 0;
 
 uint8_t hitboxActiveMasks[HBLISTSIZE] = {
 	1 << 0,
@@ -62,36 +53,10 @@ bool hitboxIsActive(player_t *player, hitbox_t *hitbox, uint8_t activeMask)
 	return ((hitboxFlags & activeMask) != 0);
 }
 
-// TODO: make lingering throw boxes work on a per-player basis
-void updateThrowBoxLingerTime(bool isActive)
-{
-	if (isActive)
-	{
-		throwBoxLingerTimeRemaining = baseThrowBoxLingerTime;
-	}
-	else
-	{
-		if (--throwBoxLingerTimeRemaining < 0)
-		{
-			throwBoxLingerTimeRemaining = 0;
-		}
-	}
-}
-
 bool throwBoxIsActive(player_t *player, hitbox_t *hitbox)
 {
 	if (!boxSizeCheck(hitbox)) { return false; }
-	if (DRAW_STALE_THROW_BOXES) { return true; }
-	bool isActive = (hitbox->boxID != 0);
-	updateThrowBoxLingerTime(isActive);
-	bool isLingering = (throwBoxLingerTimeRemaining > 0);
-	bool result = (isActive || (letThrowBoxesLinger && isLingering));
-	if (result) {
-		printf(
-			"Drawing throw box (%d more lingering frames)\n",
-			throwBoxLingerTimeRemaining);
-	}
-	return result;
+	return (hitbox->boxID != 0);
 }
 
 bool throwableBoxIsActive(player_t *player, hitbox_t *hitbox)
