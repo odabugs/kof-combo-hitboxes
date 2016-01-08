@@ -119,26 +119,32 @@ void fillGauge(gauge_info_t *gauge, double value)
 	double fillPercent = (value / maxValue);
 	actualFillSize = maxFillSize - (int)(fillPercent * maxFillSizeDbl);
 
-	if (gauge->isVertical)
+	if (actualFillSize >= maxFillSize)
 	{
-		if (gauge->fillFromBottomUp)
-		{
-			topLeft.y += actualFillSize;
-		}
-		else
-		{
-			bottomRight.y -= actualFillSize;
-		}
+		return;
 	}
-	else
-	{
-		if (gauge->fillFromRightToLeft)
+	else if (actualFillSize > 0) {
+		if (gauge->isVertical)
 		{
-			topLeft.x += actualFillSize;
+			if (gauge->fillFromBottomUp)
+			{
+				topLeft.y += actualFillSize;
+			}
+			else
+			{
+				bottomRight.y -= actualFillSize;
+			}
 		}
 		else
 		{
-			bottomRight.x -= actualFillSize;
+			if (gauge->fillFromRightToLeft)
+			{
+				topLeft.x += actualFillSize;
+			}
+			else
+			{
+				bottomRight.x -= actualFillSize;
+			}
 		}
 	}
 	drawScreenRectangle(&topLeft, &bottomRight);
