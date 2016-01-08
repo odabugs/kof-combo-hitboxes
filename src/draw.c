@@ -196,7 +196,7 @@ void capturePlayerData(game_state_t *source, int which)
 
 	// draw "throwing" box
 	hitbox = &(player->throwBox);
-	if (drawThrowBoxes && throwBoxIsActive(player, hitbox)) {
+	if (drawThrowBoxes || throwBoxIsActive(player, hitbox)) {
 		storeBox(which, BOX_THROW, hitbox);
 	}
 

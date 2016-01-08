@@ -65,7 +65,7 @@ void checkHotkeys()
 		"drawing throwable boxes");
 	checkToggleHotkey(
 		showThrowBoxesHotkey, &drawThrowBoxes,
-		"drawing throw boxes");
+		"drawing \"stale\" throw boxes");
 	checkToggleHotkey(
 		showHitboxPivotsHotkey, &drawHitboxPivots,
 		"drawing hitbox center axes");
@@ -89,7 +89,7 @@ void printHotkeys()
 		"F3 - Toggle drawing hitbox fills\n"
 		"F4 - Toggle drawing hitbox center axes\n"
 		"F5 - Toggle drawing \"throwable\"-type boxes\n"
-		"F6 - Toggle drawing \"throw\"-type boxes\n"
+		"F6 - Toggle drawing \"stale\" throw boxes\n"
 		"F7 - Toggle gauge overlays\n"
 		"\n"
 		"Press Q in this console window to exit the hitbox viewer.\n"
