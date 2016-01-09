@@ -2,11 +2,11 @@
 #define PROCESS_H
 
 #define WIN32_LEAN_AND_MEAN
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
 #include <windows.h>
 #include <winuser.h>
 #include <wingdi.h>
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501 /* this is silly */
 #include <uxtheme.h>
 #undef _WIN32_WINNT
 #include <GL/gl.h>
