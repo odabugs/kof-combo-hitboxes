@@ -6,7 +6,7 @@
 #define GAUGE_BORDER_ALPHA 0xFF
 #define GAUGE_FILL_ALPHA 0xA0
 
-draw_color_t boxEdgeColors[totalBoxTypes] = {
+draw_color_t defaultEdgeColors[totalBoxTypes] = {
 	[BOX_COLLISION]         = { .value = { 0x00, 0xFF, 0x00, BOX_EDGE_ALPHA } },
 	[BOX_VULNERABLE]        = { .value = { 0x77, 0x77, 0xFF, BOX_EDGE_ALPHA } },
 	[BOX_GUARD]             = { .value = { 0xCC, 0xCC, 0xFF, BOX_EDGE_ALPHA } },
@@ -21,6 +21,8 @@ draw_color_t boxEdgeColors[totalBoxTypes] = {
 	[BOX_DUMMY]             = { .value = { 0x00, 0x00, 0x00, 0x00 } }
 };
 // initialized during startup
+draw_color_t defaultFillColors[totalBoxTypes];
+draw_color_t boxEdgeColors[totalBoxTypes];
 draw_color_t boxFillColors[totalBoxTypes];
 
 draw_color_t
@@ -34,12 +36,15 @@ draw_color_t
 
 void initColors()
 {
-	memcpy(boxFillColors, boxEdgeColors, sizeof(boxEdgeColors));
+	memcpy(defaultFillColors, defaultEdgeColors, sizeof(defaultEdgeColors));
 	for (int i = 0; i < validBoxTypes; i++) // don't use totalBoxTypes here
 	{
-		boxFillColors[i].a = BOX_FILL_ALPHA;
+		defaultFillColors[i].a = BOX_FILL_ALPHA;
 	}
-	boxFillColors[BOX_THROWABLE].a >>= 1; // make throwable box fill less garish
+	defaultFillColors[BOX_THROWABLE].a >>= 1; // make throwable box fill less garish
+
+	memcpy(boxEdgeColors, defaultEdgeColors, sizeof(defaultEdgeColors));
+	memcpy(boxFillColors, defaultFillColors, sizeof(defaultFillColors));
 }
 
 void selectColor(draw_color_t color)
