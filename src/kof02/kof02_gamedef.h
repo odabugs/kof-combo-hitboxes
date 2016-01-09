@@ -7,6 +7,7 @@
 gamedef_t kof02_gamedef = {
 	.windowClassName = "King of Fighters 2002 Unlimited Match",
 	.shortName = "King of Fighters 2002UM (Steam)",
+	.configSection = "kof02um",
 	.basicWidth = 320,
 	.basicHeight = 224,
 	.recommendResolution = "640x448 or 796x448",
