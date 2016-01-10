@@ -67,7 +67,6 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 {
 	DWORD newProcID = (DWORD)NULL;
 	HWND wHandle = (HWND)NULL;
-	bool success = false;
 	gamedef_t *pGamedef;
 
 	for (int i = 0; gamedefs[i]->windowClassName != (LPCTSTR)NULL; i++)
@@ -80,10 +79,11 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 			GetWindowThreadProcessId(wHandle, &newProcID);
 			if (newProcID != (DWORD)NULL)
 			{
-				success = true;
 				memcpy(&(target->gamedef), pGamedef, sizeof(*pGamedef));
 				establishScreenDimensions(&(target->dimensions), pGamedef);
-				break;
+				target->gameProcessID = newProcID;
+				target->gameHwnd = wHandle;
+				return true;
 			}
 			else
 			{
@@ -93,12 +93,7 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 		}
 	}
 
-	if (success)
-	{
-		target->gameProcessID = newProcID;
-		target->gameHwnd = wHandle;
-	}
-	return success;
+	return false;
 }
 
 #define PFD_SUPPORT_COMPOSITION 0x00008000
