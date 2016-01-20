@@ -56,7 +56,7 @@ typedef struct game_definition
 {
 	LPCTSTR windowClassName;
 	char *shortName;
-	char *configSection;
+	char *configFileName;
 	void *playerAddresses[PLAYERS];
 	void *playerExtraAddresses[PLAYERS];
 	void *player2ndExtraAddresses[PLAYERS];
