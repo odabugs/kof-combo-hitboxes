@@ -7,13 +7,12 @@
 #include <winuser.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "playerstruct.h"
 #include "coords.h"
 #include "draw.h"
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "process.h"
-#include "colors.h"
+#include "config.h"
 
 #define TITLE "King of Fighters 2-in-1 Hitbox Viewer"
 #define VERSION "0.0.2"
@@ -30,6 +29,9 @@ int WINAPI WinMain(
 	printHeader();
 	startupProgram(hInstance);
 	printf("Game detected: %s\n", gameState.gamedef.shortName);
+	readConfigsForGame(&gameState.gamedef);
+
+	printf("\n");
 	printf("We recommend setting your game to %s resolution in windowed mode.\n",
 		gameState.gamedef.recommendResolution);
 	if (gameState.gamedef.extraRecommendations != (char*)NULL)

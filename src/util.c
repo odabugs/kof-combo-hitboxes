@@ -13,3 +13,10 @@ void timestamp()
 	strftime(buf, TIMESTAMP_LEN, timestampFormat, now);
 	printf(buf);
 }
+
+int strlenUntilLast(LPSTR str, TCHAR c)
+{
+	if (str == NULL) { return -1; }
+	LPSTR lastPos = StrRChr(str, (PCTSTR)NULL, c);
+	return (lastPos != (LPSTR)NULL ? (int)(lastPos - str) : -1);
+}
