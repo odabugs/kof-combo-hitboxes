@@ -5,16 +5,18 @@
 #include <GL/gl.h>
 #include "boxtypes.h"
 
+typedef GLubyte draw_color_channel_t;
+
 typedef union draw_color
 {
 	struct
 	{
-		GLubyte r;
-		GLubyte g;
-		GLubyte b;
-		GLubyte a;
+		draw_color_channel_t r;
+		draw_color_channel_t g;
+		draw_color_channel_t b;
+		draw_color_channel_t a;
 	};
-	GLubyte value[4];
+	draw_color_channel_t value[4];
 } draw_color_t;
 
 extern draw_color_t boxEdgeColors[totalBoxTypes];
