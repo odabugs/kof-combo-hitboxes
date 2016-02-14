@@ -12,10 +12,9 @@
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "process.h"
-#include "config.h"
 
 #define TITLE "King of Fighters 2-in-1 Hitbox Viewer"
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 #define HOMEPAGE "https://github.com/odabugs/kof-combo-hitboxes"
 
 #define SLEEP_TIME 10 /* ms */
