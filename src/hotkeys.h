@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <winuser.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "playerstruct.h"
 #include "gamedefs.h"
 #include "controlkey.h"

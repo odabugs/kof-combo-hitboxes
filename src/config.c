@@ -1,5 +1,8 @@
 #include "config.h"
 
+const char *currentSection, *currentName;
+void whine();
+
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
 #define POST_CHECK if (result != 0) \
@@ -8,7 +11,6 @@
 		currentName = (const char*)NULL; \
 	} \
 	return result;
-const char *currentSection, *currentName;
 
 char *booleanTrueValues[] = {
 	"true", "t",
@@ -22,6 +24,12 @@ char *booleanFalseValues[] = {
 	"no", "n",
 	"disabled", "d",
 	"off",
+	(char*)NULL
+};
+// this must come in the same order as the atk_button_t enum
+char *showRangeMarkerValues[] = {
+	"a", "b", "c", "d",
+	"none",
 	(char*)NULL
 };
 
@@ -60,6 +68,29 @@ int parseBoolean(const char *value, bool *target)
 
 		if (testBoolean(strBuf, booleanTrueValues, target, true) == 0) { return 0; }
 		if (testBoolean(strBuf, booleanFalseValues, target, false) == 0) { return 0; }
+	}
+
+	return -1;
+}
+
+int parseRangeMarkerValue(const char *value, int which)
+{
+	char strBuf[5];
+	memset(strBuf, 0, 5);
+	char *pos = strchrSet((char*)value, ALPHA_CHAR_SET);
+	if (pos != (char*)NULL)
+	{
+		size_t posLen = strlenWithinSet(pos, ALPHA_CHAR_SET);
+		strncpy(strBuf, pos, posLen);
+
+		for (int i = 0; showRangeMarkerValues[i] != (char*)NULL; i++)
+		{
+			if (stricmp(strBuf, showRangeMarkerValues[i]) == 0)
+			{
+				showButtonRanges[which] = i;
+				return 0;
+			}
+		}
 	}
 
 	return -1;
@@ -181,7 +212,6 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 	return result;
 
 }
-#undef MATCH_COLOR
 
 #define MATCH_BOOLEAN(valueName, target) \
 	if (strcmp(valueName, name) == 0) \
@@ -216,11 +246,19 @@ int handleGlobalSection(gamedef_t *gamedef, const char *name, const char *value)
 }
 
 int handlePlayerSection(
-	int playerNum, gamedef_t *gamedef, const char *name, const char *value)
+	int which, gamedef_t *gamedef, const char *name, const char *value)
 {
-	return 0;
+	int result = -1;
+
+	if (strcmp("drawRangeMarker", name) == 0)
+	{
+		currentName = name;
+		result = parseRangeMarkerValue(value, which);
+		POST_CHECK;
+	}
+
+	return result;
 }
-#undef MATCH_BOOLEAN
 
 #define MATCH_SECTION(sectionName, handler) \
 	if (strcmp(sectionName, section) == 0) \
@@ -251,8 +289,6 @@ int configFileHandler(
 
 	return result;
 }
-#undef MATCH_SECTION
-#undef MATCH_PLAYER_SECTION
 
 void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
 {
@@ -280,6 +316,11 @@ void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
 		printf("Config file \"%s\" was not found, and will be skipped.\n", fileName);
 	}
 }
+#undef MATCH_COLOR
+#undef MATCH_BOOLEAN
+#undef MATCH_SECTION
+#undef MATCH_PLAYER_SECTION
+#undef POST_CHECK
 
 void readConfigsForGame(gamedef_t *gamedef)
 {
