@@ -3,10 +3,53 @@
 // TODO: whine about bad config values
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
+//#define POST_CHECK if (result != 0) { return result; }
+#define POST_CHECK if (result == 0) { return result; }
+
+char *booleanTrueValues[] = {
+	"true", "t",
+	"yes", "y",
+	"enabled", "e",
+	"on",
+	(char*)NULL
+};
+char *booleanFalseValues[] = {
+	"false", "f",
+	"no", "n",
+	"disabled", "d",
+	"off",
+	(char*)NULL
+};
+
+int testBoolean(char *value, char *targetStrs[], bool *target, bool newValue)
+{
+	for (int i = 0; targetStrs[i] != (char*)NULL; i++)
+	{
+		if (stricmp(value, targetStrs[i]) == 0)
+		{
+			*target = newValue;
+			return 0;
+		}
+	}
+
+	return -1;
+}
 
 int parseBoolean(const char *value, bool *target)
 {
-	return 0;
+	char strBuf[10];
+	memset(strBuf, 0, 10);
+	char *pos = strchrSet((char*)value, ALPHA_CHAR_SET);
+	if (pos != (char*)NULL)
+	{
+		size_t posLen = strlenWithinSet(pos, ALPHA_CHAR_SET);
+		strncpy(strBuf, pos, posLen);
+
+		if (testBoolean(strBuf, booleanTrueValues, target, true) == 0) { return 0; }
+		if (testBoolean(strBuf, booleanFalseValues, target, false) == 0) { return 0; }
+	}
+
+	return -1;
 }
 
 #define COLOR_CHANNELS 4
@@ -21,21 +64,14 @@ int parseColor(
 	size_t posLen;
 	unsigned long channelValue;
 	memset(channelBuf, 0, COLOR_CHANNEL_MAX_STR_LEN + 1);
+	target->a = defaultOpacity;
 	
 	for (int channel = 0; channel < COLOR_CHANNELS; channel++)
 	{
 		pos = strchrSet(pos, DIGIT_CHAR_SET);
-		if (pos == (char*)NULL)
+		if (pos == (char*)NULL && channel != ALPHA_CHANNEL)
 		{
-			if (channel == ALPHA_CHANNEL)
-			{
-				target->a = defaultOpacity;
-				return 0;
-			}
-			else
-			{
-				return -1;
-			}
+			return -1;
 		}
 
 		posLen = strlenWithinSet(pos, DIGIT_CHAR_SET);
@@ -43,7 +79,6 @@ int parseColor(
 		{
 			if (posLen == 0 && channel == ALPHA_CHANNEL)
 			{
-				target->a = defaultOpacity;
 				goto bail_loop;
 			}
 			else
@@ -66,30 +101,98 @@ int parseColor(
 	return 0;
 }
 
-int handleGlobalSection(gamedef_t *gamedef, const char *name, const char *value)
+int parseAlphaChannel(const char *value, draw_color_channel_t *target)
 {
+	char channelBuf[COLOR_CHANNEL_MAX_STR_LEN + 1];
+	char *pos = (char*)value, *nextpos;
+	size_t posLen;
+	unsigned long channelValue;
+	memset(channelBuf, 0, COLOR_CHANNEL_MAX_STR_LEN + 1);
+
+	pos = strchrSet(pos, DIGIT_CHAR_SET);
+	if (pos == (char*)NULL)
+	{
+		return -1;
+	}
+
+	posLen = strlenWithinSet(pos, DIGIT_CHAR_SET);
+	if (posLen == 0 || posLen > COLOR_CHANNEL_MAX_STR_LEN)
+	{
+		return -1;
+	}
+
+	strncpy(channelBuf, pos, posLen);
+	channelValue = strtoul(channelBuf, &nextpos, 10);
+	if (errno == ERANGE || channelValue > COLOR_CHANNEL_MAX_VALUE)
+	{
+		return -1;
+	}
+	*target = (draw_color_channel_t)(channelValue & 0xFF);
 	return 0;
 }
 
+#define MATCH_COLOR(colorName, target, defaultOpacity) \
+	if (strcmp(colorName, name) == 0) \
+	{ \
+		result = parseColor(value, &(target), defaultOpacity); \
+		POST_CHECK \
+	}
 int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 {
-	int result = 0;
+	int result = -1;
+	draw_color_t colorBuf;
 
 	for (int i = 0; i < validBoxTypes; i++)
 	{
 		if (strcmp(boxTypeNames[i], name) == 0) {
-			result = parseColor(value, &(boxFillColors[i]), boxFillAlpha);
+			result = parseColor(value, &colorBuf, boxFillAlpha);
 			if (result == 0)
 			{
-				memcpy(&(boxEdgeColors[i]), &(boxFillColors[i]), sizeof(draw_color_t));
+				memcpy(&(boxFillColors[i]), &colorBuf, sizeof(colorBuf));
+				memcpy(&(boxEdgeColors[i]), &colorBuf, sizeof(colorBuf));
 				boxEdgeColors[i].a = boxEdgeAlpha;
-			}
-			else
-			{
 				return result;
 			}
 		}
 	}
+
+	MATCH_COLOR("playerPivot", playerPivotColor, pivotAlpha);
+	MATCH_COLOR("rangeMarker", closeNormalRangeColor, closeNormalRangeAlpha);
+	MATCH_COLOR("gaugeBorder", gaugeBorderColor, gaugeBorderAlpha);
+	MATCH_COLOR("stunGauge", stunGaugeFillColor, gaugeFillAlpha);
+	MATCH_COLOR("stunRecoveryGauge", stunRecoverGaugeFillColor, gaugeFillAlpha);
+	MATCH_COLOR("guardGauge", guardGaugeFillColor, gaugeFillAlpha);
+
+	return result;
+}
+#undef MATCH_COLOR
+
+#define MATCH_BOOLEAN(valueName, target) \
+	if (strcmp(valueName, name) == 0) \
+	{ \
+		result = parseBoolean(value, &(target)); \
+		POST_CHECK \
+	}
+#define MATCH_ALPHA_CHANNEL(propName, target) \
+	if (strcmp(propName, name) == 0) \
+	{ \
+		result = parseAlphaChannel(value, &(target)); \
+		POST_CHECK \
+	}
+int handleGlobalSection(gamedef_t *gamedef, const char *name, const char *value)
+{
+	int result = -1;
+
+	MATCH_ALPHA_CHANNEL("boxEdgeOpacity", boxEdgeAlpha);
+	MATCH_ALPHA_CHANNEL("boxFillOpacity", boxFillAlpha);
+	MATCH_ALPHA_CHANNEL("rangeMarkerOpacity", closeNormalRangeAlpha);
+	MATCH_ALPHA_CHANNEL("gaugeBorderOpacity", gaugeBorderAlpha);
+	MATCH_ALPHA_CHANNEL("gaugeFillOpacity", gaugeFillAlpha);
+
+	MATCH_BOOLEAN("drawBoxFill", drawBoxFill);
+	MATCH_BOOLEAN("drawBoxPivot", drawHitboxPivots);
+	MATCH_BOOLEAN("drawPlayerPivot", drawPlayerPivots);
+	MATCH_BOOLEAN("drawGauges", drawGauges);
 
 	return result;
 }
@@ -99,6 +202,7 @@ int handlePlayerSection(
 {
 	return 0;
 }
+#undef MATCH_BOOLEAN
 
 #define MATCH_SECTION(sectionName, handler) \
 	if (strcmp(sectionName, section) == 0) \
@@ -112,12 +216,11 @@ int handlePlayerSection(
 		result = handler(playerNum, gamedef, name, value); \
 		POST_CHECK \
 	}
-#define POST_CHECK if (result != 0) { return result; }
 int configFileHandler(
 	void* user, const char *section, const char *name, const char *value)
 {
 	gamedef_t *gamedef = (gamedef_t*)user;
-	int result = 0;
+	int result = -1;
 
 	// semicolons not strictly needed but good for consistency's sake
 	MATCH_SECTION("global", handleGlobalSection);
@@ -127,8 +230,6 @@ int configFileHandler(
 
 	return result;
 }
-#undef PREDICATE
-#undef POST_CHECK
 #undef MATCH_SECTION
 #undef MATCH_PLAYER_SECTION
 
