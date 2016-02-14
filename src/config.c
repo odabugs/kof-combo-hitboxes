@@ -1,7 +1,7 @@
 #include "config.h"
 
 const char *currentSection, *currentName;
-void whine();
+void whine(void);
 
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
@@ -240,6 +240,8 @@ int handleGlobalSection(gamedef_t *gamedef, const char *name, const char *value)
 	MATCH_BOOLEAN("drawBoxFill", drawBoxFill);
 	MATCH_BOOLEAN("drawBoxPivot", drawHitboxPivots);
 	MATCH_BOOLEAN("drawPlayerPivot", drawPlayerPivots);
+	MATCH_BOOLEAN("drawThrowBoxes", drawThrowBoxes);
+	MATCH_BOOLEAN("drawThrowableBoxes", drawThrowableBoxes);
 	MATCH_BOOLEAN("drawGauges", drawGauges);
 
 	return result;
@@ -298,6 +300,8 @@ void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
 	LPTSTR combineResult = PathCombine(pathBuf, basePath, tFileName);
 	if (combineResult != (LPTSTR)NULL && PathFileExists(pathBuf))
 	{
+		timestamp();
+		printf("Reading config file \"%s\"...\n", fileName);
 		int result = ini_parse((const char*)pathBuf, configFileHandler, (void*)gamedef);
 		if (result >= 0)
 		{
