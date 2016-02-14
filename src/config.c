@@ -1,10 +1,14 @@
 #include "config.h"
 
-// TODO: whine about bad config values
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
-//#define POST_CHECK if (result != 0) { return result; }
-#define POST_CHECK if (result == 0) { return result; }
+#define POST_CHECK if (result != 0) \
+	{ \
+		whine(); \
+		currentName = (const char*)NULL; \
+	} \
+	return result;
+const char *currentSection, *currentName;
 
 char *booleanTrueValues[] = {
 	"true", "t",
@@ -20,6 +24,15 @@ char *booleanFalseValues[] = {
 	"off",
 	(char*)NULL
 };
+
+void whine()
+{
+	if (currentSection == NULL || currentName == NULL) { return; }
+	timestamp();
+	printf("Could not read value for option \"%s\" under section \"%s\".  "
+		"Using default value.\n",
+		currentName, currentSection);
+}
 
 int testBoolean(char *value, char *targetStrs[], bool *target, bool newValue)
 {
@@ -134,6 +147,7 @@ int parseAlphaChannel(const char *value, draw_color_channel_t *target)
 #define MATCH_COLOR(colorName, target, defaultOpacity) \
 	if (strcmp(colorName, name) == 0) \
 	{ \
+		currentName = name; \
 		result = parseColor(value, &(target), defaultOpacity); \
 		POST_CHECK \
 	}
@@ -145,6 +159,7 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 	for (int i = 0; i < validBoxTypes; i++)
 	{
 		if (strcmp(boxTypeNames[i], name) == 0) {
+			currentName = name;
 			result = parseColor(value, &colorBuf, boxFillAlpha);
 			if (result == 0)
 			{
@@ -164,18 +179,21 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 	MATCH_COLOR("guardGauge", guardGaugeFillColor, gaugeFillAlpha);
 
 	return result;
+
 }
 #undef MATCH_COLOR
 
 #define MATCH_BOOLEAN(valueName, target) \
 	if (strcmp(valueName, name) == 0) \
 	{ \
+		currentName = name; \
 		result = parseBoolean(value, &(target)); \
 		POST_CHECK \
 	}
 #define MATCH_ALPHA_CHANNEL(propName, target) \
 	if (strcmp(propName, name) == 0) \
 	{ \
+		currentName = name; \
 		result = parseAlphaChannel(value, &(target)); \
 		POST_CHECK \
 	}
@@ -207,12 +225,14 @@ int handlePlayerSection(
 #define MATCH_SECTION(sectionName, handler) \
 	if (strcmp(sectionName, section) == 0) \
 	{ \
+		currentSection = section; \
 		result = handler(gamedef, name, value); \
 		POST_CHECK \
 	}
 #define MATCH_PLAYER_SECTION(sectionName, playerNum, handler) \
 	if (strcmp(sectionName, section) == 0) \
 	{ \
+		currentSection = section; \
 		result = handler(playerNum, gamedef, name, value); \
 		POST_CHECK \
 	}
@@ -221,6 +241,7 @@ int configFileHandler(
 {
 	gamedef_t *gamedef = (gamedef_t*)user;
 	int result = -1;
+	currentName = (const char*)NULL;
 
 	// semicolons not strictly needed but good for consistency's sake
 	MATCH_SECTION("global", handleGlobalSection);
@@ -239,7 +260,6 @@ void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
 	TCHAR pathBuf[MAX_PATH];
 
 	LPTSTR combineResult = PathCombine(pathBuf, basePath, tFileName);
-	printf("\"%s\", base=\"%s\", file=\"%s\"\n", pathBuf, basePath, tFileName);
 	if (combineResult != (LPTSTR)NULL && PathFileExists(pathBuf))
 	{
 		int result = ini_parse((const char*)pathBuf, configFileHandler, (void*)gamedef);
@@ -266,12 +286,10 @@ void readConfigsForGame(gamedef_t *gamedef)
 	TCHAR basePath[MAX_PATH];
 	int basePathFullLen = GetModuleFileName((HMODULE)NULL, basePath, MAX_PATH);
 	int basePathLen = strlenUntilLast(basePath, '\\');
-	printf("\"%s\" full=%d len=%d\n", basePath, basePathFullLen, basePathLen);
 	if (basePathLen > -1 && basePathLen < MAX_PATH - 1)
 	{
 		basePath[basePathLen + 1] = '\0'; // don't need executable file name
 	}
-	printf("\"%s\" full=%d len=%d\n", basePath, basePathFullLen, basePathLen);
 
 	LPCTSTR tBasePath = (LPCTSTR)basePath;
 	readConfigFile(DEFAULT_INI_FILE_NAME, tBasePath, gamedef);
