@@ -16,6 +16,9 @@
 #define min(l, r) (((l) < (r)) ? (l) : (r))
 
 #define DIGIT_CHAR_SET "0123456789"
+#define UPPER_ALPHA_CHAR_SET "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define LOWER_ALPHA_CHAR_SET "abcdefghijklmnopqrstuvwxyz"
+#define ALPHA_CHAR_SET (UPPER_ALPHA_CHAR_SET LOWER_ALPHA_CHAR_SET)
 #define WHITESPACE_CHAR_SET " \t" /* single-line whitespace */
 
 extern void timestamp();
