@@ -20,3 +20,55 @@ int strlenUntilLast(LPSTR str, TCHAR c)
 	LPSTR lastPos = StrRChr(str, (PCTSTR)NULL, c);
 	return (lastPos != (LPSTR)NULL ? (int)(lastPos - str) : -1);
 }
+
+// like strchr, but checks for any character in targetChars
+char *strchrSet(char *str, char *targetChars)
+{
+	if (str == NULL || targetChars == NULL) { return (char*)NULL; }
+
+	char *current, *target;
+	for (current = str; *current != '\0'; current++)
+	{
+		for (target = targetChars; *target != '\0'; target++)
+		{
+			if (*current == *target)
+			{
+				return current;
+			}
+		}
+	}
+
+	return (char*)NULL;
+}
+
+size_t strlenWithinSet(char *str, char *targetChars)
+{
+	if (str == NULL || targetChars == NULL) { return (size_t)0; }
+
+	size_t result;
+	for (result = 0; str[result] != '\0'; result++)
+	{
+		for (char *target = targetChars; *target != '\0'; target++)
+		{
+			if (str[result] == *target)
+			{
+				goto continue_outer_loop;
+			}
+		}
+
+		return result;
+		continue_outer_loop:
+			; // no-op; C does not have Java-style "continue [label];" syntax
+	}
+
+	return result; // strlen(str) == 0 case
+}
+
+size_t strlenUntilSet(char *str, char *targetChars)
+{
+	if (str == NULL || targetChars == NULL) { return (size_t)0; }
+
+	char *strEnd = strchrSet(str, targetChars);
+	if (strEnd == (char*)NULL) { return strlen(str); }
+	else { return (size_t)(strEnd - str); }
+}
