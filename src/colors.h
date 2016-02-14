@@ -19,6 +19,12 @@ typedef union draw_color
 	draw_color_channel_t value[4];
 } draw_color_t;
 
+extern draw_color_channel_t boxEdgeAlpha;
+extern draw_color_channel_t boxFillAlpha;
+extern draw_color_channel_t pivotAlpha;
+extern draw_color_channel_t gaugeBorderAlpha;
+extern draw_color_channel_t gaugeFillAlpha;
+
 extern draw_color_t boxEdgeColors[totalBoxTypes];
 extern draw_color_t boxFillColors[totalBoxTypes];
 
