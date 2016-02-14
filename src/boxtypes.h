@@ -18,18 +18,7 @@ typedef enum {
 	totalBoxTypes // this must come last
 } boxtype_t;
 
-// must be in the same order as the enum above
-char *boxTypeNames[] = {
-	"collisionBox",
-	"vulnerableBox",
-	"guardBox",
-	"attackBox",
-	"projectileVulnerableBox",
-	"projectileAttackBox",
-	"throwableBox",
-	"throwBox",
-	(char*)NULL
-};
+extern char *boxTypeNames[];
 
 // shorthand forms for box type mappings
 #define b_x  BOX_DUMMY
