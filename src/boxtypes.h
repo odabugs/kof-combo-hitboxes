@@ -1,6 +1,8 @@
 #ifndef BOXTYPES_H
 #define BOXTYPES_H
 
+#include <stdlib.h>
+
 typedef enum {
 	BOX_COLLISION, // pushbox
 	BOX_VULNERABLE,
@@ -15,6 +17,19 @@ typedef enum {
 	BOX_DUMMY, // inactive boxes (don't render them onscreen)
 	totalBoxTypes // this must come last
 } boxtype_t;
+
+// must be in the same order as the enum above
+char *boxTypeNames[] = {
+	"collisionBox",
+	"vulnerableBox",
+	"guardBox",
+	"attackBox",
+	"projectileVulnerableBox",
+	"projectileAttackBox",
+	"throwableBox",
+	"throwBox",
+	(char*)NULL
+};
 
 // shorthand forms for box type mappings
 #define b_x  BOX_DUMMY
