@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
 #include "gamedefs.h"
 #include "boxtypes.h"
 #include "colors.h"
