@@ -22,6 +22,7 @@ LRESULT CALLBACK WindowProc(
 
 void startupProgram(HINSTANCE hInstance)
 {
+	initColors();
 	if (!detectGame(&gameState, gamedefs_list))
 	{
 		printf("Failed to detect any supported game running.\n");
@@ -46,9 +47,7 @@ void startupProgram(HINSTANCE hInstance)
 		goto bailout;
 	}
 
-	initColors();
 	return;
-
 	bailout:
 	printf("Exiting now.\n");
 	exit(EXIT_FAILURE);
@@ -216,6 +215,8 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			screenDims = &(target->dimensions);
 			int projectilesCount = currentGame->projectilesListSize;
 			target->projectiles = calloc(projectilesCount, sizeof(projectile_t));
+			printf("Game detected: %s\n", currentGame->shortName);
+			readConfigsForGame(currentGame);
 			setupGamedef(currentGame);
 			return true;
 		}

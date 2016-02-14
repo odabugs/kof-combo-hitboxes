@@ -28,8 +28,6 @@ int WINAPI WinMain(
 {
 	printHeader();
 	startupProgram(hInstance);
-	printf("Game detected: %s\n", gameState.gamedef.shortName);
-	readConfigsForGame(&gameState.gamedef);
 
 	printf("\n");
 	printf("We recommend setting your game to %s resolution in windowed mode.\n",

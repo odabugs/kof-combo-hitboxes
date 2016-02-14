@@ -11,6 +11,7 @@
 #undef _WIN32_WINNT
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "gamedefs.h"
@@ -18,6 +19,7 @@
 #include "controlkey.h"
 #include "util.h"
 #include "colors.h"
+#include "config.h"
 
 typedef HRESULT (WINAPI *dwm_extend_frame_fn)(HWND, PMARGINS);
 typedef HRESULT (WINAPI *dwm_comp_enabled_fn)(BOOL *);
