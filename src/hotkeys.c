@@ -4,6 +4,7 @@ bool drawBoxFill = true;
 bool drawThrowableBoxes = true;
 bool drawThrowBoxes = true;
 bool drawHitboxPivots = true;
+bool drawPlayerPivots = true;
 bool drawGauges = true;
 atk_button_t showButtonRanges[PLAYERS] = {
 	SHOW_NO_BUTTON_RANGES,

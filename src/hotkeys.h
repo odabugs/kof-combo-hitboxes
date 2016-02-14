@@ -14,6 +14,7 @@ extern bool drawBoxFill;
 extern bool drawThrowableBoxes;
 extern bool drawThrowBoxes;
 extern bool drawHitboxPivots;
+extern bool drawPlayerPivots;
 extern bool drawGauges;
 extern atk_button_t showButtonRanges[PLAYERS];
 

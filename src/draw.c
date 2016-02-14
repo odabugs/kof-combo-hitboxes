@@ -5,6 +5,7 @@
 
 void drawPlayerPivot(player_t *player)
 {
+	if (!drawPlayerPivots) { return; }
 	player_coords_t pivot;
 	worldCoordsFromPlayer(player, &pivot);
 
