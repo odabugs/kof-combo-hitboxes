@@ -12,46 +12,25 @@ int calculateScreenOffset(double actual, double baseline, double baselineScale)
 	return (actual <= scaled) ? 0 : (int)((actual - scaled) / 2.0);
 }
 
-void setScissor(screen_dimensions_t *dimensions)
-{
-	int xOffset = dimensions->leftOffset, yOffset = dimensions->topOffset;
-	int w = dimensions->width, h = dimensions->height;
-	int croppedWidth  = max(0, w - (xOffset << 1));
-	int croppedHeight = max(0, h - (yOffset << 1));
-
-	if (!ALLOW_SCISSOR_TEST || (xOffset <= 0 && yOffset <= 0))
-	{
-		glDisable(GL_SCISSOR_TEST);
-	}
-	else
-	{
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(max(0, xOffset), max(0, yOffset), croppedWidth, croppedHeight);
-	}
-}
-
-void setScreenOffsetsPillarboxed(
+int setScreenOffsetsPillarboxed(
 	screen_dimensions_t *dimensions, double dblWidth, double dblHeight)
 {
 	dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
 	dimensions->xScale = dimensions->yScale;
-	dimensions->leftOffset = calculateScreenOffset(
+	return calculateScreenOffset(
 		dblWidth, dimensions->basicWidthAsDouble, dimensions->xScale);
-	dimensions->topOffset = 0;
 }
 
-void setScreenOffsetsLetterboxed(
+int setScreenOffsetsLetterboxed(
 	screen_dimensions_t *dimensions, double dblWidth, double dblHeight)
 {
 	dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
 	dimensions->yScale = dimensions->xScale;
-	dimensions->leftOffset = 0;
-	dimensions->topOffset = calculateScreenOffset(
+	return calculateScreenOffset(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
 }
 
-// TODO: account for letterboxing and window resize (enlarging window breaks it)
-void setGLWindowDimensions(screen_dimensions_t *dimensions)
+void setWindowDimensions(screen_dimensions_t *dimensions)
 {
 	int w = dimensions->width, h = dimensions->height;
 
@@ -74,6 +53,7 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 	int newTopY = (int)clientTopLeft.y;
 	int newWidth = (int)clientRect.right;
 	int newHeight = (int)clientRect.bottom;
+	int newXOffset = 0, newYOffset = 0;
 
 	// has the game window position and/or size changed since we last checked?
 	bool changedPosition, changedSize, enlarged;
@@ -81,53 +61,51 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 	changedSize = (dimensions->width != newWidth || dimensions->height != newHeight);
 	enlarged = (changedSize && (newWidth > dimensions->width || newHeight > dimensions->height));
 
-	if (changedPosition || changedSize) {
-		MoveWindow(overlay, newLeftX, newTopY, newWidth, newHeight, true);
-		dimensions->leftX = newLeftX;
-		dimensions->topY = newTopY;
-	}
+	if (!changedPosition && !changedSize) { return; }
+	dimensions->leftX = newLeftX;
+	dimensions->topY = newTopY;
 
-	if (changedSize)
+	dimensions->width = newWidth;
+	dimensions->height = newHeight;
+	double dblWidth = (double)newWidth;
+	double dblHeight = (double)newHeight;
+	dimensions->aspect = dblWidth / dblHeight;
+
+	switch (dimensions->aspectMode)
 	{
-		dimensions->width = newWidth;
-		dimensions->height = newHeight;
-		double dblWidth = (double)newWidth;
-		double dblHeight = (double)newHeight;
-		dimensions->aspect = dblWidth / dblHeight;
-
-		switch (dimensions->aspectMode)
-		{
-			case AM_FIXED:
-			case AM_STRETCH:
-				dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
-				dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
-				dimensions->leftOffset = 0;
-				dimensions->topOffset = 0;
-				break;
-			case AM_PILLARBOX:
-					setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
-				break;
-			case AM_LETTERBOX:
-					setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
-				break;
-			case AM_WINDOW_FRAME:
-				if (dimensions->aspect < dimensions->basicAspect)
-				{
-					setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
-				}
-				else
-				{
-					setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
-				}
-				break;
-			default:
-				printf("Encountered invalid aspect mode.");
-				exit(EXIT_FAILURE);
-		}
-
-		setGLWindowDimensions(dimensions);
-		setScissor(dimensions);
+		case AM_FIXED:
+		case AM_STRETCH:
+			dimensions->xScale = dblWidth / dimensions->basicWidthAsDouble;
+			dimensions->yScale = dblHeight / dimensions->basicHeightAsDouble;
+			dimensions->leftOffset = 0;
+			dimensions->topOffset = 0;
+			break;
+		case AM_PILLARBOX:
+				newXOffset = setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
+			break;
+		case AM_LETTERBOX:
+				newYOffset = setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
+			break;
+		case AM_WINDOW_FRAME:
+			if (dimensions->aspect < dimensions->basicAspect)
+			{
+				newYOffset = setScreenOffsetsLetterboxed(dimensions, dblWidth, dblHeight);
+			}
+			else
+			{
+				newXOffset = setScreenOffsetsPillarboxed(dimensions, dblWidth, dblHeight);
+			}
+			break;
+		default:
+			printf("Encountered invalid aspect mode.");
+			exit(EXIT_FAILURE);
 	}
+
+	setWindowDimensions(dimensions);
+	MoveWindow(overlay,
+		newLeftX + newXOffset, newTopY + newYOffset,
+		newWidth - (newXOffset << 1), newHeight - (newYOffset << 1),
+		true);
 }
 
 // also applies offsetting from the left/top of the screen
