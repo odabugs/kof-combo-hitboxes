@@ -4,6 +4,9 @@
 char *boxTypeNames[] = {
 	"collisionBox",
 	"vulnerableBox",
+	"counterBox",
+	"anywhereBox",
+	"otgBox",
 	"guardBox",
 	"attackBox",
 	"projectileVulnerableBox",
