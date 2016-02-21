@@ -8,6 +8,7 @@ gamedef_t kof98_gamedef = {
 	.windowClassName = "King of Fighters '98 Ultimate Match Final Edition",
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.configFileName = "kof98umfe.ini",
+	.configSectionPrefix = "kof98umfe",
 	.basicWidth = 320,
 	.basicHeight = 224,
 	.recommendResolution = "640x448 or 796x448",
