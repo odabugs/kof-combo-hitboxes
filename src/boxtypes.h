@@ -25,7 +25,7 @@ extern char *boxTypeNames[];
 
 // shorthand forms for box type mappings
 #define b_x  BOX_DUMMY
-#define b_c  BOX_COLLISION 
+#define b_c  BOX_COLLISION
 #define b_v  BOX_VULNERABLE
 #define b_vc BOX_COUNTER_VULN
 #define b_va BOX_ANYWHERE_VULN
