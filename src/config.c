@@ -225,9 +225,6 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
 {
 	unsigned long boxID, valueByte;
-	char idBuf[10], valueBuf[10];
-	memset(idBuf, 0, sizeof(idBuf));
-	memset(valueBuf, 0, sizeof(valueBuf));
 	char *pos;
 
 	currentName = name;
@@ -238,27 +235,24 @@ int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
 		return -1;
 	}
 
-	//*
-	strncpy(idBuf, boxIDstr + 1, sizeof(idBuf));
-	boxID = strtoul(idBuf, &pos, 16);
-	//*/
-	//boxID = strtoul((boxIDstr + 1), &pos, 16);
+	boxID = strtoul((boxIDstr + 1), &pos, 16);
 	if ((boxID == ULONG_MAX && errno == ERANGE) || boxID > 0xFF)
 	{
 		whine();
 		return -1;
 	}
 
-	valueByte = strtoul(value, &pos, 16);
-	if ((valueByte == ULONG_MAX && errno == ERANGE) || valueByte > 0xFF)
+	valueByte = strtoul(value, &pos, 10);
+	if ((valueByte == ULONG_MAX && errno == ERANGE) || valueByte >= validBoxTypes)
 	{
 		whine();
 		return -1;
 	}
 
 	timestamp();
+	boxID &= 0xFF;
 	printf("Setting box ID %02X to value %02X\n", boxID, valueByte);
-	currentGame->boxTypeMap[boxID & 0xFF] = (uint8_t)(valueByte & 0xFF);
+	currentGame->boxTypeMap[boxID] = (boxtype_t)valueByte;
 
 	return 0;
 }
