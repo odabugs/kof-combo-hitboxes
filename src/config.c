@@ -2,8 +2,6 @@
 
 #define SEP "."
 #define strbufLength 100
-gamedef_t *currentGamedef;
-//LPCTSTR tCurrentFileName;
 const char *currentSection, *currentName;
 char *targetName;
 char sectionNameBuf[strbufLength];
@@ -11,12 +9,19 @@ void whine(void);
 
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
-#define POST_CHECK if (result != 0) \
+#define POST_CHECK \
+	if (result != 0) \
 	{ \
 		whine(); \
 		currentName = (const char*)NULL; \
 	} \
 	return result;
+#define RANGE_CHECK(x, limit) \
+	if ((x == ULONG_MAX && errno == ERANGE) || x >= limit) \
+	{ \
+		whine(); \
+		return -1; \
+	}
 
 char *booleanTrueValues[] = {
 	"true", "t",
@@ -105,7 +110,7 @@ int parseRangeMarkerValue(const char *value, int which)
 #define COLOR_CHANNELS 4
 #define ALPHA_CHANNEL (COLOR_CHANNELS - 1)
 #define COLOR_CHANNEL_MAX_STR_LEN 3
-#define COLOR_CHANNEL_MAX_VALUE 255
+#define COLOR_CHANNEL_MAX_VALUE 256 /* exclusive */
 int parseColor(
 	const char *value, draw_color_t *target, draw_color_channel_t defaultOpacity)
 {
@@ -141,11 +146,7 @@ int parseColor(
 		memset(channelBuf, 0, sizeof(channelBuf));
 		strncpy(channelBuf, pos, posLen);
 		channelValue = strtoul(channelBuf, &nextpos, 10);
-		if ((channelValue == ULONG_MAX && errno == ERANGE) || channelValue > COLOR_CHANNEL_MAX_VALUE)
-		{
-			whine();
-			return -1;
-		}
+		RANGE_CHECK(channelValue, COLOR_CHANNEL_MAX_VALUE);
 		target->value[channel] = (draw_color_channel_t)(channelValue & 0xFF);
 		pos += posLen;
 	}
@@ -178,11 +179,7 @@ int parseAlphaChannel(const char *value, draw_color_channel_t *target)
 
 	strncpy(channelBuf, pos, posLen);
 	channelValue = strtoul(channelBuf, &nextpos, 10);
-	if ((channelValue == ULONG_MAX && errno == ERANGE) || channelValue > COLOR_CHANNEL_MAX_VALUE)
-	{
-		whine();
-		return -1;
-	}
+	RANGE_CHECK(channelValue, COLOR_CHANNEL_MAX_VALUE);
 	*target = (draw_color_channel_t)(channelValue & 0xFF);
 	return 0;
 }
@@ -238,18 +235,10 @@ int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
 	}
 
 	boxID = strtoul((boxIDstr + 1), &pos, 16);
-	if ((boxID == ULONG_MAX && errno == ERANGE) || boxID > 0xFF)
-	{
-		whine();
-		return -1;
-	}
+	RANGE_CHECK(boxID, 0x100);
 
 	valueByte = strtoul(value, &pos, 10);
-	if ((valueByte == ULONG_MAX && errno == ERANGE) || valueByte >= validBoxTypes)
-	{
-		whine();
-		return -1;
-	}
+	RANGE_CHECK(valueByte, validBoxTypes);
 
 	timestamp();
 	boxID &= 0xFF;
@@ -418,6 +407,7 @@ void readConfigFile(const char *fileName, LPCTSTR tFileName, LPCTSTR basePath, g
 #undef MATCH_SECTION
 #undef MATCH_PLAYER_SECTION
 #undef POST_CHECK
+#undef RANGE_CHECK
 
 void readConfigsForGame(gamedef_t *gamedef)
 {
@@ -430,7 +420,6 @@ void readConfigsForGame(gamedef_t *gamedef)
 	}
 
 	LPCTSTR tBasePath = (LPCTSTR)basePath;
-	currentGamedef = gamedef;
 	readConfigFile(
 		DEFAULT_INI_FILE_NAME,
 		_T(DEFAULT_INI_FILE_NAME),
