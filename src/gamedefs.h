@@ -84,7 +84,8 @@ typedef struct game_definition
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
 	int rosterSize;
 	character_def_t *roster;
-	boxtype_t *boxTypeMap;
+	boxtype_t *boxTypeMapSource;
+	boxtype_t boxTypeMap[0x100];
 	// information used for drawing the stun meters
 	bool showStunGauge; // if false, show stun gauge empty except during stun recovery
 	bool showGuardGauge; // if false, hide the guard gauge entirely

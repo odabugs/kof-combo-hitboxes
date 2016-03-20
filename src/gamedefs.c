@@ -94,6 +94,7 @@ void setupGuardGauges(gamedef_t *gamedef)
 // performs runtime setup with info provided statically in the gamedef struct
 void setupGamedef(gamedef_t *gamedef)
 {
+	memcpy(&(gamedef->boxTypeMap), gamedef->boxTypeMapSource, 0x100);
 	setupStunGauges(gamedef);
 	setupStunRecoverGauges(gamedef);
 	if (gamedef->showGuardGauge)
