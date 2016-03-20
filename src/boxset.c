@@ -7,6 +7,9 @@ int layerBoxesInUse[PLAYERS][validBoxTypes];
 boxtype_t boxLayerOrder[validBoxTypes] = {
 	BOX_COLLISION,
 	BOX_VULNERABLE,
+	BOX_COUNTER_VULN,
+	BOX_ANYWHERE_VULN,
+	BOX_OTG_VULN,
 	BOX_GUARD,
 	BOX_ATTACK,
 	BOX_PROJECTILE_VULN,
