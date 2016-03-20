@@ -72,3 +72,30 @@ size_t strlenUntilSet(char *str, char *targetChars)
 	if (strEnd == (char*)NULL) { return strlen(str); }
 	else { return (size_t)(strEnd - str); }
 }
+
+char *strConcat(
+	char *buf, size_t buflen, char *left, char *right, char *separator)
+{
+	if (buf == NULL || buflen == 0) { return (char*)NULL; }
+	if (left == NULL) { return right; }
+	if (right == NULL) { return left; }
+
+	int remaining = (int)buflen;
+	memset(buf, 0, buflen);
+	strncat(buf, left, remaining);
+
+	remaining -= strlen(left);
+	if (remaining <= 0) { return buf; }
+	if (separator != (char*)NULL) {
+		strncat(buf, separator, remaining);
+		remaining -= strlen(separator);
+	}
+
+	if (remaining <= 0) { return buf; }
+	if (right != (char*)NULL) {
+		strncat(buf, right, remaining);
+		remaining -= strlen(right);
+	}
+
+	return buf;
+}

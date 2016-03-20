@@ -26,5 +26,7 @@ extern int strlenUntilLast(LPSTR str, TCHAR c);
 extern char *strchrSet(char *str, char *targetChars);
 extern size_t strlenWithinSet(char *str, char *targetChars);
 extern size_t strlenUntilSet(char *str, char *targetChars);
+extern char *strConcat(
+	char *buf, size_t buflen, char *left, char *right, char *separator);
 
 #endif /* UTIL_H */
