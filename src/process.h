@@ -5,6 +5,7 @@
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
+#include <tchar.h>
 #include <winuser.h>
 #include <wingdi.h>
 #include <uxtheme.h>

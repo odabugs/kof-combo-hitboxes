@@ -2,6 +2,8 @@
 
 #define SEP "."
 #define strbufLength 100
+gamedef_t *currentGamedef;
+//LPCTSTR tCurrentFileName;
 const char *currentSection, *currentName;
 char *targetName;
 char sectionNameBuf[strbufLength];
@@ -346,27 +348,63 @@ int configFileHandler(
 	return result;
 }
 
-void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
+void readConfigFile(const char *fileName, LPCTSTR tFileName, LPCTSTR basePath, gamedef_t *gamedef)
 {
-	LPCTSTR tFileName = (LPCTSTR)fileName;
 	TCHAR pathBuf[MAX_PATH];
+	for (int i = 0; i < MAX_PATH; i++)
+	{
+		pathBuf[i] = _T('\0');
+	}
 
 	LPTSTR combineResult = PathCombine(pathBuf, basePath, tFileName);
-	if (combineResult != (LPTSTR)NULL && PathFileExists(pathBuf))
+	if (combineResult != (LPTSTR)NULL && PathFileExists(combineResult))
 	{
 		timestamp();
 		printf("Reading config file \"%s\"...\n", fileName);
-		int result = ini_parse((const char*)pathBuf, configFileHandler, (void*)gamedef);
-		if (result >= 0)
+		HANDLE hFile = CreateFile((LPCTSTR)combineResult,
+				GENERIC_READ,
+				FILE_SHARE_READ | FILE_SHARE_WRITE,
+				(LPSECURITY_ATTRIBUTES)NULL,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				(HANDLE)NULL
+			);
+		if (hFile == INVALID_HANDLE_VALUE)
 		{
 			timestamp();
-			printf("Successfully read config file \"%s\".\n", fileName);
+			printf(
+				"Failed to retrieve handle to config file \"%s\"."
+				"  This file will be skipped.\n",
+				fileName);
+			return;
+		}
+		int fd = _open_osfhandle((intptr_t)hFile, _O_RDONLY);
+		FILE* fp = _tfdopen(fd, _T("r"));
+		if (fp != (FILE*)NULL)
+		{
+			int result = ini_parse_file(fp, configFileHandler, (void*)gamedef);
+			int closeResult = fclose(fp);
+			if (result >= 0 && closeResult == 0)
+			{
+				timestamp();
+				printf("Successfully read config file \"%s\".\n", fileName);
+			}
+			else
+			{
+				timestamp();
+				printf("Could not read config file \"%s\".\n", fileName);
+			}
 		}
 		else
 		{
 			timestamp();
-			printf("Could not read config file \"%s\".\n", fileName);
+			printf(
+				"Failed to retrieve file pointer to config file \"%s\"."
+				"  This file will be skipped.\n",
+				fileName);
 		}
+
+		CloseHandle(hFile);
 	}
 	else
 	{
@@ -385,13 +423,22 @@ void readConfigsForGame(gamedef_t *gamedef)
 {
 	TCHAR basePath[MAX_PATH];
 	int basePathFullLen = GetModuleFileName((HMODULE)NULL, basePath, MAX_PATH);
-	int basePathLen = strlenUntilLast(basePath, '\\');
+	int basePathLen = strlenUntilLast((PTSTR)basePath, _T('\\'));
 	if (basePathLen > -1 && basePathLen < MAX_PATH - 1)
 	{
-		basePath[basePathLen + 1] = '\0'; // don't need executable file name
+		basePath[basePathLen + 1] = _T('\0'); // don't need executable file name
 	}
 
 	LPCTSTR tBasePath = (LPCTSTR)basePath;
-	readConfigFile(DEFAULT_INI_FILE_NAME, tBasePath, gamedef);
-	readConfigFile((const char*)(gamedef->configFileName), tBasePath, gamedef);
+	currentGamedef = gamedef;
+	readConfigFile(
+		DEFAULT_INI_FILE_NAME,
+		_T(DEFAULT_INI_FILE_NAME),
+		tBasePath,
+		gamedef);
+	readConfigFile(
+		(const char*)(gamedef->configFileName),
+		gamedef->tConfigFileName,
+		tBasePath,
+		gamedef);
 }

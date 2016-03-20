@@ -1,13 +1,15 @@
 #ifndef NO_KOF_98
+#include <tchar.h>
 #include "../boxtypes.h"
 #include "../gamedefs.h"
 #include "kof98_roster.h"
 #include "kof98_boxtypemap.h"
 
 gamedef_t kof98_gamedef = {
-	.windowClassName = "King of Fighters '98 Ultimate Match Final Edition",
+	.windowClassName = _T("King of Fighters '98 Ultimate Match Final Edition"),
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.configFileName = "kof98umfe.ini",
+	.tConfigFileName = _T("kof98umfe.ini"),
 	.configSectionPrefix = "kof98umfe",
 	.basicWidth = 320,
 	.basicHeight = 224,

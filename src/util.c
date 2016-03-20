@@ -14,11 +14,11 @@ void timestamp()
 	printf(buf);
 }
 
-int strlenUntilLast(LPSTR str, TCHAR c)
+int strlenUntilLast(PTSTR str, TCHAR c)
 {
 	if (str == NULL) { return -1; }
 	LPSTR lastPos = StrRChr(str, (PCTSTR)NULL, c);
-	return (lastPos != (LPSTR)NULL ? (int)(lastPos - str) : -1);
+	return (lastPos != (LPSTR)NULL ? (int)((PTSTR)lastPos - str) : -1);
 }
 
 // like strchr, but checks for any character in targetChars

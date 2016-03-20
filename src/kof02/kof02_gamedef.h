@@ -1,13 +1,15 @@
 #ifndef NO_KOF_02
+#include <tchar.h>
 #include "../boxtypes.h"
 #include "../gamedefs.h"
 #include "kof02_roster.h"
 #include "kof02_boxtypemap.h"
 
 gamedef_t kof02_gamedef = {
-	.windowClassName = "King of Fighters 2002 Unlimited Match",
+	.windowClassName = _T("King of Fighters 2002 Unlimited Match"),
 	.shortName = "King of Fighters 2002UM (Steam)",
 	.configFileName = "kof2002um.ini",
+	.tConfigFileName = _T("kof2002um.ini"),
 	.configSectionPrefix = "kof2002um",
 	.basicWidth = 320,
 	.basicHeight = 224,
