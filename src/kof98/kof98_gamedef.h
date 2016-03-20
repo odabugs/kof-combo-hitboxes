@@ -1,13 +1,16 @@
 #ifndef NO_KOF_98
+#include <tchar.h>
 #include "../boxtypes.h"
 #include "../gamedefs.h"
 #include "kof98_roster.h"
 #include "kof98_boxtypemap.h"
 
 gamedef_t kof98_gamedef = {
-	.windowClassName = "King of Fighters '98 Ultimate Match Final Edition",
+	.windowClassName = _T("King of Fighters '98 Ultimate Match Final Edition"),
 	.shortName = "King of Fighters '98UMFE (Steam)",
 	.configFileName = "kof98umfe.ini",
+	.tConfigFileName = _T("kof98umfe.ini"),
+	.configSectionPrefix = "kof98umfe",
 	.basicWidth = 320,
 	.basicHeight = 224,
 	.recommendResolution = "640x448 or 796x448",
@@ -32,7 +35,7 @@ gamedef_t kof98_gamedef = {
 	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
 	.rosterSize = KOF_98_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof98_roster,
-	.boxTypeMap = (boxtype_t*)&kof98_boxTypeMap,
+	.boxTypeMapSource = (boxtype_t*)&kof98_boxTypeMap,
 	.showStunGauge = true,
 	.showGuardGauge = true,
 	.stunGaugeInfo = {

@@ -1,13 +1,16 @@
 #ifndef NO_KOF_02
+#include <tchar.h>
 #include "../boxtypes.h"
 #include "../gamedefs.h"
 #include "kof02_roster.h"
 #include "kof02_boxtypemap.h"
 
 gamedef_t kof02_gamedef = {
-	.windowClassName = "King of Fighters 2002 Unlimited Match",
+	.windowClassName = _T("King of Fighters 2002 Unlimited Match"),
 	.shortName = "King of Fighters 2002UM (Steam)",
 	.configFileName = "kof2002um.ini",
+	.tConfigFileName = _T("kof2002um.ini"),
+	.configSectionPrefix = "kof2002um",
 	.basicWidth = 320,
 	.basicHeight = 224,
 	.recommendResolution = "640x448 or 796x448",
@@ -32,7 +35,7 @@ gamedef_t kof02_gamedef = {
 	.extraStructIndex = 0, // '02 player_extra_t pointer is at player_t +1A4h
 	.rosterSize = KOF_02_ROSTER_SIZE,
 	.roster = (character_def_t*)&kof02_roster,
-	.boxTypeMap = (boxtype_t*)&kof02_boxTypeMap,
+	.boxTypeMapSource = (boxtype_t*)&kof02_boxTypeMap,
 	.showStunGauge = false,
 	.showGuardGauge = false,
 	.stunGaugeInfo = {

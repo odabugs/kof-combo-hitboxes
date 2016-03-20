@@ -1,16 +1,27 @@
 #include "config.h"
 
+#define SEP "."
+#define strbufLength 100
 const char *currentSection, *currentName;
+char *targetName;
+char sectionNameBuf[strbufLength];
 void whine(void);
 
 // TODO: use a real regex library for parsing config line values
 #define DEFAULT_INI_FILE_NAME "default.ini"
-#define POST_CHECK if (result != 0) \
+#define POST_CHECK \
+	if (result != 0) \
 	{ \
 		whine(); \
 		currentName = (const char*)NULL; \
 	} \
 	return result;
+#define RANGE_CHECK(x, limit) \
+	if ((x == ULONG_MAX && errno == ERANGE) || x >= limit) \
+	{ \
+		whine(); \
+		return -1; \
+	}
 
 char *booleanTrueValues[] = {
 	"true", "t",
@@ -99,7 +110,7 @@ int parseRangeMarkerValue(const char *value, int which)
 #define COLOR_CHANNELS 4
 #define ALPHA_CHANNEL (COLOR_CHANNELS - 1)
 #define COLOR_CHANNEL_MAX_STR_LEN 3
-#define COLOR_CHANNEL_MAX_VALUE 255
+#define COLOR_CHANNEL_MAX_VALUE 256 /* exclusive */
 int parseColor(
 	const char *value, draw_color_t *target, draw_color_channel_t defaultOpacity)
 {
@@ -107,7 +118,6 @@ int parseColor(
 	char *pos = (char*)value, *nextpos;
 	size_t posLen;
 	unsigned long channelValue;
-	memset(channelBuf, 0, COLOR_CHANNEL_MAX_STR_LEN + 1);
 	target->a = defaultOpacity;
 	
 	for (int channel = 0; channel < COLOR_CHANNELS; channel++)
@@ -115,6 +125,7 @@ int parseColor(
 		pos = strchrSet(pos, DIGIT_CHAR_SET);
 		if (pos == (char*)NULL && channel != ALPHA_CHANNEL)
 		{
+			whine();
 			return -1;
 		}
 
@@ -127,16 +138,15 @@ int parseColor(
 			}
 			else
 			{
+				whine();
 				return -1;
 			}
 		}
 
+		memset(channelBuf, 0, sizeof(channelBuf));
 		strncpy(channelBuf, pos, posLen);
 		channelValue = strtoul(channelBuf, &nextpos, 10);
-		if (errno == ERANGE || channelValue > COLOR_CHANNEL_MAX_VALUE)
-		{
-			return -1;
-		}
+		RANGE_CHECK(channelValue, COLOR_CHANNEL_MAX_VALUE);
 		target->value[channel] = (draw_color_channel_t)(channelValue & 0xFF);
 		pos += posLen;
 	}
@@ -156,21 +166,20 @@ int parseAlphaChannel(const char *value, draw_color_channel_t *target)
 	pos = strchrSet(pos, DIGIT_CHAR_SET);
 	if (pos == (char*)NULL)
 	{
+		whine();
 		return -1;
 	}
 
 	posLen = strlenWithinSet(pos, DIGIT_CHAR_SET);
 	if (posLen == 0 || posLen > COLOR_CHANNEL_MAX_STR_LEN)
 	{
+		whine();
 		return -1;
 	}
 
 	strncpy(channelBuf, pos, posLen);
 	channelValue = strtoul(channelBuf, &nextpos, 10);
-	if (errno == ERANGE || channelValue > COLOR_CHANNEL_MAX_VALUE)
-	{
-		return -1;
-	}
+	RANGE_CHECK(channelValue, COLOR_CHANNEL_MAX_VALUE);
 	*target = (draw_color_channel_t)(channelValue & 0xFF);
 	return 0;
 }
@@ -197,8 +206,8 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 				memcpy(&(boxFillColors[i]), &colorBuf, sizeof(colorBuf));
 				memcpy(&(boxEdgeColors[i]), &colorBuf, sizeof(colorBuf));
 				boxEdgeColors[i].a = boxEdgeAlpha;
-				return result;
 			}
+			POST_CHECK;
 		}
 	}
 
@@ -210,7 +219,33 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 	MATCH_COLOR("guardGauge", guardGaugeFillColor, gaugeFillAlpha);
 
 	return result;
+}
 
+int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
+{
+	unsigned long boxID, valueByte;
+	char *pos;
+
+	currentName = name;
+	char *boxIDstr = strchr(name, '.');
+	if (boxIDstr == (char*)NULL)
+	{
+		whine();
+		return -1;
+	}
+
+	boxID = strtoul((boxIDstr + 1), &pos, 16);
+	RANGE_CHECK(boxID, 0x100);
+
+	valueByte = strtoul(value, &pos, 10);
+	RANGE_CHECK(valueByte, validBoxTypes);
+
+	timestamp();
+	boxID &= 0xFF;
+	printf("Setting box ID %02X to value %02X\n", boxID, valueByte);
+	currentGame->boxTypeMap[boxID] = (boxtype_t)valueByte;
+
+	return 0;
 }
 
 #define MATCH_BOOLEAN(valueName, target) \
@@ -262,57 +297,103 @@ int handlePlayerSection(
 	return result;
 }
 
-#define MATCH_SECTION(sectionName, handler) \
-	if (strcmp(sectionName, section) == 0) \
+#define PREFIX(sectionPrefix, sectionName) \
+	targetName = strConcat(sectionNameBuf, strbufLength, sectionPrefix, sectionName, SEP); \
+	/*printf("target name: %s\n", targetName);*/ \
+	if (strcmp(targetName, section) == 0) \
 	{ \
-		currentSection = section; \
-		result = handler(gamedef, name, value); \
-		POST_CHECK \
-	}
-#define MATCH_PLAYER_SECTION(sectionName, playerNum, handler) \
-	if (strcmp(sectionName, section) == 0) \
-	{ \
-		currentSection = section; \
-		result = handler(playerNum, gamedef, name, value); \
-		POST_CHECK \
-	}
+		currentSection = targetName;
+#define MATCH_SECTION(sectionPrefix, sectionName, handler) \
+	PREFIX(sectionPrefix, sectionName) \
+	result = handler(gamedef, name, value); \
+	POST_CHECK \
+}
+#define MATCH_PLAYER_SECTION(sectionPrefix, sectionName, playerNum, handler) \
+	PREFIX(sectionPrefix, sectionName) \
+	result = handler(playerNum, gamedef, name, value); \
+	POST_CHECK \
+}
 int configFileHandler(
 	void* user, const char *section, const char *name, const char *value)
 {
 	gamedef_t *gamedef = (gamedef_t*)user;
 	int result = -1;
 	currentName = (const char*)NULL;
+	char *gameSectionPrefix = currentGame->configSectionPrefix;
 
 	// semicolons not strictly needed but good for consistency's sake
-	MATCH_SECTION("global", handleGlobalSection);
-	MATCH_SECTION("colors", handleColorsSection);
-	MATCH_PLAYER_SECTION("player1", 0, handlePlayerSection);
-	MATCH_PLAYER_SECTION("player2", 1, handlePlayerSection);
+	MATCH_SECTION((char*)NULL, "global", handleGlobalSection);
+	MATCH_SECTION((char*)NULL, "colors", handleColorsSection);
+	MATCH_PLAYER_SECTION((char*)NULL, "player1", 0, handlePlayerSection);
+	MATCH_PLAYER_SECTION((char*)NULL, "player2", 1, handlePlayerSection);
+
+	MATCH_SECTION(gameSectionPrefix, "global", handleGlobalSection);
+	MATCH_SECTION(gameSectionPrefix, "colors", handleColorsSection);
+	MATCH_PLAYER_SECTION(gameSectionPrefix, "player1", 0, handlePlayerSection);
+	MATCH_PLAYER_SECTION(gameSectionPrefix, "player2", 1, handlePlayerSection);
+
+	MATCH_SECTION(gameSectionPrefix, "boxIDs", handleBoxIDsSection);
 
 	return result;
 }
 
-void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
+void readConfigFile(const char *fileName, LPCTSTR tFileName, LPCTSTR basePath, gamedef_t *gamedef)
 {
-	LPCTSTR tFileName = (LPCTSTR)fileName;
 	TCHAR pathBuf[MAX_PATH];
+	for (int i = 0; i < MAX_PATH; i++)
+	{
+		pathBuf[i] = _T('\0');
+	}
 
 	LPTSTR combineResult = PathCombine(pathBuf, basePath, tFileName);
-	if (combineResult != (LPTSTR)NULL && PathFileExists(pathBuf))
+	if (combineResult != (LPTSTR)NULL && PathFileExists(combineResult))
 	{
 		timestamp();
 		printf("Reading config file \"%s\"...\n", fileName);
-		int result = ini_parse((const char*)pathBuf, configFileHandler, (void*)gamedef);
-		if (result >= 0)
+		HANDLE hFile = CreateFile((LPCTSTR)combineResult,
+				GENERIC_READ,
+				FILE_SHARE_READ | FILE_SHARE_WRITE,
+				(LPSECURITY_ATTRIBUTES)NULL,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				(HANDLE)NULL
+			);
+		if (hFile == INVALID_HANDLE_VALUE)
 		{
 			timestamp();
-			printf("Successfully read config file \"%s\".\n", fileName);
+			printf(
+				"Failed to retrieve handle to config file \"%s\"."
+				"  This file will be skipped.\n",
+				fileName);
+			return;
+		}
+		int fd = _open_osfhandle((intptr_t)hFile, _O_RDONLY);
+		FILE* fp = _tfdopen(fd, _T("r"));
+		if (fp != (FILE*)NULL)
+		{
+			int result = ini_parse_file(fp, configFileHandler, (void*)gamedef);
+			int closeResult = fclose(fp);
+			if (result >= 0 && closeResult == 0)
+			{
+				timestamp();
+				printf("Successfully read config file \"%s\".\n", fileName);
+			}
+			else
+			{
+				timestamp();
+				printf("Could not read config file \"%s\".\n", fileName);
+			}
 		}
 		else
 		{
 			timestamp();
-			printf("Could not read config file \"%s\".\n", fileName);
+			printf(
+				"Failed to retrieve file pointer to config file \"%s\"."
+				"  This file will be skipped.\n",
+				fileName);
 		}
+
+		CloseHandle(hFile);
 	}
 	else
 	{
@@ -320,23 +401,33 @@ void readConfigFile(const char *fileName, LPCTSTR basePath, gamedef_t *gamedef)
 		printf("Config file \"%s\" was not found, and will be skipped.\n", fileName);
 	}
 }
+#undef PREFIX
 #undef MATCH_COLOR
 #undef MATCH_BOOLEAN
 #undef MATCH_SECTION
 #undef MATCH_PLAYER_SECTION
 #undef POST_CHECK
+#undef RANGE_CHECK
 
 void readConfigsForGame(gamedef_t *gamedef)
 {
 	TCHAR basePath[MAX_PATH];
 	int basePathFullLen = GetModuleFileName((HMODULE)NULL, basePath, MAX_PATH);
-	int basePathLen = strlenUntilLast(basePath, '\\');
+	int basePathLen = strlenUntilLast((PTSTR)basePath, _T('\\'));
 	if (basePathLen > -1 && basePathLen < MAX_PATH - 1)
 	{
-		basePath[basePathLen + 1] = '\0'; // don't need executable file name
+		basePath[basePathLen + 1] = _T('\0'); // don't need executable file name
 	}
 
 	LPCTSTR tBasePath = (LPCTSTR)basePath;
-	readConfigFile(DEFAULT_INI_FILE_NAME, tBasePath, gamedef);
-	readConfigFile((const char*)(gamedef->configFileName), tBasePath, gamedef);
+	readConfigFile(
+		DEFAULT_INI_FILE_NAME,
+		_T(DEFAULT_INI_FILE_NAME),
+		tBasePath,
+		gamedef);
+	readConfigFile(
+		(const char*)(gamedef->configFileName),
+		gamedef->tConfigFileName,
+		tBasePath,
+		gamedef);
 }

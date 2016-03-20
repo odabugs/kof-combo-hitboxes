@@ -57,6 +57,8 @@ typedef struct game_definition
 	LPCTSTR windowClassName;
 	char *shortName;
 	char *configFileName;
+	LPCTSTR tConfigFileName;
+	char *configSectionPrefix;
 	void *playerAddresses[PLAYERS];
 	void *playerExtraAddresses[PLAYERS];
 	void *player2ndExtraAddresses[PLAYERS];
@@ -83,7 +85,8 @@ typedef struct game_definition
 	aspect_mode_t aspectMode; // how does the game handle widescreen?
 	int rosterSize;
 	character_def_t *roster;
-	boxtype_t *boxTypeMap;
+	boxtype_t *boxTypeMapSource;
+	boxtype_t boxTypeMap[0x100];
 	// information used for drawing the stun meters
 	bool showStunGauge; // if false, show stun gauge empty except during stun recovery
 	bool showGuardGauge; // if false, hide the guard gauge entirely
@@ -99,6 +102,7 @@ extern gamedef_t *currentGame;
 extern gamedef_t *gamedefs_list[];
 
 extern void setupGamedef(gamedef_t *gamedef);
+extern void setupBoxTypeMap(gamedef_t *gamedef);
 extern character_def_t *characterForID(int charID);
 extern char *characterNameForID(int charID);
 

@@ -7,9 +7,13 @@ draw_color_channel_t closeNormalRangeAlpha = 0xFF;
 draw_color_channel_t gaugeBorderAlpha = 0xFF;
 draw_color_channel_t gaugeFillAlpha = 0xA0;
 
+// must be in the same order as the boxtype_t enum (see boxtypes.h)
 draw_color_t defaultEdgeColors[totalBoxTypes] = {
 	[BOX_COLLISION]         = { .value = { 0x00, 0xFF, 0x00, 0xFF } },
 	[BOX_VULNERABLE]        = { .value = { 0x77, 0x77, 0xFF, 0xFF } },
+	[BOX_COUNTER_VULN]      = { .value = { 0x77, 0x77, 0xFF, 0xFF } },
+	[BOX_ANYWHERE_VULN]     = { .value = { 0x77, 0x77, 0xFF, 0xFF } },
+	[BOX_OTG_VULN]          = { .value = { 0x77, 0x77, 0xFF, 0xFF } },
 	[BOX_GUARD]             = { .value = { 0xCC, 0xCC, 0xFF, 0xFF } },
 	[BOX_ATTACK]            = { .value = { 0xFF, 0x00, 0x00, 0xFF } },
 	[BOX_PROJECTILE_VULN]   = { .value = { 0x00, 0xFF, 0xFF, 0xFF } },
@@ -21,7 +25,7 @@ draw_color_t defaultEdgeColors[totalBoxTypes] = {
 	[validBoxTypes]         = { .value = { 0x00, 0x00, 0x00, 0xFF } },
 	[BOX_DUMMY]             = { .value = { 0x00, 0x00, 0x00, 0xFF } }
 };
-// initialized during startup
+// initialized during startup and while reading the config file
 draw_color_t defaultFillColors[totalBoxTypes];
 draw_color_t boxEdgeColors[totalBoxTypes];
 draw_color_t boxFillColors[totalBoxTypes];
@@ -43,7 +47,6 @@ void initColors()
 		defaultFillColors[i].a = boxFillAlpha;
 		defaultEdgeColors[i].a = boxEdgeAlpha;
 	}
-	//defaultFillColors[BOX_THROWABLE].a >>= 1; // make throwable box fill less garish
 
 	memcpy(boxEdgeColors, defaultEdgeColors, sizeof(defaultEdgeColors));
 	memcpy(boxFillColors, defaultFillColors, sizeof(defaultFillColors));

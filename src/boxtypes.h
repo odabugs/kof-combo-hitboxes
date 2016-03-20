@@ -6,6 +6,9 @@
 typedef enum {
 	BOX_COLLISION, // pushbox
 	BOX_VULNERABLE,
+	BOX_COUNTER_VULN,
+	BOX_ANYWHERE_VULN,
+	BOX_OTG_VULN,
 	BOX_GUARD,
 	BOX_ATTACK,
 	BOX_PROJECTILE_VULN,
@@ -24,6 +27,9 @@ extern char *boxTypeNames[];
 #define b_x  BOX_DUMMY
 #define b_c  BOX_COLLISION
 #define b_v  BOX_VULNERABLE
+#define b_vc BOX_COUNTER_VULN
+#define b_va BOX_ANYWHERE_VULN
+#define b_vo BOX_OTG_VULN
 #define b_g  BOX_GUARD
 #define b_a  BOX_ATTACK
 #define b_pv BOX_PROJECTILE_VULN

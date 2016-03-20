@@ -4,12 +4,6 @@
 
 gamedef_t *currentGame;
 
-// list ender - DO NOT REMOVE THIS
-gamedef_t gamedefSentinel =
-{
-	.windowClassName = (LPCTSTR)NULL
-};
-
 gamedef_t *gamedefs_list[] = {
 	#ifndef NO_KOF_98
 	&kof98_gamedef,
@@ -17,7 +11,7 @@ gamedef_t *gamedefs_list[] = {
 	#ifndef NO_KOF_02
 	&kof02_gamedef,
 	#endif
-	&gamedefSentinel
+	(gamedef_t*)NULL
 };
 
 // kids, don't write code like this
@@ -100,6 +94,10 @@ void setupGamedef(gamedef_t *gamedef)
 	{
 		setupGuardGauges(gamedef);
 	}
+}
+
+void setupBoxTypeMap(gamedef_t *gamedef) {
+	memcpy(&(gamedef->boxTypeMap), gamedef->boxTypeMapSource, 0x100);
 }
 
 // TODO: if player is using an EX character then this yields the non-EX equivalent

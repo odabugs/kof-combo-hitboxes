@@ -6,7 +6,8 @@ endif
 #TODO: add debug build target
 
 INCLUDES=-I"./lib/inih"
-CFLAGS=-std=c11 -g -mwindows -mconsole $(INCLUDES)
+DEFINES=-D UNICODE -D _UNICODE
+CFLAGS=-std=c11 -g -mwindows -mconsole $(INCLUDES) $(DEFINES)
 LDFLAGS=-lgdi32 -lopengl32 -lglu32 -lShlwapi
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o

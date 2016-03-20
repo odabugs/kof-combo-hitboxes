@@ -68,7 +68,7 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	HWND wHandle = (HWND)NULL;
 	gamedef_t *pGamedef;
 
-	for (int i = 0; gamedefs[i]->windowClassName != (LPCTSTR)NULL; i++)
+	for (int i = 0; gamedefs[i] != (gamedef_t*)NULL; i++)
 	{
 		pGamedef = gamedefs[i];
 		wHandle = FindWindow(pGamedef->windowClassName, (LPCTSTR)NULL);
@@ -118,7 +118,7 @@ void setupGL(game_state_t *target)
 // TODO: real handling of failure conditions
 bool createOverlayWindow(game_state_t *target)
 {
-	char title[] = "KOF Combo Hitbox Viewer";
+	LPCTSTR title = _T("KOF Combo Hitbox Viewer");
 	HWND overlayHwnd;
 	ATOM atom;
 	WNDCLASSEX windowClass;
@@ -136,13 +136,13 @@ bool createOverlayWindow(game_state_t *target)
 	windowClass.hCursor = NULL;
 	windowClass.hbrBackground = NULL;
 
-	atom = RegisterClassExA(&windowClass);
+	atom = RegisterClassEx(&windowClass);
 	if (!atom)
 	{
 		return false;
 	}
 
-	overlayHwnd = CreateWindowExA(
+	overlayHwnd = CreateWindowEx(
 		(WS_EX_TOPMOST | WS_EX_COMPOSITED | WS_EX_TRANSPARENT | WS_EX_LAYERED),
 		title,
 		title,
@@ -160,7 +160,7 @@ bool createOverlayWindow(game_state_t *target)
 	}
 
 	// ensure that window composition is supported
-	target->dwmapi = LoadLibraryA("dwmapi.dll");
+	target->dwmapi = LoadLibrary(_T("dwmapi.dll"));
 	if (target->dwmapi == (HMODULE)NULL)
 	{
 		return false;
@@ -211,7 +211,8 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
 			currentGame = &(target->gamedef);
-			boxTypeMap = target->gamedef.boxTypeMap;
+			setupBoxTypeMap(currentGame);
+			boxTypeMap = (boxtype_t*)&(currentGame->boxTypeMap);
 			screenDims = &(target->dimensions);
 			int projectilesCount = currentGame->projectilesListSize;
 			target->projectiles = calloc(projectilesCount, sizeof(projectile_t));

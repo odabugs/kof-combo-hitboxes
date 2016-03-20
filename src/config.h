@@ -3,6 +3,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <tchar.h>
+#include <fcntl.h>
+#include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
