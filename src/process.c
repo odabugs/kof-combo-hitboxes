@@ -211,6 +211,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
 			currentGame = &(target->gamedef);
+			setupBoxTypeMap(currentGame);
 			boxTypeMap = (boxtype_t*)&(currentGame->boxTypeMap);
 			screenDims = &(target->dimensions);
 			int projectilesCount = currentGame->projectilesListSize;

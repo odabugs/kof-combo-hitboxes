@@ -101,6 +101,7 @@ extern gamedef_t *currentGame;
 extern gamedef_t *gamedefs_list[];
 
 extern void setupGamedef(gamedef_t *gamedef);
+extern void setupBoxTypeMap(gamedef_t *gamedef);
 extern character_def_t *characterForID(int charID);
 extern char *characterNameForID(int charID);
 
