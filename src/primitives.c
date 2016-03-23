@@ -5,15 +5,20 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
-void GLRectangle(int leftX, int topY, int rightX, int bottomY)
+void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 {
-	glVertex2i(leftX, topY);
-	glVertex2i(rightX, topY);
-	glVertex2i(leftX, bottomY);
-
-	glVertex2i(leftX, bottomY);
-	glVertex2i(rightX, topY);
-	glVertex2i(rightX, bottomY);
+	static VOID *pVoid;
+	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
+	CUSTOMVERTEX vertices[] = {
+		{ leftX,  topY,    1.0f, 1.0f, currentColor },
+		{ rightX, topY,    1.0f, 1.0f, currentColor },
+		{ leftX,  bottomY, 1.0f, 1.0f, currentColor },
+		{ rightX, bottomY, 1.0f, 1.0f, currentColor },
+	};
+	memcpy(pVoid, vertices, sizeof(CUSTOMVERTEX) * 4);
+	IDirect3DVertexBuffer9_Unlock(boxBuffer);
+	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
+	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
 	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
 }
 
@@ -30,13 +35,13 @@ void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 	rightX  = ensureMinThickness(bottomRightScreen.x, leftX);
 	bottomY = ensureMinThickness(bottomRightScreen.y, topY);
 
-	GLRectangle(leftX, topY, rightX, bottomY);
+	DXRectangle(leftX, topY, rightX, bottomY);
 }
 
 // used for unscaled drawing, e.g. for the fill portion of onscreen gauges
 void drawScreenRectangle(screen_coords_t *topLeft, screen_coords_t *bottomRight)
 {
-	GLRectangle(
+	DXRectangle(
 		min(topLeft->x, bottomRight->x),
 		min(topLeft->y, bottomRight->y),
 		max(topLeft->x, bottomRight->x),
@@ -77,10 +82,10 @@ void drawBox(player_coords_t *topLeft, player_coords_t *bottomRight)
 	outerBottomY = ensureMinThickness(outerBottomRight.y, innerBottomY);
 
 	// draw box sides in order: left, right, top, bottom
-	GLRectangle(outerLeftX, outerTopY, innerLeftX, outerBottomY);
-	GLRectangle(innerRightX, outerTopY, outerRightX, outerBottomY);
-	GLRectangle(innerLeftX, outerTopY, innerRightX, innerTopY);
-	GLRectangle(innerLeftX, innerBottomY, innerRightX, outerBottomY);
+	DXRectangle(outerLeftX, outerTopY, innerLeftX, outerBottomY);
+	DXRectangle(innerRightX, outerTopY, outerRightX, outerBottomY);
+	DXRectangle(innerLeftX, outerTopY, innerRightX, innerTopY);
+	DXRectangle(innerLeftX, innerBottomY, innerRightX, outerBottomY);
 }
 
 void drawPivot(player_coords_t *pivot, int pivotSize)

@@ -7,11 +7,11 @@ endif
 
 INCLUDES=-I"./lib/inih"
 DEFINES=-D UNICODE -D _UNICODE
-CFLAGS=-std=c11 -g -mwindows -mconsole $(INCLUDES) $(DEFINES)
-LDFLAGS=-lgdi32 -lopengl32 -lglu32 -lShlwapi
+CFLAGS=-std=c11 -g -mwindows -mconsole $(DEFINES) $(INCLUDES)
+LDFLAGS=-lgdi32 -lopengl32 -lglu32 -lShlwapi -ld3d9 -ld3dx9
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
-HEADERS=playerstruct.h coords.h draw.h gamedefs.h gamestate.h process.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h config.h ini.h
+OBJECTS=directx.o playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
+HEADERS=directx.h playerstruct.h coords.h draw.h gamedefs.h gamestate.h process.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h config.h ini.h
 KOF98_HEADERS=kof98_roster.h kof98_boxtypemap.h kof98_gamedef.h
 KOF02_HEADERS=kof02_roster.h kof02_boxtypemap.h kof02_gamedef.h
 MAIN_AND_OBJECTS=main.o $(OBJECTS)

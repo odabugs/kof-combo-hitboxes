@@ -10,11 +10,13 @@
 #include <wingdi.h>
 #include <uxtheme.h>
 #undef _WIN32_WINNT
-#include <GL/gl.h>
-#include <GL/glu.h>
+#define CINTERFACE
+#include <d3d9.h>
+#include <d3dx9.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "directx.h"
 #include "gamedefs.h"
 #include "gamestate.h"
 #include "controlkey.h"

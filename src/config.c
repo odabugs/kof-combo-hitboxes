@@ -147,7 +147,22 @@ int parseColor(
 		strncpy(channelBuf, pos, posLen);
 		channelValue = strtoul(channelBuf, &nextpos, 10);
 		RANGE_CHECK(channelValue, COLOR_CHANNEL_MAX_VALUE);
-		target->value[channel] = (draw_color_channel_t)(channelValue & 0xFF);
+		draw_color_channel_t targetValue = (draw_color_channel_t)(channelValue & 0xFF);
+		// straight r,g,b,a or a,r,g,b mapping gives the wrong color results here
+		switch (channel) {
+			case 0:
+				target->b = targetValue;
+				break;
+			case 1:
+				target->g = targetValue;
+				break;
+			case 2:
+				target->r = targetValue;
+				break;
+			case 3:
+				target->a = targetValue;
+				break;
+		}
 		pos += posLen;
 	}
 

@@ -254,7 +254,7 @@ void eraseScene()
 {
 	checkHotkeys();
 	clearStoredBoxes();
-	glClear(GL_COLOR_BUFFER_BIT);
+	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 }
 
 void drawNextFrame()
@@ -262,12 +262,12 @@ void drawNextFrame()
 	readGameState(&gameState);
 	eraseScene();
 
-	glBegin(GL_TRIANGLES);
+	IDirect3DDevice9_BeginScene(d3dDevice);
+	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 	if (checkShouldRenderScene())
 	{
 		drawScene(&gameState);
 	}
-	glEnd();
-	SwapBuffers(gameState.overlayHdc);
-	glFinish();
+	IDirect3DDevice9_EndScene(d3dDevice);
+	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
 }

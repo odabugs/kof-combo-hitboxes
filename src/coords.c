@@ -30,17 +30,13 @@ int setScreenOffsetsLetterboxed(
 		dblHeight, dimensions->basicHeightAsDouble, dimensions->yScale);
 }
 
-void setWindowDimensions(screen_dimensions_t *dimensions)
+void setWindowDimensions(screen_dimensions_t *dimensions, int newXOffset, int newYOffset)
 {
 	int w = dimensions->width, h = dimensions->height;
-
-	glViewport(0, 0, w, h);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	//gluOrtho2D(0, w, 0, h);
-	gluOrtho2D(0, w, h, 0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	w = w - (newXOffset << 1);
+	h = h - (newYOffset << 1);
+	RECT scissorRect = { .right = (LONG)w, .bottom = (LONG)h };
+	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
 }
 
 void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimensions)
@@ -101,10 +97,16 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 			exit(EXIT_FAILURE);
 	}
 
-	setWindowDimensions(dimensions);
+	if (!enlarged)
+	{
+		RECT fullscreenRect = { .right = (LONG)screenWidth, .bottom = (LONG)screenHeight };
+		IDirect3DDevice9_SetScissorRect(d3dDevice, &fullscreenRect);
+		IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+	}
+	setWindowDimensions(dimensions, newXOffset, newYOffset);
 	MoveWindow(overlay,
 		newLeftX + newXOffset, newTopY + newYOffset,
-		newWidth - (newXOffset << 1), newHeight - (newYOffset << 1),
+		(int)screenWidth, (int)screenHeight,
 		true);
 }
 
@@ -200,10 +202,11 @@ void getScreenEdgeInWorldCoords(
 	target->y = vEdges[vEdge];
 }
 
-void flipXOnAxis(player_coords_t *target, player_coords_t *axis)
+void flipXOnAxis(player_coords_t *target, player_coords_t *axis, int postAdjustment)
 {
 	game_pixel_t xDifference = axis->x - target->x;
 	target->x += (xDifference * 2);
+	target->x += postAdjustment;
 }
 
 void swapXComponents(player_coords_t *one, player_coords_t *two)

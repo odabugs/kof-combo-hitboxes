@@ -4,9 +4,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winuser.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#define CINTERFACE
+#include <d3d9.h>
+#include <d3dx9.h>
 #include <stdbool.h>
+#include "directx.h"
 #include "playerstruct.h"
 #include "coords.h"
 #include "gamedefs.h"

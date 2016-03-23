@@ -95,24 +95,51 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	return false;
 }
 
-#define PFD_SUPPORT_COMPOSITION 0x00008000
-void setupGL(game_state_t *target)
+void setupD3D(game_state_t *target)
 {
-	HDC hdc = target->overlayHdc;
-	PIXELFORMATDESCRIPTOR pfd;
-	int iPixelFormat = 1;
-	// the lazy man's way to set up a pixel format descriptor
-	int iMax = DescribePixelFormat(target->gameHdc, iPixelFormat, sizeof(pfd), &pfd);
-	pfd.dwFlags |= (PFD_SUPPORT_COMPOSITION | PFD_SUPPORT_OPENGL);
-	SetPixelFormat(hdc, iPixelFormat, &pfd);
-	target->hglrc = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, target->hglrc);
+	gamedef_t *gamedef = &(target->gamedef);
+	d3d = Direct3DCreate9(D3D_SDK_VERSION);
+	D3DPRESENT_PARAMETERS presentParams;
+	memset(&presentParams, 0, sizeof(presentParams));
+	presentParams.Windowed = TRUE;
+	presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
+	presentParams.hDeviceWindow = target->overlayHwnd;
+	screenWidth = (UINT)GetSystemMetrics(SM_CXSCREEN);
+	screenHeight = (UINT)GetSystemMetrics(SM_CYSCREEN);
+	presentParams.BackBufferWidth = screenWidth;
+	presentParams.BackBufferHeight = screenHeight;
+	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_ALPHA_TEST);
-	//glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // transparent
+	IDirect3D9_CreateDevice(
+		d3d,
+		D3DADAPTER_DEFAULT,
+		D3DDEVTYPE_HAL,
+		target->overlayHwnd,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		&presentParams,
+		&d3dDevice);
+
+	for (int i = 0; i < RENDER_STATE_OPTIONS_COUNT; i++)
+	{
+		IDirect3DDevice9_SetRenderState(
+			d3dDevice,
+			renderStateOptions[i].option,
+			renderStateOptions[i].value);
+	}
+
+	IDirect3DDevice9_CreateVertexBuffer(
+		d3dDevice,
+		BOX_VERTEX_BUFFER_SIZE * sizeof(CUSTOMVERTEX),
+		0, // mandatory if CreateDevice used D3DCREATE_HARDWARE_VERTEXPROCESSING
+		CUSTOMFVF,
+		D3DPOOL_MANAGED,
+		&boxBuffer,
+		NULL);
+
+	VOID *pVoid;
+	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
+	memcpy(pVoid, templateBoxBuffer, sizeof(templateBoxBuffer));
+	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 }
 
 // TODO: real handling of failure conditions
@@ -208,7 +235,6 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			target->gameHdc = GetDC(target->gameHwnd);
 			createOverlayWindow(target);
 			target->overlayHdc = GetDC(target->overlayHwnd);
-			setupGL(target);
 			SetBkMode(target->overlayHdc, TRANSPARENT);
 			currentGame = &(target->gamedef);
 			setupBoxTypeMap(currentGame);
@@ -219,6 +245,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			printf("Game detected: %s\n", currentGame->shortName);
 			readConfigsForGame(currentGame);
 			setupGamedef(currentGame);
+			setupD3D(target);
 			return true;
 		}
 	}
@@ -232,7 +259,6 @@ void closeGame(game_state_t *target)
 	ReleaseDC(target->overlayHwnd, target->overlayHdc);
 	CloseHandle(target->gameHandle);
 	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(target->hglrc);
 	free(target->projectiles);
 	memset(target, 0, sizeof(*target));
 }

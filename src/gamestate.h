@@ -27,7 +27,6 @@ typedef struct game_state
 	HDC overlayHdc;
 	WNDPROC wndProc; // window message pump
 	HMODULE dwmapi;
-	HGLRC hglrc; // OpenGL rendering context
 } game_state_t;
 
 extern game_state_t gameState;

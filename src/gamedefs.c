@@ -44,10 +44,10 @@ void setupStunGauges(gamedef_t *gamedef)
 	gauge = &(gamedef->stunGauges[0]);
 	memcpy(gauge, &(gamedef->stunGauges[1]), sizeof(*gauge));
 	gauge->fillFromRightToLeft = true;
-	flipXOnAxis(&(gauge->borderTopLeft), pAxis);
-	flipXOnAxis(&(gauge->borderBottomRight), pAxis);
-	flipXOnAxis(&(gauge->fillTopLeft), pAxis);
-	flipXOnAxis(&(gauge->fillBottomRight), pAxis);
+	flipXOnAxis(&(gauge->borderTopLeft), pAxis, -1);
+	flipXOnAxis(&(gauge->borderBottomRight), pAxis, -1);
+	flipXOnAxis(&(gauge->fillTopLeft), pAxis, -1);
+	flipXOnAxis(&(gauge->fillBottomRight), pAxis, -1);
 	swapXComponents(&(gauge->borderTopLeft), &(gauge->borderBottomRight));
 	swapXComponents(&(gauge->fillTopLeft), &(gauge->fillBottomRight));
 }

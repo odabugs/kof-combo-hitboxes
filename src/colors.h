@@ -1,13 +1,19 @@
 #ifndef COLORS_H
 #define COLORS_H
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#define CINTERFACE
+#include <d3d9.h>
+#include <d3dx9.h>
+#include <stdint.h>
 #include <string.h>
-#include <GL/gl.h>
+#include "directx.h"
 #include "boxtypes.h"
 
-typedef GLubyte draw_color_channel_t;
+typedef uint8_t draw_color_channel_t;
 
-typedef union draw_color
+typedef union __attribute__((__packed__)) draw_color
 {
 	struct
 	{
@@ -17,6 +23,7 @@ typedef union draw_color
 		draw_color_channel_t a;
 	};
 	draw_color_channel_t value[4];
+	D3DCOLOR rawValue;
 } draw_color_t;
 
 extern draw_color_channel_t boxEdgeAlpha;
@@ -37,6 +44,8 @@ extern draw_color_t gaugeBorderColor;
 extern draw_color_t stunGaugeFillColor;
 extern draw_color_t stunRecoverGaugeFillColor;
 extern draw_color_t guardGaugeFillColor;
+
+extern D3DCOLOR currentColor;
 
 extern void initColors();
 extern void selectColor(draw_color_t color);

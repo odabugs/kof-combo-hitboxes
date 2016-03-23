@@ -7,6 +7,7 @@
 #include <winuser.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "directx.h"
 #include "coords.h"
 #include "draw.h"
 #include "gamedefs.h"

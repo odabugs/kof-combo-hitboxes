@@ -3,13 +3,15 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#define CINTERFACE
+#include <d3d9.h>
+#include <d3dx9.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include "directx.h"
 #include "playerstruct.h"
 #include "util.h"
 
@@ -126,7 +128,8 @@ extern void adjustWorldCoords(
 extern void ensureCorners(player_coords_t *topLeft, player_coords_t *bottomRight);
 extern void getScreenEdgeInWorldCoords(
 	player_coords_t *target, screen_horz_edge_t hEdge, screen_vert_edge_t vEdge);
-extern void flipXOnAxis(player_coords_t *target, player_coords_t *axis);
+extern void flipXOnAxis(
+	player_coords_t *target, player_coords_t *axis, int postAdjustment);
 extern void swapXComponents(player_coords_t *one, player_coords_t *two);
 extern void copyAndAdjust(
 	player_coords_t *target, player_coords_t *source, player_coords_t *adjustment);
