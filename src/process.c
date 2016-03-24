@@ -235,7 +235,6 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			target->gameHdc = GetDC(target->gameHwnd);
 			createOverlayWindow(target);
 			target->overlayHdc = GetDC(target->overlayHwnd);
-			SetBkMode(target->overlayHdc, TRANSPARENT);
 			currentGame = &(target->gamedef);
 			setupBoxTypeMap(currentGame);
 			boxTypeMap = (boxtype_t*)&(currentGame->boxTypeMap);
@@ -258,7 +257,6 @@ void closeGame(game_state_t *target)
 	ReleaseDC(target->gameHwnd, target->gameHdc);
 	ReleaseDC(target->overlayHwnd, target->overlayHdc);
 	CloseHandle(target->gameHandle);
-	wglMakeCurrent(NULL, NULL);
 	free(target->projectiles);
 	memset(target, 0, sizeof(*target));
 }

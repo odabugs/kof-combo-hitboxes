@@ -2,6 +2,8 @@ King of Fighters '98UMFE and 2002UM hitbox viewer
 https://github.com/odabugs/kof-combo-hitboxes
 
 To compile with MinGW: make.bat (native), make (Linux + MinGW or Cygwin)
+If MinGW's GCC gives a compile error to the effect of "Unknown type name
+SOLE_AUTHENTICATION_SERVICE", this is usually fixed by running "make" again.
 Compilation with Visual Studio currently not supported.
 
 Usage notes:
@@ -9,11 +11,17 @@ Usage notes:
   Manager (DWM) enabled.
 - Start either KOF '98UMFE or KOF 2002UM, then start the viewer .exe.
 - Additional instructions and hotkeys are presented upon program startup.
+- The config file (default.ini) can be used to change display settings.
 
 TODO:
-- Support loading settings (e.g., box colors) from a config file.
 - Make box layer drawing order configurable (currently hardcoded).
+- Make drawing of all box types togglable in the config file (currently only the
+  "throw" and "throwable" box types can be disabled wholesale, the rest can be
+  "mostly hidden" to show only box borders by giving them a color with an
+  opacity of 0).
 - Figure out proximity detection for moves like Kyo hcb+K or Clark running grab.
+- Better detection of when to suppress hitbox drawing (e.g., char select screen).
+- Figure out counterhit vulnerable hitbox states in greater depth.
 - Look into API hooking.
   - Does Microsoft Detours play well with MinGW?
   - Possible MinGW-friendly alternative: https://github.com/TsudaKageyu/minhook
