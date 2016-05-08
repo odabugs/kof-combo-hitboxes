@@ -4,6 +4,8 @@ https://github.com/odabugs/kof-combo-hitboxes
 To compile with MinGW: make.bat (native), make (Linux + MinGW or Cygwin)
 If MinGW's GCC gives a compile error to the effect of "Unknown type name
 SOLE_AUTHENTICATION_SERVICE", this is usually fixed by running "make" again.
+Ready-made builds are currently compiled with mingw-w64 and GCC 5.2.x;
+compilation with "vanilla" MinGW or earlier versions of GCC is not tested.
 Compilation with Visual Studio currently not supported.
 
 Usage notes:
