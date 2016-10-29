@@ -11,9 +11,11 @@ CFLAGS=-std=c11 -g -mwindows -mconsole $(DEFINES) $(INCLUDES)
 LDFLAGS=-lShlwapi -ld3d9 -ld3dx9
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=directx.o playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
-HEADERS=directx.h playerstruct.h coords.h draw.h gamedefs.h gamestate.h process.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h config.h ini.h
+#HEADERS=directx.h playerstruct.h coords.h draw.h gamedefs.h gamestate.h process.h colors.h controlkey.h hotkeys.h util.h boxtypes.h boxset.h primitives.h config.h ini.h
+HEADERS=$(subst .o,.h,$(OBJECTS))
 KOF98_HEADERS=kof98_roster.h kof98_boxtypemap.h kof98_gamedef.h
-KOF02_HEADERS=kof02_roster.h kof02_boxtypemap.h kof02_gamedef.h
+#KOF02_HEADERS=kof02_roster.h kof02_boxtypemap.h kof02_gamedef.h
+KOF02_HEADERS=$(subst 98,02,$(KOF98_HEADERS))
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
 VPATH=src src/kof98 src/kof02 lib lib/inih
 
@@ -61,8 +63,6 @@ ifeq ($(USING_BATCH_FILE),true)
 	del /S *.h.gch
 else
 	rm -f "$(EXE_NAME)"
-	rm -f ./*.o src/*.o src/kof98/*.o src/kof02/*.o
-	rm -f lib/inih/*.o
-	rm -f ./*.h.gch src/*.h.gch src/kof98/*.h.gch src/kof02/*.h.gch
-	rm -f lib/inih/*.h.gch
+	find . -type f -name '*.o' -delete
+	find . -type f -name '*.h.gch' -delete
 endif
