@@ -7,6 +7,9 @@
 #include <winuser.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <luajit.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include "directx.h"
 #include "coords.h"
 #include "draw.h"
@@ -26,6 +29,21 @@ void printHeader();
 int WINAPI WinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
 {
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+	//SetCurrentDirectoryW(_T("lua"));
+	int status = luaL_loadfile(L, "lua/main.lua");
+	if (status != 0) {
+		printf("Failed to load Lua script: %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+	int result = lua_pcall(L, 0, LUA_MULTRET, 0);
+	if (result != 0) {
+		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+	lua_close(L);
+
 	printHeader();
 	startupProgram(hInstance);
 
