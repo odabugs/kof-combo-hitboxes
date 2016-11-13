@@ -29,7 +29,7 @@ if x then
 	window.clientToScreen(x.gameHwnd, pointBuf)
 	print(string.format("pointBuf = { %d, %d }", p.x, p.y))
 
-	if x.module == "pcsx2.kof_xi" then
+	if x.module == "game.pcsx2.kof_xi" then
 		local address = 0x2081EBC4
 		local buffer = ffi.new("coordPair")
 		local h = x.gameHandle
