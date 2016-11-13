@@ -99,19 +99,3 @@ void setupGamedef(gamedef_t *gamedef)
 void setupBoxTypeMap(gamedef_t *gamedef) {
 	memcpy(&(gamedef->boxTypeMap), gamedef->boxTypeMapSource, 0x100);
 }
-
-// TODO: if player is using an EX character then this yields the non-EX equivalent
-character_def_t *characterForID(int charID)
-{
-	if (charID < 0 || charID >= currentGame->rosterSize)
-	{
-		return (character_def_t*)NULL;
-	}
-	return &(currentGame->roster[charID]);
-}
-
-char *characterNameForID(int charID)
-{
-	character_def_t *result = characterForID(charID);
-	return ((result == (character_def_t*)NULL) ? "INVALID" : result->charName);
-}

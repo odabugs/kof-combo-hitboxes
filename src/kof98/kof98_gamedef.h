@@ -2,7 +2,6 @@
 #include <tchar.h>
 #include "../boxtypes.h"
 #include "../gamedefs.h"
-#include "kof98_roster.h"
 #include "kof98_boxtypemap.h"
 
 gamedef_t kof98_gamedef = {
@@ -33,8 +32,6 @@ gamedef_t kof98_gamedef = {
 	.projectilesListSize = 51, // final projectiles list entry starts at 0x01709600
 	.projectilesListStep = 0x200,
 	.extraStructIndex = 1, // '98 player_extra_t pointer is at player_t +1A8h
-	.rosterSize = KOF_98_ROSTER_SIZE,
-	.roster = (character_def_t*)&kof98_roster,
 	.boxTypeMapSource = (boxtype_t*)&kof98_boxTypeMap,
 	.showStunGauge = true,
 	.showGuardGauge = true,
