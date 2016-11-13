@@ -1,7 +1,7 @@
 local luautil = {}
 
-function luautil.collect(iterator)
-	local result = {}
+function luautil.collect(iterator, target)
+	local result = (target or {})
 	for i in iterator do table.insert(result, i) end
 	return result
 end
@@ -15,10 +15,14 @@ function luautil.asBoolean(predicate)
 	return (predicate and true) or false
 end
 
-function luautil.stringEndsWith(str, key)
+function luautil.stringEndsWith(str, key, plain)
 	local start = -#key
-	local result = string.find(str, key, start)
+	local result = string.find(str, key, start, luautil.asBoolean(plain))
 	return result ~= nil
+end
+
+function luautil.identity(...)
+	return ...
 end
 
 return luautil

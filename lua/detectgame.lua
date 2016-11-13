@@ -1,117 +1,127 @@
 local detectgame = {}
 local ffi = require("ffi")
 local winapi = require("winapi")
-local winerror = require("winerror")
-local luautil = require("luautil")
+local window = require("window")
 local winprocess = require("winprocess")
+local winerror = require("winerror")
+local winutil = require("winutil")
+local luautil = require("luautil")
 
 ffi.cdef[[
 typedef BOOL (__stdcall *WNDENUMPROC)(HWND hwnd, LPARAM lParam);
 BOOL EnumWindows(WNDENUMPROC lpEnumFunc, LPARAM lParam);
-int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
-int GetWindowTextLengthW(HWND hWnd);
-DWORD GetWindowThreadProcessId(HWND hWnd, LPDWORD lpdwProcessId);
-BOOL QueryFullProcessImageNameW(HANDLE hProcess, DWORD dwFlags, LPTSTR lpExeName, PDWORD lpdwSize);
-typedef struct { int16_t x; int16_t y; } coordPair;
 ]]
 local C = ffi.C
--- winapi.wcs module uses WCHAR when you ask it for a char buffer via WCS()
-local charSize = ffi.sizeof("WCHAR")
-
--- set by EnumWindowsProc, returned by detectgame.findSupportedGame
-local detectedGame
-
-local function makeStringBuffer(n)
-	local newN = (n > 0 and n or 255)
-	local buffer = winapi.WCS(newN)
-	local bufSize = ffi.sizeof(buffer) / charSize
-	return buffer, bufSize
-end
-
-local function getWindowTitle(hwnd)
-	local titleLen = C.GetWindowTextLengthW(hwnd)
-	winerror.checkNotZero(titleLen)
-	local buffer, limit = makeStringBuffer(titleLen)
-	winerror.checkNotZero(C.GetWindowTextW(
-		hwnd, ffi.cast("LPTSTR", buffer), limit))
-	return winapi.mbs(buffer)
-end
-
-local function getClassName(hwnd)
-	local buffer, n = makeStringBuffer(1024)
-	local nBuf = ffi.new("DWORD[1]", n)
-	winerror.checkNotZero(C.QueryFullProcessImageNameW(
-		hwnd, 0, ffi.cast("LPTSTR", buffer), nBuf))
-	return winapi.mbs(buffer)
-end
 
 local function checkClassName(hwnd, params)
-	local parentPid = ffi.new("DWORD[1]")
-	local parentThread = C.GetWindowThreadProcessId(hwnd, parentPid)
-	winerror.checkNotZero(parentThread)
-	local handle = winprocess.open(parentPid[0])
-
-	local className = getClassName(handle)
+	local parentPID, parentThread = window.getParentProcessID(hwnd)
+	local handle = winprocess.open(parentPID)
+	local imageName = window.getProcessImageName(handle)
 	local target = params.targetProcessName
-	--[[
-	local splitClass = luautil.collect(string.gmatch(className, "[^\\]+"))
-	local programName = splitClass[#splitClass]
-	print(parentPid[0], parentThread, className, programName)
-	local result = string.find(programName, target) == 1
-	--]]
-	local result = luautil.stringEndsWith(className, target)
-	print(parentPid[0], parentThread, className, result)
-	return result, (result and handle or NULL)
+	local result = luautil.stringEndsWith(imageName, target, true)
+	if result == false then
+		winprocess.close(handle)
+		return nil
+	else
+		return {
+			gameHwnd = hwnd,
+			gameHandle = handle,
+			gamePID = parentPID,
+			module = params.module,
+		}
+	end
 end
 
 local function checkWindowTitleAndProcessName(params, hwnd, lParam)
-	local title = getWindowTitle(hwnd)
-	if string.find(title, params.targetWindowTitle, 1, true) == nil then
-		return false, NULL
+	local title = window.getWindowTitle(hwnd)
+	local targetTitle = params.targetWindowTitle
+	local raw = params.rawTitle
+	if string.find(title, targetTitle, 1, raw) == nil then
+		return nil
 	end
 	-- also opens handle on successful match
-	local result, handle = checkClassName(hwnd, params)
-	return result, handle
+	local result = checkClassName(hwnd, params)
+	return result
+end
+
+local function findGameWindowByParentPID(params, game)
+	-- nested EnumWindows; not the greatest, but functional
+	local targetTitle = params.gameWindowTitle
+	local targetPID = game.gamePID
+	local pidBuffer = winutil.dwordBufType(0)
+	local result = nil
+	local function EnumWindowsProc(hwnd, lParam)
+		local pid = window.getParentProcessID(hwnd, pidBuffer)
+		if pid ~= targetPID then
+			return true -- continue EnumWindows loop
+		end
+		local title = window.getWindowTitle(hwnd)
+		if string.find(title, targetTitle, 1, true) ~= nil then
+			result = hwnd
+			return false -- match found; stop EnumWindows loop
+		else
+			return true -- continue EnumWindows loop
+		end
+	end
+
+	local successful = C.EnumWindows(EnumWindowsProc, 0)
+	winerror.checkNotZero(successful)
+	if result ~= nil then
+		game.gameHwnd = result
+		return game
+	else
+		winprocess.close(game.gameHandle)
+		return nil
+	end
 end
 
 local detectedGames = {
 	{
 		module = "steam.kof98um",
 		detectMethod = checkWindowTitleAndProcessName,
+		postprocess = luautil.identity,
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
+		rawTitle = true, -- use false if title is a Lua pattern string
 		targetProcessName = "KingOfFighters98UM.exe",
 	},
 	{
 		module = "steam.kof2002um",
 		detectMethod = checkWindowTitleAndProcessName,
+		postprocess = luautil.identity,
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",
+		rawTitle = true,
 		targetProcessName = "KingOfFighters2002UM.exe",
 	},
 	{
 		module = "pcsx2.kof_xi",
 		detectMethod = checkWindowTitleAndProcessName,
-		-- the PCSX2 console's window title will start with this line
+		postprocess = findGameWindowByParentPID,
+		-- PCSX2's CONSOLE window title will start with this line
+		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI, The (NTSC-U)",
+		-- PCSX2's GAME DISPLAY window title will contain this line
+		-- (this is the window we really want, not the console window)
+		gameWindowTitle = "GSdx",
+		rawTitle = true,
 		targetProcessName = "pcsx2.exe",
 	},
 }
 
-local function EnumWindowsProc(hwnd, lParam)
-	local detected, handle
-	for i, game in ipairs(detectedGames) do
-		detected, handle = game.detectMethod(game, hwnd, lParam)
-		if detected then
-			detectedGame = {
-				module = game.module,
-				processHandle = handle,
-			}
-			return false -- stop EnumWindows loop
-		end
-	end
-	return true -- continue EnumWindows loop
-end
-
 function detectgame.findSupportedGame()
+	local detectedGame = nil
+	local function EnumWindowsProc(hwnd, lParam)
+		local result
+		for i, game in ipairs(detectedGames) do
+			result = game.detectMethod(game, hwnd, lParam)
+			result = (result and game.postprocess(game, result))
+			if result ~= nil then
+				detectedGame = result
+				return false -- match found; stop EnumWindows loop
+			end
+		end
+		return true -- continue EnumWindows loop
+	end
+
 	local successful = C.EnumWindows(EnumWindowsProc, 0)
 	winerror.checkNotZero(successful)
 	return detectedGame
