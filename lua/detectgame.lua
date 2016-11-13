@@ -75,11 +75,13 @@ local function findGameWindowByParentPID(params, game)
 	end
 end
 
+function noPostprocess(params, game) return game end
+
 local detectedGames = {
 	{
 		module = "steam.kof98um",
 		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = luautil.identity,
+		postprocess = noPostprocess,
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 		rawTitle = true, -- use false if title is a Lua pattern string
 		targetProcessName = "KingOfFighters98UM.exe",
@@ -87,7 +89,7 @@ local detectedGames = {
 	{
 		module = "steam.kof2002um",
 		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = luautil.identity,
+		postprocess = noPostprocess,
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",
 		rawTitle = true,
 		targetProcessName = "KingOfFighters2002UM.exe",
