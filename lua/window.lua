@@ -9,6 +9,7 @@ int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
 int GetWindowTextLengthW(HWND hWnd);
 DWORD GetWindowThreadProcessId(HWND hWnd, LPDWORD lpdwProcessId);
 BOOL QueryFullProcessImageNameW(HANDLE hProcess, DWORD dwFlags, LPTSTR lpExeName, PDWORD lpdwSize);
+HWND GetConsoleWindow(void);
 HWND GetForegroundWindow(void);
 HWND GetDesktopWindow(void);
 BOOL GetClientRect(HWND hWnd, LPRECT lpRect);
@@ -17,9 +18,11 @@ BOOL IsWindow(HWND hWnd);
 ]]
 local C = ffi.C
 
+function window.console() return C.GetConsoleWindow() end
 function window.foreground() return C.GetForegroundWindow() end
 function window.desktop() return C.GetDesktopWindow() end
 function window.isWindow(hwnd) return C.IsWindow(hwnd) ~= 0LL end
+function window.isForeground(hwnd) return window.foreground() == hwnd end
 
 function window.getWindowTitle(hwnd, buffer)
 	local titleLen = C.GetWindowTextLengthW(hwnd)
@@ -51,7 +54,6 @@ function window.getParentProcessID(hwnd, pidBuffer)
 end
 
 function window.getClientRect(hwnd, rectBuffer)
-	print(hwnd)
 	rectBuffer = (rectBuffer or winutil.rectBufType())
 	local result = C.GetClientRect(hwnd, rectBuffer)
 	winerror.checkNotZero(result)

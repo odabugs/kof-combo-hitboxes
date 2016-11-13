@@ -27,7 +27,7 @@ local function checkClassName(hwnd, params)
 			gameHwnd = hwnd,
 			gameHandle = handle,
 			gamePID = parentPID,
-			module = params.module,
+			module = "game." .. params.module,
 		}
 	end
 end
