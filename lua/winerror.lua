@@ -1,6 +1,6 @@
 local winerror = {}
 local ffi = require("ffi")
-local winapi = require("winapi")
+local types = require("winapi.types")
 
 ffi.cdef[[
 DWORD GetLastError(void);

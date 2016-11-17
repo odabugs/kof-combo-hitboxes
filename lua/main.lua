@@ -1,5 +1,5 @@
 local ffi = require("ffi")
-local winapi = require("winapi")
+local types = require("winapi.types")
 local winerror = require("winerror")
 local winutil = require("winutil")
 local luautil = require("luautil")
@@ -29,7 +29,7 @@ if x then
 	window.clientToScreen(x.gameHwnd, pointBuf)
 	print(string.format("pointBuf = { %d, %d }", p.x, p.y))
 
-	if x.module == "game.pcsx2.kof_xi" then
+	if x.module == "pcsx2.kof_xi" then
 		local address = 0x2081EBC4
 		local buffer = ffi.new("coordPair")
 		local h = x.gameHandle

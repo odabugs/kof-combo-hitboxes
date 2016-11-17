@@ -1,6 +1,6 @@
 local detectgame = {}
 local ffi = require("ffi")
-local winapi = require("winapi")
+local types = require("winapi.types")
 local window = require("window")
 local winprocess = require("winprocess")
 local winerror = require("winerror")
@@ -27,7 +27,7 @@ local function checkClassName(hwnd, params)
 			gameHwnd = hwnd,
 			gameHandle = handle,
 			gamePID = parentPID,
-			module = "game." .. params.module,
+			module = params.module,
 		}
 	end
 end
@@ -75,7 +75,7 @@ local function findGameWindowByParentPID(params, game)
 	end
 end
 
-function noPostprocess(params, game) return game end
+local function noPostprocess(params, game) return game end
 
 local detectedGames = {
 	{

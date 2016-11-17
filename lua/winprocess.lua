@@ -1,6 +1,6 @@
 local winprocess = {}
 local ffi = require("ffi")
-local winapi = require("winapi")
+local types = require("winapi.types")
 local winerror = require("winerror")
 local luautil = require("luautil")
 
