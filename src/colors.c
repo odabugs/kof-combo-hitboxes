@@ -61,7 +61,7 @@ void initColors()
 
 void selectColor(draw_color_t color)
 {
-	currentColor = color.rawValue;
+	setColor(color.rawValue);
 }
 
 void selectEdgeColor(boxtype_t boxType)

@@ -32,5 +32,6 @@ extern d3dRenderOption_t renderStateOptions[];
 
 extern void setupD3D(HWND hwnd);
 extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
+extern void setColor(D3DCOLOR color);
 
 #endif /* DIRECTX_H */

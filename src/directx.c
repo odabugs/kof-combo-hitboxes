@@ -90,3 +90,8 @@ void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
 	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
 }
+
+void setColor(D3DCOLOR color)
+{
+	currentColor = color;
+}
