@@ -5,23 +5,6 @@ int ensureMinThickness(int goal, int baseline)
 	return max(goal, baseline) + 1;
 }
 
-void DXRectangle(int leftX, int topY, int rightX, int bottomY)
-{
-	static VOID *pVoid;
-	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
-	CUSTOMVERTEX vertices[] = {
-		{ leftX,  topY,    1.0f, 1.0f, currentColor },
-		{ rightX, topY,    1.0f, 1.0f, currentColor },
-		{ leftX,  bottomY, 1.0f, 1.0f, currentColor },
-		{ rightX, bottomY, 1.0f, 1.0f, currentColor },
-	};
-	memcpy(pVoid, vertices, sizeof(CUSTOMVERTEX) * 4);
-	IDirect3DVertexBuffer9_Unlock(boxBuffer);
-	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
-	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
-	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
-}
-
 void drawRectangle(player_coords_t *topLeft, player_coords_t *bottomRight)
 {
 	screen_coords_t topLeftScreen, bottomRightScreen;

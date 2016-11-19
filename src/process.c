@@ -95,53 +95,6 @@ bool detectGame(game_state_t *target, gamedef_t *gamedefs[])
 	return false;
 }
 
-void setupD3D(game_state_t *target)
-{
-	gamedef_t *gamedef = &(target->gamedef);
-	d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	D3DPRESENT_PARAMETERS presentParams;
-	memset(&presentParams, 0, sizeof(presentParams));
-	presentParams.Windowed = TRUE;
-	presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
-	presentParams.hDeviceWindow = target->overlayHwnd;
-	screenWidth = (UINT)GetSystemMetrics(SM_CXSCREEN);
-	screenHeight = (UINT)GetSystemMetrics(SM_CYSCREEN);
-	presentParams.BackBufferWidth = screenWidth;
-	presentParams.BackBufferHeight = screenHeight;
-	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
-
-	IDirect3D9_CreateDevice(
-		d3d,
-		D3DADAPTER_DEFAULT,
-		D3DDEVTYPE_HAL,
-		target->overlayHwnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING,
-		&presentParams,
-		&d3dDevice);
-
-	for (int i = 0; i < RENDER_STATE_OPTIONS_COUNT; i++)
-	{
-		IDirect3DDevice9_SetRenderState(
-			d3dDevice,
-			renderStateOptions[i].option,
-			renderStateOptions[i].value);
-	}
-
-	IDirect3DDevice9_CreateVertexBuffer(
-		d3dDevice,
-		BOX_VERTEX_BUFFER_SIZE * sizeof(CUSTOMVERTEX),
-		0, // mandatory if CreateDevice used D3DCREATE_HARDWARE_VERTEXPROCESSING
-		CUSTOMFVF,
-		D3DPOOL_MANAGED,
-		&boxBuffer,
-		NULL);
-
-	VOID *pVoid;
-	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
-	memcpy(pVoid, templateBoxBuffer, sizeof(templateBoxBuffer));
-	IDirect3DVertexBuffer9_Unlock(boxBuffer);
-}
-
 // TODO: real handling of failure conditions
 bool createOverlayWindow(game_state_t *target)
 {
@@ -244,7 +197,7 @@ bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc)
 			printf("Game detected: %s\n", currentGame->shortName);
 			readConfigsForGame(currentGame);
 			setupGamedef(currentGame);
-			setupD3D(target);
+			setupD3D(target->overlayHwnd);
 			return true;
 		}
 	}

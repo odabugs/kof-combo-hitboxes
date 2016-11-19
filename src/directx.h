@@ -27,6 +27,10 @@ extern LPDIRECT3DDEVICE9 d3dDevice;
 extern LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 extern CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE];
 extern UINT screenWidth, screenHeight;
+extern D3DCOLOR currentColor;
 extern d3dRenderOption_t renderStateOptions[];
+
+extern void setupD3D(HWND hwnd);
+extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
 
 #endif /* DIRECTX_H */

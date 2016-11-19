@@ -45,8 +45,6 @@ extern draw_color_t stunGaugeFillColor;
 extern draw_color_t stunRecoverGaugeFillColor;
 extern draw_color_t guardGaugeFillColor;
 
-extern D3DCOLOR currentColor;
-
 extern void initColors();
 extern void selectColor(draw_color_t color);
 extern void selectEdgeColor(boxtype_t boxType);

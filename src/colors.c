@@ -39,8 +39,6 @@ draw_color_t
 	stunRecoverGaugeFillColor = { .rawValue = D3DCOLOR_RGBA(0xFF, 0x00, 0x00, 0xA0) },
 	guardGaugeFillColor   = { .rawValue = D3DCOLOR_RGBA(0xA0, 0xC0, 0xE0, 0xA0) };
 
-D3DCOLOR currentColor;
-
 void initColors()
 {
 	memcpy(defaultFillColors, defaultEdgeColors, sizeof(defaultEdgeColors));
