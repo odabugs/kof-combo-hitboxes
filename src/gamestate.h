@@ -26,7 +26,6 @@ typedef struct game_state
 	HWND overlayHwnd;
 	HDC overlayHdc;
 	WNDPROC wndProc; // window message pump
-	HMODULE dwmapi;
 } game_state_t;
 
 extern game_state_t gameState;

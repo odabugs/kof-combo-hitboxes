@@ -140,15 +140,15 @@ bool createOverlayWindow(game_state_t *target)
 	}
 
 	// ensure that window composition is supported
-	target->dwmapi = LoadLibrary(_T("dwmapi.dll"));
-	if (target->dwmapi == (HMODULE)NULL)
+	HMODULE dwmapi = LoadLibrary(_T("dwmapi.dll"));
+	if (dwmapi == (HMODULE)NULL)
 	{
 		return false;
 	}
 	dwm_extend_frame_fn dwmExtendFrame = (dwm_extend_frame_fn)GetProcAddress(
-		target->dwmapi, "DwmExtendFrameIntoClientArea");
+		dwmapi, "DwmExtendFrameIntoClientArea");
 	dwm_comp_enabled_fn dwmCompositionEnabled = (dwm_comp_enabled_fn)GetProcAddress(
-		target->dwmapi, "DwmIsCompositionEnabled");
+		dwmapi, "DwmIsCompositionEnabled");
 	if ((void*)dwmExtendFrame == NULL || (void*)dwmCompositionEnabled == NULL)
 	{
 		return false;
@@ -167,6 +167,7 @@ bool createOverlayWindow(game_state_t *target)
 		return false;
 	}
 
+	FreeLibrary(dwmapi);
 	ShowWindow(overlayHwnd, SW_SHOWNORMAL);
 	UpdateWindow(overlayHwnd);
 	return true;
