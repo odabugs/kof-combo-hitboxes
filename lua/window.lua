@@ -84,11 +84,11 @@ window.extendMargins = ffi.new("MARGINS[1]", {
 	cyTopHeight = -1,
 	cyBottomHeight = -1,
 })
-window.defaultWindowTitle = ffi.cast("LPCTSTR", "KOF Combo Hitbox Viewer")
+window.defaultWindowTitle = ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
 	style = bit.bor(window.CS_HREDRAW, window.CS_VREDRAW),
-	lpfnWndProc = NULL,
+	lpfnWndProc = ffi.new("WNDPROC", winutil.WindowProc),
 	cbClsExtra = 0,
 	cbWndExtra = 0,
 	hInstance = NULL,
@@ -155,15 +155,17 @@ function window.getDC(hwnd)
 	return result
 end
 
-function window.createOverlayWindow(hInstance, wndProc, windowClass, windowOptions)
+function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	local newWinClass = luautil.extend({},
 		window.defaultWindowClass,
-		{ hInstance = hInstance, lpfnWndProc = wndProc },
+		{ hInstance = hInstance },
 		windowClass)
 	-- Surprise!  When you pass a table to initialize a FFI constructor
 	-- like this, it uses rawget() to pull the values from that table
 	for k,v in pairs(newWinClass) do print(k,v) end
-	local atom = C.RegisterClassExW(ffi.new("WNDCLASSEX[1]", newWinClass))
+	local wndclassEx = ffi.new("WNDCLASSEX", newWinClass)
+	print(wndclassEx.lpfnWndProc)
+	local atom = C.RegisterClassExW(wndclassEx)
 	winerror.checkNotZero(atom)
 
 	local newWinOptions = luautil.extend({},
@@ -171,11 +173,11 @@ function window.createOverlayWindow(hInstance, wndProc, windowClass, windowOptio
 		{ hInstance = hInstance },
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
-		luautil.unpackKeys(windowOptions, window.createWindowExParamsOrder))
+		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
 	winerror.checkNotEqual(overlayHwnd, NULL)
 
 	if not window.supportsComposition() then
-		error("Window composition support was not detected.\nPlease enable Windows Aero to use this program.")
+		error("Window composition support was not detected.\nPlease enable Windows Aero before using this program.")
 	end
 	window.extendFrame(overlayHwnd, window.extendMargins)
 	window.show(overlayHwnd)
