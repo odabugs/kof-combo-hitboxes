@@ -109,7 +109,7 @@ local detectedGames = {
 	},
 }
 
-function detectgame.findSupportedGame()
+function detectgame.findSupportedGame(hInstance)
 	local detectedGame = nil
 	local function EnumWindowsProc(hwnd, lParam)
 		local result
@@ -118,6 +118,7 @@ function detectgame.findSupportedGame()
 			result = (result and game.postprocess(game, result))
 			if result ~= nil then
 				detectedGame = result
+				detectedGame.hInstance = hInstance
 				return false -- match found; stop EnumWindows loop
 			end
 		end

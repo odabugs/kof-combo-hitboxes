@@ -18,8 +18,8 @@ local C = ffi.C
 -- open it and print the pivot coordinates of player 1's lead character
 function main(hInstance)
 	hInstance = ffi.cast("HINSTANCE", hInstance)
-	--print("-->", hInstance)
-	local x = detectgame.findSupportedGame()
+	print("-->", hInstance, window.createOverlayWindow(hInstance))
+	local x = detectgame.findSupportedGame(hInstance)
 	if x then
 		for k,v in pairs(x) do print(k,v) end
 
@@ -33,7 +33,7 @@ function main(hInstance)
 		window.clientToScreen(x.gameHwnd, pointBuf)
 		print(string.format("pointBuf = { %d, %d }", p.x, p.y))
 
-		--[[
+		---[[
 		if x.module == "pcsx2.kof_xi" then
 			local address = 0x2081EBC4
 			local buffer = ffi.new("coordPair")
