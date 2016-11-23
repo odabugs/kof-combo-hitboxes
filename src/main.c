@@ -37,7 +37,17 @@ int WINAPI WinMain(
 		printf("Failed to load Lua script: %s\n", lua_tostring(L, -1));
 		exit(1);
 	}
-	int result = lua_pcall(L, 0, LUA_MULTRET, 0);
+	// parse Lua scripts
+	int result = lua_pcall(L, 0, 0, 0);
+	if (result != 0) {
+		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
+		exit(1);
+	}
+	// call main() in Lua, with hInstance as first argument
+	lua_getglobal(L, "main");
+	lua_pushinteger(L, (lua_Integer)hInstance);
+	//printf("hInstance = 0x%08p\n", hInstance);
+	result = lua_pcall(L, 1, LUA_MULTRET, 0);
 	if (result != 0) {
 		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
 		exit(1);
