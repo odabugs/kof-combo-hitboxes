@@ -9,6 +9,7 @@ winutil.pointType = ffi.typeof("POINT")
 winutil.pointBufType = ffi.typeof("POINT[1]")
 winutil.rectType = ffi.typeof("RECT")
 winutil.rectBufType = ffi.typeof("RECT[1]")
+winutil.boolBufType = ffi.typeof("BOOL[1]")
 -- winapi.wcs module uses WCHAR when you ask it for a char buffer via WCS()
 winutil.charSize = ffi.sizeof("WCHAR")
 
