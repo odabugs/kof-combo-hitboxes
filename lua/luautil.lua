@@ -1,9 +1,9 @@
 local luautil = {}
 
 function luautil.collect(iterator, target)
-	local result = (target or {})
-	for i in iterator do table.insert(result, i) end
-	return result
+	target = (target or {})
+	for i in iterator do table.insert(target, i) end
+	return target
 end
 
 function luautil.insertPairs(target, source)
@@ -23,6 +23,26 @@ end
 
 function luautil.identity(...)
 	return ...
+end
+
+function luautil.unpackKeys(t, keys, i)
+	i = (i or 1)
+	local nextKey = keys[i]
+	if nextKey ~= nil then
+		return t[nextKey], luautil.unpackKeys(t, keys, i + 1)
+	end
+end
+
+function luautil.extend(t, ...)
+	t = (t or {})
+	local current
+	for i = 1, select("#", ...) do
+		current = select(i, ...)
+		if current ~= nil then
+			for k, v in pairs(current) do t[k] = v end
+		end
+	end
+	return t
 end
 
 return luautil
