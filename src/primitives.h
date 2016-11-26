@@ -3,9 +3,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#define CINTERFACE
-#include <d3d9.h>
-#include <d3dx9.h>
 #include <stdbool.h>
 #include <string.h>
 #include "directx.h"

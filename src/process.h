@@ -9,9 +9,6 @@
 #include <winuser.h>
 #include <uxtheme.h>
 #undef _WIN32_WINNT
-#define CINTERFACE
-#include <d3d9.h>
-#include <d3dx9.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -29,7 +26,6 @@ typedef HRESULT (WINAPI *dwm_comp_enabled_fn)(BOOL *);
 extern void startupProgram(HINSTANCE hInstance);
 extern void cleanupProgram();
 extern bool detectGame(game_state_t *target, gamedef_t *gamedefs[]);
-extern void establishScreenDimensions(screen_dimensions_t *dims, gamedef_t *source);
 extern bool openGame(game_state_t *target, HINSTANCE hInstance, WNDPROC wndProc);
 extern void closeGame(game_state_t *target);
 extern bool checkShouldContinueRunning(char **reason);

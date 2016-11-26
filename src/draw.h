@@ -6,7 +6,6 @@
 #include <winuser.h>
 #define CINTERFACE
 #include <d3d9.h>
-#include <d3dx9.h>
 #include <stdbool.h>
 #include "directx.h"
 #include "playerstruct.h"
