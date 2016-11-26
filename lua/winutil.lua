@@ -1,11 +1,14 @@
 local winutil = {}
 local ffi = require("ffi")
 local winapi = require("winapi")
+local winerror = require("winerror")
 
 ffi.cdef[[
 LRESULT WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT DefWindowProcW(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID PostQuitMessage(int nExitCode);
+HANDLE GetStdHandle(DWORD nStdHandle);
+BOOL FlushConsoleInputBuffer(HANDLE hConsoleInput);
 ]]
 local C = ffi.C
 
@@ -23,6 +26,11 @@ winutil.charSize = ffi.sizeof("WCHAR")
 -- window notifications
 winutil.WM_DESTROY = 0x02
 
+-- standard in/out/error handles used by Get/SetStdHandle()
+winutil.STD_INPUT_HANDLE = ffi.cast("DWORD", -10)
+winutil.STD_OUTPUT_HANDLE = ffi.cast("DWORD", -11)
+winutil.STD_ERROR_HANDLE = ffi.cast("DWORD", -12)
+
 function winutil.stringBufferLength(buffer)
 	return (ffi.sizeof(buffer) / winutil.charSize)
 end
@@ -31,6 +39,29 @@ function winutil.makeStringBuffer(n)
 	local newN = (n > 0 and n or 255)
 	local buffer = winapi.WCS(newN)
 	return buffer
+end
+
+function winutil.getStdHandle(stdHandle)
+	return C.GetStdHandle(stdHandle)
+end
+
+function winutil.getStdin()
+	return winutil.getStdHandle(winutil.STD_INPUT_HANDLE)
+end
+
+function winutil.getStdout()
+	return winutil.getStdHandle(winutil.STD_OUTPUT_HANDLE)
+end
+
+function winutil.getStderr()
+	return winutil.getStdHandle(winutil.STD_ERROR_HANDLE)
+end
+
+function winutil.flushConsoleInput(handle)
+	handle = (handle or winutil.getStdin())
+	local result = C.FlushConsoleInputBuffer(handle)
+	winerror.checkNotZero(result)
+	return result
 end
 
 function winutil.WindowProc(hwnd, message, wParam, lParam)
