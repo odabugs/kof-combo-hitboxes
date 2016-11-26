@@ -5,7 +5,6 @@
 #include <windows.h>
 #define CINTERFACE
 #include <d3d9.h>
-//#include <d3dx9.h>
 
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
 #define BOX_VERTEX_BUFFER_SIZE 4
