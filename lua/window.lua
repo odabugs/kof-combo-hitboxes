@@ -108,8 +108,8 @@ window.createWindowExDefaults = {
 	dwStyle = window.WS_POPUP,
 	x = 0,
 	y = 0,
-	nWidth = 1,
-	nHeight = 1,
+	nWidth = 300,
+	nHeight = 300,
 	hWndParent = NULL,
 	hMenu = NULL,
 	hInstance = NULL,
@@ -162,9 +162,8 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 		windowClass)
 	-- Surprise!  When you pass a table to initialize a FFI constructor
 	-- like this, it uses rawget() to pull the values from that table
-	for k,v in pairs(newWinClass) do print(k,v) end
+	--for k,v in pairs(newWinClass) do print(k,v) end
 	local wndclassEx = ffi.new("WNDCLASSEX", newWinClass)
-	print(wndclassEx.lpfnWndProc)
 	local atom = C.RegisterClassExW(wndclassEx)
 	winerror.checkNotZero(atom)
 
