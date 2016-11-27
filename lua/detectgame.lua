@@ -25,6 +25,7 @@ local function checkClassName(hwnd, params)
 	else
 		return {
 			gameHwnd = hwnd,
+			--gameDC = window.getDC(hwnd),
 			gameHandle = handle,
 			gamePID = parentPID,
 			module = params.module,
@@ -109,7 +110,8 @@ local detectedGames = {
 	},
 }
 
-function detectgame.findSupportedGame(hInstance)
+function detectgame.findSupportedGame(hInstance, createOverlay)
+	if createOverlay == nil then createOverlay = true end
 	local detectedGame = nil
 	local function EnumWindowsProc(hwnd, lParam)
 		local result
@@ -118,7 +120,6 @@ function detectgame.findSupportedGame(hInstance)
 			result = (result and game.postprocess(game, result))
 			if result ~= nil then
 				detectedGame = result
-				detectedGame.hInstance = hInstance
 				return false -- match found; stop EnumWindows loop
 			end
 		end
@@ -127,6 +128,12 @@ function detectgame.findSupportedGame(hInstance)
 
 	local successful = C.EnumWindows(EnumWindowsProc, 0)
 	winerror.checkNotZero(successful)
+	if detectedGame ~= nil and hInstance ~= nil and createOverlay then
+		detectedGame.hInstance = hInstance
+		detectedGame.overlayHwnd = window.createOverlayWindow(hInstance)
+		detectedGame.overlayDC = window.getDC(detectedGame.overlayHwnd)
+		detectedGame.gameDC = window.getDC(detectedGame.gameHwnd)
+	end
 	return detectedGame
 end
 

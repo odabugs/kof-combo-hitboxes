@@ -50,27 +50,26 @@ end
 ---[[
 function main(hInstance)
 	hInstance = ffi.cast("HINSTANCE", hInstance)
-	print("-->", hInstance, window.createOverlayWindow(hInstance))
-	local x = detectgame.findSupportedGame(hInstance)
-	if x then
-		for k,v in pairs(x) do print(k,v) end
+	local detected = detectgame.findSupportedGame(hInstance)
+	if detected then
+		for k,v in pairs(detected) do print(k,v) end
 
 		local rectBuf = winutil.rectBufType()
 		local r = rectBuf[0]
-		window.getClientRect(x.gameHwnd, rectBuf)
+		window.getClientRect(detected.gameHwnd, rectBuf)
 		print(string.format("rectBuf = { %d, %d, %d, %d }",
 		r.x, r.y, r.right, r.bottom))
 		local pointBuf = winutil.pointBufType()
 		local p = pointBuf[0]
-		window.clientToScreen(x.gameHwnd, pointBuf)
+		window.clientToScreen(detected.gameHwnd, pointBuf)
 		print(string.format("pointBuf = { %d, %d }", p.x, p.y))
 
 		local c1 = coroutine.create(runLoop)
 		local c2 = coroutine.create(function()
-			if x.module == "pcsx2.kof_xi" then
+			if detected.module == "pcsx2.kof_xi" then
 				local address = 0x2081EBC4
 				local buffer = ffi.new("coordPair")
-				local h = x.gameHandle
+				local h = detected.gameHandle
 				io.write("\n")
 				while true do
 					winprocess.read(h, buffer, ffi.cast("void*", address))
@@ -94,7 +93,7 @@ function main(hInstance)
 			C.Sleep(30)
 		end
 	else
-		print(x)
+		print(detected)
 	end
 end
 --]]

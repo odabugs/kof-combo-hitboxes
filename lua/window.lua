@@ -28,6 +28,7 @@ typedef struct _MARGINS {
 	int cyBottomHeight;
 } MARGINS, *PMARGINS;
 
+BOOL SetWindowTextW(HWND hWnd, LPCTSTR lpString);
 int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
 int GetWindowTextLengthW(HWND hWnd);
 DWORD GetWindowThreadProcessId(HWND hWnd, LPDWORD lpdwProcessId);
@@ -38,6 +39,7 @@ HWND GetDesktopWindow(void);
 BOOL GetClientRect(HWND hWnd, LPRECT lpRect);
 BOOL ClientToScreen(HWND hWnd, LPPOINT lpPoint);
 BOOL IsWindow(HWND hWnd);
+BOOL IsWindowVisible(HWND hWnd);
 BOOL UpdateWindow(HWND hWnd);
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 HDC GetDC(HWND hWnd);
@@ -59,6 +61,7 @@ HWND CreateWindowExW(
 // functions from dwmapi.dll (supported only in Windows Vista and newer)
 HRESULT DwmIsCompositionEnabled(BOOL *pfEnabled);
 HRESULT DwmExtendFrameIntoClientArea(HWND hwnd, MARGINS *pMarInset);
+int GetSystemMetrics(int nIndex);
 ]]
 local C = ffi.C
 local dwmapi = ffi.load("dwmapi")
@@ -77,6 +80,9 @@ window.WS_EX_TOPMOST = 0x08
 window.WS_EX_TRANSPARENT = 0x20
 window.WS_EX_LAYERED = 0x00080000
 window.WS_EX_COMPOSITED = 0x02000000
+-- keys for GetSystemMetrics()
+window.SM_CXSCREEN = 0
+window.SM_CYSCREEN = 1
 
 window.extendMargins = ffi.new("MARGINS[1]", {
 	cxLeftWidth = -1,
@@ -84,7 +90,10 @@ window.extendMargins = ffi.new("MARGINS[1]", {
 	cyTopHeight = -1,
 	cyBottomHeight = -1,
 })
-window.defaultWindowTitle = ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
+function window.getDefaultTitle()
+	return ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
+end
+window.defaultWindowTitle = window.getDefaultTitle()
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
 	style = bit.bor(window.CS_HREDRAW, window.CS_VREDRAW),
@@ -103,8 +112,8 @@ window.createWindowExDefaults = {
 	dwExStyle = bit.bor(
 		window.WS_EX_TOPMOST, window.WS_EX_TRANSPARENT,
 		window.WS_EX_LAYERED, window.WS_EX_COMPOSITED),
-	lpClassName = window.defaultWindowTitle,
-	lpWindowName = window.defaultWindowTitle,
+	lpClassName = NULL,
+	lpWindowName = NULL,
 	dwStyle = window.WS_POPUP,
 	x = 0,
 	y = 0,
@@ -135,7 +144,16 @@ function window.console() return C.GetConsoleWindow() end
 function window.foreground() return C.GetForegroundWindow() end
 function window.desktop() return C.GetDesktopWindow() end
 function window.isWindow(hwnd) return C.IsWindow(hwnd) ~= 0LL end
+function window.isVisible(hwnd) return C.IsVisibleWindow(hwnd) ~= 0LL end
 function window.isForeground(hwnd) return window.foreground() == hwnd end
+
+-- return screen dimensions of the system's primary monitor
+function window.getScreenSize()
+	return {
+		x = C.GetSystemMetrics(window.SM_CXSCREEN), -- width
+		y = C.GetSystemMetrics(window.SM_CYSCREEN), -- height
+	}
+end
 
 function window.update(hwnd)
 	local result = C.UpdateWindow(hwnd)
@@ -156,9 +174,10 @@ function window.getDC(hwnd)
 end
 
 function window.createOverlayWindow(hInstance, windowClass, windowOptions)
+	local hi = { hInstance = hInstance }
 	local newWinClass = luautil.extend({},
 		window.defaultWindowClass,
-		{ hInstance = hInstance },
+		hi,
 		windowClass)
 	-- Surprise!  When you pass a table to initialize a FFI constructor
 	-- like this, it uses rawget() to pull the values from that table
@@ -169,11 +188,16 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 
 	local newWinOptions = luautil.extend({},
 		window.createWindowExDefaults,
-		{ hInstance = hInstance },
+		hi,
+		{ lpClassName = ffi.cast("LPCTSTR", bit.band(atom, 0xFFFF)) },
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
 		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
 	winerror.checkNotEqual(overlayHwnd, NULL)
+	-- strange things happen with the window title being set to gibberish
+	-- if you don't explicitly use SetWindowTitle() after window creation
+	local setResult = C.SetWindowTextW(overlayHwnd, window.getDefaultTitle())
+	winerror.checkNotZero(setResult)
 
 	if not window.supportsComposition() then
 		error("Window composition support was not detected.\nPlease enable Windows Aero before using this program.")

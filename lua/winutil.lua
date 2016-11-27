@@ -30,6 +30,7 @@ winutil.WM_DESTROY = 0x02
 winutil.STD_INPUT_HANDLE = ffi.cast("DWORD", -10)
 winutil.STD_OUTPUT_HANDLE = ffi.cast("DWORD", -11)
 winutil.STD_ERROR_HANDLE = ffi.cast("DWORD", -12)
+winutil.INVALID_HANDLE_VALUE = ffi.cast("HANDLE", -1)
 
 function winutil.stringBufferLength(buffer)
 	return (ffi.sizeof(buffer) / winutil.charSize)
