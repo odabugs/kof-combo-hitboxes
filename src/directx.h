@@ -12,7 +12,7 @@
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
 #define BOX_VERTEX_BUFFER_SIZE 4
 #define MASK_32BITS 0xFFFFFFFF
-#define DIRECTX_LUA_FUNCTIONS_COUNT 4
+#define DIRECTX_LUA_FUNCTIONS_COUNT 6
 
 typedef struct customVertexFormat {
 	FLOAT x, y, z, rhw;
@@ -36,6 +36,8 @@ extern d3dRenderOption_t renderStateOptions[];
 extern void setupD3D(HWND hwnd);
 extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
 extern void setColor(D3DCOLOR color);
+extern void beginFrame();
+extern void endFrame();
 extern int l_registerDirectX(lua_State *L);
 
 #endif /* DIRECTX_H */

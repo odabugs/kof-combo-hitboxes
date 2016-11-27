@@ -77,14 +77,14 @@ void setupD3D(HWND hwnd)
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 }
 
-// Takes 1 mandatory argument: HWND to setup Direct3D for
+// Takes 1 mandatory argument: HWND for which to set up Direct3D
 // Returns 0 values
 // TODO: return initialization errors
 static int l_setupD3D(lua_State *L)
 {
-	HWND hwnd = (HWND)lua_touserdata(L, -1);
-	printf("hwnd = 0x%08p, *hwnd = 0x%08p\n", hwnd, hwnd);
-	setupD3D(hwnd);
+	HWND *hwnd = (HWND*)lua_topointer(L, -1);
+	printf("hwnd = 0x%08p, *hwnd = 0x%08p\n", hwnd, *hwnd);
+	setupD3D(*hwnd);
 	return 0;
 }
 
@@ -113,17 +113,15 @@ static int l_DXRectangle(lua_State *L)
 	D3DCOLOR newColor = 0, oldColor = currentColor;
 	bool haveNewColor = false;
 	// if we got a 5th argument for the color, use it then restore old color after
-	if (lua_type(L, -5) != LUA_TNIL)
+	if (lua_type(L, 5) == LUA_TNUMBER)
 	{
-		newColor = (D3DCOLOR)luaL_checkint(L, -5);
+		newColor = (D3DCOLOR)luaL_checkint(L, 5);
 		setColor(newColor);
 		haveNewColor = true;
 	}
-	DXRectangle(
-		luaL_checkint(L, -1),  // leftX
-		luaL_checkint(L, -2),  // topY
-		luaL_checkint(L, -3),  // rightX
-		luaL_checkint(L, -4)); // bottomY
+	int leftX = luaL_checkint(L, 1), topY = luaL_checkint(L, 2);
+	int rightX = luaL_checkint(L, 3), bottomY = luaL_checkint(L, 4);
+	DXRectangle(leftX, topY, rightX, bottomY);
 	if (haveNewColor) { setColor(oldColor); }
 	return 0;
 }
@@ -154,12 +152,43 @@ static int l_getColor(lua_State *L)
 	return 1;
 }
 
+void beginFrame()
+{
+	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+	IDirect3DDevice9_BeginScene(d3dDevice);
+	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
+}
+
+void endFrame()
+{
+	IDirect3DDevice9_EndScene(d3dDevice);
+	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
+}
+
+// Takes 0 arguments
+// Returns 0 values
+static int l_beginFrame(lua_State *L)
+{
+	beginFrame();
+	return 0;
+}
+
+// Takes 0 arguments
+// Returns 0 values
+static int l_endFrame(lua_State *L)
+{
+	endFrame();
+	return 0;
+}
+
 static const luaL_Reg lib_directX[] = {
 
 	{ "setupD3D", l_setupD3D },
-	{ "dxRect", l_DXRectangle },
+	{ "rect", l_DXRectangle },
 	{ "getColor", l_getColor },
 	{ "setColor", l_setColor },
+	{ "beginFrame", l_beginFrame },
+	{ "endFrame", l_endFrame },
 	{ NULL, NULL } // sentinel
 };
 
