@@ -46,8 +46,10 @@ int WINAPI WinMain(
 	// call main() in Lua, with hInstance as first argument
 	lua_getglobal(L, "main");
 	lua_pushinteger(L, (lua_Integer)hInstance);
+	lua_createtable(L, 0, DIRECTX_LUA_FUNCTIONS_COUNT);
+	l_registerDirectX(L);
 	//printf("hInstance = 0x%08p\n", hInstance);
-	result = lua_pcall(L, 1, LUA_MULTRET, 0);
+	result = lua_pcall(L, 2, LUA_MULTRET, 0);
 	if (result != 0) {
 		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
 		exit(1);

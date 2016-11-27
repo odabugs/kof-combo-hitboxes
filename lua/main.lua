@@ -48,7 +48,14 @@ end
 -- if KOF XI is currently running in PCSX2,
 -- open it and print the pivot coordinates of player 1's lead character
 ---[[
-function main(hInstance)
+function main(hInstance, dxLib)
+	if type(dxLib) == "table" then
+		for k,v in pairs(dxLib) do print(k,v) end
+		_G.directx = dxLib
+	else
+		print "No DirectX!"
+		os.exit(1)
+	end
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected then
@@ -68,11 +75,12 @@ function main(hInstance)
 		local c2 = coroutine.create(function()
 			if detected.module == "pcsx2.kof_xi" then
 				local address = 0x2081EBC4
+				local addressPtr = ffi.cast("void*", address)
 				local buffer = ffi.new("coordPair")
 				local h = detected.gameHandle
 				io.write("\n")
 				while true do
-					winprocess.read(h, buffer, ffi.cast("void*", address))
+					winprocess.read(h, buffer, addressPtr)
 					io.write(string.format("\rresult at 0x%08X is { x=0x%04X, y=0x%04X }        ",
 					address, buffer.x, buffer.y))
 					io.flush()
@@ -85,13 +93,14 @@ function main(hInstance)
 		while running do
 			coroutine.resume(c1)
 			coroutine.resume(c2)
-			if hk.down(hk.VK_Q) and window.isForeground(window.console()) then
+			if hk.down(hk.VK_Q) and window.isForeground(detected.consoleHwnd) then
 				winutil.flushConsoleInput()
 				io.write("\n")
 				running = false
 			end
 			C.Sleep(30)
 		end
+		os.exit(0)
 	else
 		print(detected)
 	end

@@ -133,6 +133,8 @@ function detectgame.findSupportedGame(hInstance, createOverlay)
 		detectedGame.overlayHwnd = window.createOverlayWindow(hInstance)
 		detectedGame.overlayDC = window.getDC(detectedGame.overlayHwnd)
 		detectedGame.gameDC = window.getDC(detectedGame.gameHwnd)
+		detectedGame.consoleHwnd = window.console()
+		directx.setupD3D(detectedGame.overlayHwnd)
 	end
 	return detectedGame
 end

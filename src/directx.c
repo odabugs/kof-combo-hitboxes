@@ -13,7 +13,7 @@ CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE] = {
 	{ 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) }
 };
 
-d3dRenderOption_t renderStateOptions[RENDER_STATE_OPTIONS_COUNT] = {
+d3dRenderOption_t renderStateOptions[] = {
 	{ D3DRS_ZENABLE, FALSE },
 	{ D3DRS_LIGHTING, FALSE },
 	{ D3DRS_CULLMODE, D3DCULL_NONE },
@@ -25,11 +25,13 @@ d3dRenderOption_t renderStateOptions[RENDER_STATE_OPTIONS_COUNT] = {
 	{ D3DRS_SEPARATEALPHABLENDENABLE, TRUE },
 	{ D3DRS_SRCBLENDALPHA, D3DBLEND_SRCALPHA },
 	{ D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA },
-	{ D3DRS_BLENDOPALPHA, D3DBLENDOP_MAX }
+	{ D3DRS_BLENDOPALPHA, D3DBLENDOP_MAX },
+	{ -1, -1 } // sentinel
 };
 
 void setupD3D(HWND hwnd)
 {
+	printf("hwnd = 0x%08p\n", hwnd);
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	D3DPRESENT_PARAMETERS presentParams;
 	memset(&presentParams, 0, sizeof(presentParams));
@@ -47,11 +49,12 @@ void setupD3D(HWND hwnd)
 		D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
 		hwnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		// D3DCREATE_FPU_PRESERVE is necessary to avoid undefined behavior with LuaJIT
+		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE,
 		&presentParams,
 		&d3dDevice);
 
-	for (int i = 0; i < RENDER_STATE_OPTIONS_COUNT; i++)
+	for (int i = 0; renderStateOptions[i].option != -1 && renderStateOptions[i].value != -1; i++)
 	{
 		IDirect3DDevice9_SetRenderState(
 			d3dDevice,
@@ -74,6 +77,17 @@ void setupD3D(HWND hwnd)
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 }
 
+// Takes 1 mandatory argument: HWND to setup Direct3D for
+// Returns 0 values
+// TODO: return initialization errors
+static int l_setupD3D(lua_State *L)
+{
+	HWND hwnd = (HWND)lua_touserdata(L, -1);
+	printf("hwnd = 0x%08p, *hwnd = 0x%08p\n", hwnd, hwnd);
+	setupD3D(hwnd);
+	return 0;
+}
+
 void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 {
 	static VOID *pVoid;
@@ -91,7 +105,66 @@ void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
 }
 
+// Takes 4 mandatory arguments: Left X, top Y, right X, bottom Y (all integers)
+// Optional 5th argument: Color to use for this draw call (uses current color otherwise)
+// Returns 0 values
+static int l_DXRectangle(lua_State *L)
+{
+	D3DCOLOR newColor = 0, oldColor = currentColor;
+	bool haveNewColor = false;
+	// if we got a 5th argument for the color, use it then restore old color after
+	if (lua_type(L, -5) != LUA_TNIL)
+	{
+		newColor = (D3DCOLOR)luaL_checkint(L, -5);
+		setColor(newColor);
+		haveNewColor = true;
+	}
+	DXRectangle(
+		luaL_checkint(L, -1),  // leftX
+		luaL_checkint(L, -2),  // topY
+		luaL_checkint(L, -3),  // rightX
+		luaL_checkint(L, -4)); // bottomY
+	if (haveNewColor) { setColor(oldColor); }
+	return 0;
+}
+
 void setColor(D3DCOLOR color)
 {
 	currentColor = color;
+}
+
+// Takes 1 mandatory argument: New color to set as current color
+// Returns 1 value: Old color (the prior current color before this function call)
+static int l_setColor(lua_State *L)
+{
+	D3DCOLOR oldColor = currentColor;
+	D3DCOLOR newColor = (D3DCOLOR)luaL_checkint(L, -1);
+	currentColor = newColor;
+	lua_Integer toPush = ((lua_Integer)oldColor) & MASK_32BITS;
+	lua_pushinteger(L, toPush);
+	return 1;
+}
+
+// Takes 0 arguments
+// Returns 1 value: Current color
+static int l_getColor(lua_State *L)
+{
+	lua_Integer toPush = ((lua_Integer)currentColor) & MASK_32BITS;
+	lua_pushinteger(L, toPush);
+	return 1;
+}
+
+static const luaL_Reg lib_directX[] = {
+
+	{ "setupD3D", l_setupD3D },
+	{ "dxRect", l_DXRectangle },
+	{ "getColor", l_getColor },
+	{ "setColor", l_setColor },
+	{ NULL, NULL } // sentinel
+};
+
+int l_registerDirectX(lua_State *L)
+{
+	luaL_register(L, NULL, lib_directX);
+	return 1;
 }
