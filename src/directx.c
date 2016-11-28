@@ -54,7 +54,7 @@ void setupD3D(HWND hwnd)
 		&presentParams,
 		&d3dDevice);
 
-	for (int i = 0; renderStateOptions[i].option != -1 && renderStateOptions[i].value != -1; i++)
+	for (int i = 0; renderStateOptions[i].option != -1 || renderStateOptions[i].value != -1; i++)
 	{
 		IDirect3DDevice9_SetRenderState(
 			d3dDevice,

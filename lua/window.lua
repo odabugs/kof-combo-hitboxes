@@ -84,12 +84,13 @@ window.WS_EX_COMPOSITED = 0x02000000
 window.SM_CXSCREEN = 0
 window.SM_CYSCREEN = 1
 
-window.extendMargins = ffi.new("MARGINS[1]", {
+window.extendMargins = ffi.new("MARGINS", {
 	cxLeftWidth = -1,
 	cxRightWidth = -1,
 	cyTopHeight = -1,
 	cyBottomHeight = -1,
 })
+window.extendMarginsPtr = ffi.new("MARGINS[1]", window.extendMargins)
 function window.getDefaultTitle()
 	return ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
 end
@@ -117,8 +118,8 @@ window.createWindowExDefaults = {
 	dwStyle = window.WS_POPUP,
 	x = 0,
 	y = 0,
-	nWidth = 300,
-	nHeight = 300,
+	nWidth = 1,
+	nHeight = 1,
 	hWndParent = NULL,
 	hMenu = NULL,
 	hInstance = NULL,
@@ -150,8 +151,8 @@ function window.isForeground(hwnd) return window.foreground() == hwnd end
 -- return screen dimensions of the system's primary monitor
 function window.getScreenSize()
 	return {
-		x = C.GetSystemMetrics(window.SM_CXSCREEN), -- width
-		y = C.GetSystemMetrics(window.SM_CYSCREEN), -- height
+		nWidth = C.GetSystemMetrics(window.SM_CXSCREEN),
+		nHeight = C.GetSystemMetrics(window.SM_CYSCREEN),
 	}
 end
 
@@ -174,6 +175,10 @@ function window.getDC(hwnd)
 end
 
 function window.createOverlayWindow(hInstance, windowClass, windowOptions)
+	if not window.supportsComposition() then
+		error("Window composition support was not detected.\nPlease enable Windows Aero before using this program.")
+	end
+
 	local hi = { hInstance = hInstance }
 	local newWinClass = luautil.extend({},
 		window.defaultWindowClass,
@@ -182,7 +187,11 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	-- Surprise!  When you pass a table to initialize a FFI constructor
 	-- like this, it uses rawget() to pull the values from that table
 	--for k,v in pairs(newWinClass) do print(k,v) end
-	local wndclassEx = ffi.new("WNDCLASSEX", newWinClass)
+	local wndclassEx = ffi.new("WNDCLASSEX")
+	for k, v in pairs(newWinClass) do
+		--print("Setting ", k, " to ", v)
+		wndclassEx[k] = v
+	end
 	local atom = C.RegisterClassExW(wndclassEx)
 	winerror.checkNotZero(atom)
 
@@ -190,6 +199,7 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 		window.createWindowExDefaults,
 		hi,
 		{ lpClassName = ffi.cast("LPCTSTR", bit.band(atom, 0xFFFF)) },
+		window.getScreenSize(),
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
 		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
@@ -199,10 +209,7 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	local setResult = C.SetWindowTextW(overlayHwnd, window.getDefaultTitle())
 	winerror.checkNotZero(setResult)
 
-	if not window.supportsComposition() then
-		error("Window composition support was not detected.\nPlease enable Windows Aero before using this program.")
-	end
-	window.extendFrame(overlayHwnd, window.extendMargins)
+	window.extendFrame(overlayHwnd, window.extendMarginsPtr)
 	window.show(overlayHwnd)
 	window.update(overlayHwnd)
 	return overlayHwnd
