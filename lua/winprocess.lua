@@ -5,12 +5,16 @@ local winerror = require("winerror")
 local luautil = require("luautil")
 
 ffi.cdef[[
+// workaround to avoid excess object creation with ffi.cast()
+typedef union { intptr_t i; void *p; } ptrBuffer;
+
 HANDLE OpenProcess(DWORD access, BOOL inherit, DWORD pid);
 BOOL CloseHandle(HANDLE hObject);
 BOOL ReadProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
 BOOL WriteProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
 ]]
 local C = ffi.C
+winprocess.ptrBufType = ffi.typeof("ptrBuffer")
 
 -- bit masks for process access rights used by OpenProcess
 luautil.insertPairs(winprocess, {
@@ -47,24 +51,22 @@ function winprocess.close(handle)
 	return result
 end
 
--- address MUST be cast to "void*" using ffi.cast() beforehand;
--- this is NOT done automatically, to avoid excess garbage collection
-function winprocess.read(handle, buffer, address, n, bytesReadBuffer)
+-- expects a cdata of type "ip" (defined above) for address parameter
+function winprocess.read(handle, address, buffer, n, bytesReadBuffer)
 	local result = C.ReadProcessMemory(
-		handle, address, buffer, n or ffi.sizeof(buffer),
+		handle, address.p, buffer, n or ffi.sizeof(buffer),
 		bytesReadBuffer or NULL)
 	winerror.checkNotZero(result)
-	return result, buffer
+	return buffer, result
 end
 
--- address MUST be cast to "void*" using ffi.cast() beforehand;
--- this is NOT done automatically, to avoid excess garbage collection
-function winprocess.write(handle, buffer, address, n, bytesWrittenBuffer)
+-- expects a cdata of type "ip" (defined above) for address parameter
+function winprocess.write(handle, address, buffer, n, bytesWrittenBuffer)
 	local result = C.WriteProcessMemory(
-		handle, address, buffer, n or ffi.sizeof(buffer),
+		handle, address.p, buffer, n or ffi.sizeof(buffer),
 		bytesWrittenBuffer or NULL)
 	winerror.checkNotZero(result)
-	return result, buffer
+	return buffer, result
 end
 
 return winprocess
