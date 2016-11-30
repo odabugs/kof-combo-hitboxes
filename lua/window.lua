@@ -42,8 +42,10 @@ BOOL IsWindow(HWND hWnd);
 BOOL IsWindowVisible(HWND hWnd);
 BOOL UpdateWindow(HWND hWnd);
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
+BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
 HDC GetDC(HWND hWnd);
 ATOM RegisterClassExW(WNDCLASSEX *lpwCx);
+BOOL UnregisterClassW(LPCTSTR lpClassName, HINSTANCE hInstance);
 HWND CreateWindowExW(
 	DWORD dwExStyle,
 	LPCTSTR lpClassName,  // optional
@@ -57,6 +59,7 @@ HWND CreateWindowExW(
 	HMENU hMenu,          // optional
 	HINSTANCE hInstance,  // optional
 	LPVOID lpParam);
+BOOL DestroyWindow(HWND hWnd);
 
 // functions from dwmapi.dll (supported only in Windows Vista and newer)
 HRESULT DwmIsCompositionEnabled(BOOL *pfEnabled);
@@ -141,6 +144,9 @@ window.createWindowExParamsOrder = {
 	"lpParam",
 }
 
+-- used by registerClass()/unregisterAllClasses()
+window.registeredClasses = {}
+
 function window.console() return C.GetConsoleWindow() end
 function window.foreground() return C.GetForegroundWindow() end
 function window.desktop() return C.GetDesktopWindow() end
@@ -184,21 +190,12 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 		window.defaultWindowClass,
 		hi,
 		windowClass)
-	-- Surprise!  When you pass a table to initialize a FFI constructor
-	-- like this, it uses rawget() to pull the values from that table
-	--for k,v in pairs(newWinClass) do print(k,v) end
-	local wndclassEx = ffi.new("WNDCLASSEX")
-	for k, v in pairs(newWinClass) do
-		--print("Setting ", k, " to ", v)
-		wndclassEx[k] = v
-	end
-	local atom = C.RegisterClassExW(wndclassEx)
-	winerror.checkNotZero(atom)
+	local atom = window.registerClass(newWinClass, hInstance)
 
 	local newWinOptions = luautil.extend({},
 		window.createWindowExDefaults,
 		hi,
-		{ lpClassName = ffi.cast("LPCTSTR", bit.band(atom, 0xFFFF)) },
+		{ lpClassName = ffi.cast("LPCTSTR", atom) },
 		window.getScreenSize(),
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
@@ -213,6 +210,12 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	window.show(overlayHwnd)
 	window.update(overlayHwnd)
 	return overlayHwnd
+end
+
+function window.destroy(hwnd)
+	local result = C.DestroyWindow(hwnd)
+	winerror.checkNotZero(result)
+	return result
 end
 
 function window.getWindowTitle(hwnd, buffer)
@@ -251,8 +254,10 @@ function window.getClientRect(hwnd, rectBuffer)
 	return rectBuffer
 end
 
-function window.clientToScreen(hwnd, pointBuffer)
+function window.clientToScreen(hwnd, pointBuffer, x, y)
 	pointBuffer = (pointBuffer or winutil.pointBufType())
+	-- POINT struct must always be reset for repeat calls to be correct
+	pointBuffer[0].x, pointBuffer[0].y = (x or 0), (y or 0)
 	local result = C.ClientToScreen(hwnd, pointBuffer)
 	winerror.checkNotZero(result)
 	return pointBuffer
@@ -270,6 +275,50 @@ function window.extendFrame(hwnd, margins)
 	local result = dwmapi.DwmExtendFrameIntoClientArea(hwnd, margins)
 	winerror.checkEqual(result, window.S_OK)
 	return result
+end
+
+function window.getPosition(hwnd, result, rectBuffer, pointBuffer)
+	result = (result or {})
+	pointBuffer = window.clientToScreen(source, pointBuffer)
+	result.x, result.y = pointBuffer[0].x, pointBuffer[0].y
+	rectBuffer = window.getClientRect(target, rectBuffer)
+	result.width, result.height = rectBuffer[0].right, rectBuffer[0].bottom
+	return result
+end
+
+-- move target window to overlap with source window
+function window.move(target, source, rectBuffer, pointBuffer)
+	pointBuffer = window.clientToScreen(source, pointBuffer)
+	local newX, newY = pointBuffer[0].x, pointBuffer[0].y
+	-- don't resize target window (TODO: for now)
+	rectBuffer = window.getClientRect(target, rectBuffer)
+	local newW, newH = rectBuffer[0].right, rectBuffer[0].bottom
+	local result = C.MoveWindow(target, newX, newY, newW, newH, true)
+	winerror.checkNotZero(result)
+	return result, newX, newY, newW, newH
+end
+
+function window.registerClass(newWinClass, hInstance)
+	local wndclassEx = ffi.new("WNDCLASSEX")
+	for k, v in pairs(newWinClass) do wndclassEx[k] = v end
+	local atom = C.RegisterClassExW(wndclassEx)
+	winerror.checkNotZero(atom)
+	atom = bit.band(atom, 0xFFFF)
+	window.registeredClasses[atom] = hInstance
+	return atom
+end
+
+function window.unregisterClass(atom, hInstance)
+	local result = C.UnregisterClassW(ffi.cast("LPCTSTR", atom), hInstance)
+	winerror.checkNotZero(result)
+	return result
+end
+
+function window.unregisterAllClasses()
+	for atom, hInstance in pairs(window.registeredClasses) do
+		window.unregisterClass(atom, hInstance)
+		window.registeredClasses[atom] = nil
+	end
 end
 
 return window
