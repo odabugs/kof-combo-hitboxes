@@ -182,7 +182,6 @@ static int l_endFrame(lua_State *L)
 }
 
 static const luaL_Reg lib_directX[] = {
-
 	{ "setupD3D", l_setupD3D },
 	{ "rect", l_DXRectangle },
 	{ "getColor", l_getColor },
