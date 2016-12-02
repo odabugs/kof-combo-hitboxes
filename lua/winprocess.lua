@@ -5,16 +5,12 @@ local luautil = require("luautil")
 local winprocess = {}
 
 ffi.cdef[[
-// workaround to avoid excess object creation with ffi.cast()
-typedef union { intptr_t i; void *p; } ptrBuffer;
-
 HANDLE OpenProcess(DWORD access, BOOL inherit, DWORD pid);
 BOOL CloseHandle(HANDLE hObject);
 BOOL ReadProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
 BOOL WriteProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
 ]]
 local C = ffi.C
-winprocess.ptrBufType = ffi.typeof("ptrBuffer")
 
 -- bit masks for process access rights used by OpenProcess
 luautil.insertPairs(winprocess, {
@@ -51,7 +47,7 @@ function winprocess.close(handle)
 	return result
 end
 
--- expects a cdata of type "ip" (defined above) for address parameter
+-- expects a cdata of type "ptrBuffer" (winutil.lua) for address parameter
 function winprocess.read(handle, address, buffer, n, bytesReadBuffer)
 	local result = C.ReadProcessMemory(
 		handle, address.p, buffer, n or ffi.sizeof(buffer),
@@ -60,7 +56,7 @@ function winprocess.read(handle, address, buffer, n, bytesReadBuffer)
 	return buffer, result
 end
 
--- expects a cdata of type "ip" (defined above) for address parameter
+-- expects a cdata of type "ptrBuffer" (winutil.lua) for address parameter
 function winprocess.write(handle, address, buffer, n, bytesWrittenBuffer)
 	local result = C.WriteProcessMemory(
 		handle, address.p, buffer, n or ffi.sizeof(buffer),

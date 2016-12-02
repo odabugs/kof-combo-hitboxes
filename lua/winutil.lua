@@ -4,6 +4,9 @@ local winerror = require("winerror")
 local winutil = {}
 
 ffi.cdef[[
+// workaround to avoid excess object creation with ffi.cast()
+typedef union { intptr_t i; void *p; } ptrBuffer;
+
 LRESULT WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT DefWindowProcW(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID PostQuitMessage(int nExitCode);
@@ -11,6 +14,7 @@ HANDLE GetStdHandle(DWORD nStdHandle);
 BOOL FlushConsoleInputBuffer(HANDLE hConsoleInput);
 ]]
 local C = ffi.C
+winutil.ptrBufType = ffi.typeof("ptrBuffer")
 
 -- using actual LPDWORD, LPPOINT, LPRECT etc. won't work with most
 -- functions in the Win32 API (e.g., GetClientRect)
