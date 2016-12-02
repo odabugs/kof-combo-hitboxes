@@ -11,7 +11,6 @@ local hk = require("hotkey")
 local colors = require("render.colors")
 
 ffi.cdef[[
-typedef struct { int16_t x; int16_t y; } coordPair;
 typedef struct tagMSG {
 	HWND   hwnd;
 	UINT   message;
