@@ -36,6 +36,8 @@ extern d3dRenderOption_t renderStateOptions[];
 extern void setupD3D(HWND hwnd);
 extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
 extern void setColor(D3DCOLOR color);
+extern void setScissor(int width, int height);
+extern void clearFrame();
 extern void beginFrame();
 extern void endFrame();
 extern int l_registerDirectX(lua_State *L);

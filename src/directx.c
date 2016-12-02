@@ -152,17 +152,40 @@ static int l_getColor(lua_State *L)
 	return 1;
 }
 
-void beginFrame()
+void setScissor(int width, int height)
 {
-	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-	IDirect3DDevice9_BeginScene(d3dDevice);
-	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
+	RECT fullscreenRect = { .right = (LONG)width, .bottom = (LONG)height };
+	IDirect3DDevice9_SetScissorRect(d3dDevice, &fullscreenRect);
 }
 
-void endFrame()
+// Requires 2 arguments: New width/height of scissor clipping area (top-left is {0, 0})
+// Returns 0 values
+// TODO: error conditions
+static int l_setScissor(lua_State *L)
 {
-	IDirect3DDevice9_EndScene(d3dDevice);
-	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
+	int w = luaL_checkint(L, 1), h = luaL_checkint(L, 2);
+	setScissor(w, h);
+	return 0;
+}
+
+void clearFrame()
+{
+	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+}
+
+// Takes 0 arguments
+// Returns 0 values
+static int l_clearFrame(lua_State *L)
+{
+	clearFrame();
+	return 0;
+}
+
+void beginFrame()
+{
+	clearFrame();
+	IDirect3DDevice9_BeginScene(d3dDevice);
+	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 }
 
 // Takes 0 arguments
@@ -171,6 +194,12 @@ static int l_beginFrame(lua_State *L)
 {
 	beginFrame();
 	return 0;
+}
+
+void endFrame()
+{
+	IDirect3DDevice9_EndScene(d3dDevice);
+	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
 }
 
 // Takes 0 arguments
@@ -186,6 +215,8 @@ static const luaL_Reg lib_directX[] = {
 	{ "rect", l_DXRectangle },
 	{ "getColor", l_getColor },
 	{ "setColor", l_setColor },
+	{ "setScissor", l_setScissor },
+	{ "clearFrame", l_clearFrame },
 	{ "beginFrame", l_beginFrame },
 	{ "endFrame", l_endFrame },
 	{ NULL, NULL } // sentinel

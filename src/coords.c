@@ -36,7 +36,7 @@ void setWindowDimensions(screen_dimensions_t *dimensions, int newXOffset, int ne
 	w = w - (newXOffset << 1);
 	h = h - (newYOffset << 1);
 	RECT scissorRect = { .right = (LONG)w, .bottom = (LONG)h };
-	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
+	setScissor(w, h);
 }
 
 void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimensions)
@@ -99,9 +99,8 @@ void getGameScreenDimensions(HWND game, HWND overlay, screen_dimensions_t *dimen
 
 	if (!enlarged)
 	{
-		RECT fullscreenRect = { .right = (LONG)screenWidth, .bottom = (LONG)screenHeight };
-		IDirect3DDevice9_SetScissorRect(d3dDevice, &fullscreenRect);
-		IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+		setScissor(screenWidth, screenHeight);
+		clearFrame();
 	}
 	setWindowDimensions(dimensions, newXOffset, newYOffset);
 	MoveWindow(overlay,
