@@ -131,13 +131,19 @@ function detectgame.findSupportedGame(hInstance, createOverlay)
 		detectedGame.hInstance = hInstance
 		--detectedGame.gameDC = window.getDC(detectedGame.gameHwnd)
 		detectedGame.consoleHwnd = window.console()
-		if createOverlay ~= false then
+		if createOverlay then
 			detectedGame.overlayHwnd = window.createOverlayWindow(hInstance)
 			--detectedGame.overlayDC = window.getDC(detectedGame.overlayHwnd)
 			directx.setupD3D(detectedGame.overlayHwnd)
 		end
 	end
 	return detectedGame
+end
+
+function detectgame.moduleForGame(game)
+	local target = string.format("game.%s.game", game.module)
+	local result = require(target):new(game)
+	return result
 end
 
 return detectgame
