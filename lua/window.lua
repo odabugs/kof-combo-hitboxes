@@ -1,9 +1,9 @@
-local window = {}
 local ffi = require("ffi")
 local winapi = require("winapi")
 local winutil = require("winutil")
 local luautil = require("luautil")
 local winerror = require("winerror")
+local window = {}
 
 ffi.cdef[[
 typedef struct tagWNDCLASSEX {
@@ -151,15 +151,14 @@ function window.console() return C.GetConsoleWindow() end
 function window.foreground() return C.GetForegroundWindow() end
 function window.desktop() return C.GetDesktopWindow() end
 function window.isWindow(hwnd) return C.IsWindow(hwnd) ~= 0LL end
-function window.isVisible(hwnd) return C.IsVisibleWindow(hwnd) ~= 0LL end
+function window.isVisible(hwnd) return C.IsWindowVisible(hwnd) ~= 0LL end
 function window.isForeground(hwnd) return window.foreground() == hwnd end
 
 -- return screen dimensions of the system's primary monitor
 function window.getScreenSize()
-	return {
-		nWidth = C.GetSystemMetrics(window.SM_CXSCREEN),
-		nHeight = C.GetSystemMetrics(window.SM_CYSCREEN),
-	}
+	local w = C.GetSystemMetrics(window.SM_CXSCREEN)
+	local h = C.GetSystemMetrics(window.SM_CYSCREEN)
+	return w, h
 end
 
 function window.update(hwnd)
@@ -192,11 +191,11 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 		windowClass)
 	local atom = window.registerClass(newWinClass, hInstance)
 
+	local w, h = window.getScreenSize()
 	local newWinOptions = luautil.extend({},
 		window.createWindowExDefaults,
 		hi,
-		{ lpClassName = ffi.cast("LPCTSTR", atom) },
-		window.getScreenSize(),
+		{ lpClassName = ffi.cast("LPCTSTR", atom), nWidth = w, nHeight = h },
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
 		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
@@ -209,7 +208,7 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	window.extendFrame(overlayHwnd, window.extendMarginsPtr)
 	window.show(overlayHwnd)
 	window.update(overlayHwnd)
-	return overlayHwnd
+	return overlayHwnd, atom
 end
 
 function window.destroy(hwnd)
@@ -287,11 +286,11 @@ function window.getPosition(hwnd, result, rectBuffer, pointBuffer)
 end
 
 -- move target window to overlap with source window
-function window.move(target, source, rectBuffer, pointBuffer)
+function window.move(target, source, rectBuffer, pointBuffer, resize)
 	pointBuffer = window.clientToScreen(source, pointBuffer)
 	local newX, newY = pointBuffer[0].x, pointBuffer[0].y
-	-- don't resize target window (TODO: for now)
-	rectBuffer = window.getClientRect(target, rectBuffer)
+	local sizeSource = (resize and source) or target
+	rectBuffer = window.getClientRect(sizeSource, rectBuffer)
 	local newW, newH = rectBuffer[0].right, rectBuffer[0].bottom
 	local result = C.MoveWindow(target, newX, newY, newW, newH, true)
 	winerror.checkNotZero(result)
