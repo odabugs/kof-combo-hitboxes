@@ -8,6 +8,7 @@ local detectgame = require("detectgame")
 local window = require("window")
 local winprocess = require("winprocess")
 local hk = require("hotkey")
+local colors = require("render.colors")
 
 ffi.cdef[[
 typedef struct { int16_t x; int16_t y; } coordPair;
@@ -34,14 +35,13 @@ local C = ffi.C
 
 local PM_REMOVE = 0x01 -- used by PeekMessage()
 
-function runLoop()
+do
 	local message = ffi.new("MSG[1]")
-	while true do
+	function messagePump()
 		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
 			C.TranslateMessage(message)
 			C.DispatchMessageW(message)
 		end
-		coroutine.yield()
 	end
 end
 
@@ -52,54 +52,27 @@ function main(hInstance, dxLib)
 	if type(dxLib) == "table" then
 		for k,v in pairs(dxLib) do print(k,v) end
 		_G.directx = dxLib
-	else
-		print "No DirectX!"
-		os.exit(1)
 	end
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected then
 		for k,v in pairs(detected) do print(k,v) end
 
-		local rectBuf = winutil.rectBufType()
-		local r = rectBuf[0]
-		window.getClientRect(detected.gameHwnd, rectBuf)
-		print(string.format("rectBuf = { %d, %d, %d, %d }",
-		r.x, r.y, r.right, r.bottom))
-		local pointBuf = winutil.pointBufType()
-		local p = pointBuf[0]
-		window.clientToScreen(detected.gameHwnd, pointBuf)
-		print(string.format("pointBuf = { %d, %d }", p.x, p.y))
-
-		local c1 = coroutine.create(runLoop)
-		local c2 = coroutine.create(function()
-			if detected.module == "pcsx2.kof_xi" then
-				local address = 0x2081EBC4
-				local addressPtr = ffi.cast("void*", address)
-				local buffer = ffi.new("coordPair")
-				local h = detected.gameHandle
-				io.write("\n")
-				while true do
-					winprocess.read(h, buffer, addressPtr)
-					io.write(string.format("\rresult at 0x%08X is { x=0x%04X, y=0x%04X }        ",
-					address, buffer.x, buffer.y))
-					io.flush()
-					coroutine.yield()
-				end
-			end
-		end)
-
+		local game = detectgame.moduleForGame(detected)
+		game:setupOverlay(dxLib)
+		
 		local running = true
 		while running do
-			coroutine.resume(c1)
-			coroutine.resume(c2)
+			messagePump()
+			game:nextFrame()
 			if hk.down(hk.VK_Q) and window.isForeground(detected.consoleHwnd) then
 				winutil.flushConsoleInput()
 				io.write("\n")
 				running = false
 			end
-			C.Sleep(30)
+			C.Sleep(10)
 		end
+		game:close()
 		os.exit(0)
 	else
 		print(detected)
