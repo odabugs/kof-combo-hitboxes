@@ -1,6 +1,6 @@
-local hotkey = {}
 local ffi = require("ffi")
 local types = require("winapi.types")
+local hotkey = {}
 
 ffi.cdef[[
 SHORT GetKeyState(int vKey);

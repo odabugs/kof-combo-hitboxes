@@ -1,5 +1,4 @@
 local colors = {}
-local bit = require("bit")
 
 local function bandsl(value, mask, shift)
 	return bit.lshift(bit.band(value, mask), shift)

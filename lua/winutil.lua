@@ -1,7 +1,7 @@
-local winutil = {}
 local ffi = require("ffi")
 local winapi = require("winapi")
 local winerror = require("winerror")
+local winutil = {}
 
 ffi.cdef[[
 LRESULT WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

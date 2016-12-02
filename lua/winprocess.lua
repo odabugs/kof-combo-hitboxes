@@ -1,8 +1,8 @@
-local winprocess = {}
 local ffi = require("ffi")
 local types = require("winapi.types")
 local winerror = require("winerror")
 local luautil = require("luautil")
+local winprocess = {}
 
 ffi.cdef[[
 // workaround to avoid excess object creation with ffi.cast()

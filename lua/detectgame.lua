@@ -1,4 +1,3 @@
-local detectgame = {}
 local ffi = require("ffi")
 local types = require("winapi.types")
 local window = require("window")
@@ -6,6 +5,7 @@ local winprocess = require("winprocess")
 local winerror = require("winerror")
 local winutil = require("winutil")
 local luautil = require("luautil")
+local detectgame = {}
 
 ffi.cdef[[
 typedef BOOL (__stdcall *WNDENUMPROC)(HWND hwnd, LPARAM lParam);
