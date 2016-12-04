@@ -110,19 +110,36 @@ void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 // Returns 0 values
 static int l_DXRectangle(lua_State *L)
 {
+	int leftX = luaL_checkint(L, 1), topY = luaL_checkint(L, 2);
+	int rightX = luaL_checkint(L, 3), bottomY = luaL_checkint(L, 4);
+	int temp = 0;
+	if (leftX > rightX)
+	{
+		temp = leftX;
+		leftX = rightX;
+		rightX = temp;
+	}
+	if (topY > bottomY)
+	{
+		temp = topY;
+		topY = bottomY;
+		bottomY = temp;
+	}
+
 	D3DCOLOR newColor = 0, oldColor = currentColor;
-	bool haveNewColor = false;
 	// if we got a 5th argument for the color, use it then restore old color after
-	if (lua_type(L, 5) == LUA_TNUMBER)
+	int ltype = lua_type(L, 5);
+	if (ltype != LUA_TNONE && ltype != LUA_TNIL)
 	{
 		newColor = (D3DCOLOR)luaL_checkint(L, 5);
 		setColor(newColor);
-		haveNewColor = true;
+		DXRectangle(leftX, topY, rightX, bottomY);
+		setColor(oldColor);
 	}
-	int leftX = luaL_checkint(L, 1), topY = luaL_checkint(L, 2);
-	int rightX = luaL_checkint(L, 3), bottomY = luaL_checkint(L, 4);
-	DXRectangle(leftX, topY, rightX, bottomY);
-	if (haveNewColor) { setColor(oldColor); }
+	else
+	{
+		DXRectangle(leftX, topY, rightX, bottomY);
+	}
 	return 0;
 }
 
