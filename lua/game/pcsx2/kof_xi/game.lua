@@ -130,12 +130,17 @@ function KOF_XI:extraInit()
 	self.players = {}
 	self.teams = {}
 	for i = 1, 2 do
-		self.players[i] = ffiutil.ntypes("playerMain", 3)
+		self.players[i] = ffiutil.ntypes("playerMain", 3, 0)
 		self.teams[i] = ffi.new("teamMain")
 	end
 
 	self.playerTable = ffi.new("playerMainTable") -- shared by both players
 	self.camera = ffi.new("camera")
+end
+
+function KOF_XI:activeCharacter(which)
+	local activeIndex = self.teams[which].point
+	return self.players[which][activeIndex]
 end
 
 --[[
@@ -162,18 +167,27 @@ function KOF_XI:captureState()
 	self:read(self.playerTablePtr, self.playerTable)
 	for i = 1, 2 do
 		self:read(self.teamPtrs[i], self.teams[i])
-		for j = 1, 3 do
-			self:read(self.playerTable.p[i-1][j-1], self.players[i][j])
+		-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
+		for j = 0, 2 do
+			self:read(self.playerTable.p[i-1][j], self.players[i][j])
 		end
 	end
+
+	local active = self:activeCharacter(1)
+	---[=[
+	io.write(string.format("\rP1 active character's position is { x=0x%04X, y=0x%04X }        ",
+	active.position.x, active.position.y))
+	--]=]
+	io.flush()
 end
 
 function KOF_XI:renderState()
 	self:setColor(color.rgb(255, 0, 0, 128))
 	local pos = self.camera.position
-	local cx, cy = pos.x, pos.y
+	local s, cx, cy = 50, pos.x, pos.y
+	local by = 500-cy
 	--self:rect(100, 120, 200, 250)
-	self:rect(cx, cy, cx+10, cy+10)
+	self:rect(cx, by, cx+s, by+s)
 end
 
 return KOF_XI
