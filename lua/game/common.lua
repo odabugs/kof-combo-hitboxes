@@ -4,8 +4,15 @@ local winutil = require("winutil")
 local color = require("render.colors")
 local Game_Common = {}
 
+local RAM_LIMIT_EXCEEDED = "Attempted to exceed the upper limit of the RAM range."
+
 -- value added to address parameter in every call to read()/write()
 Game_Common.RAMbase = 0
+-- upper limit for valid RAM addresses; it is an error if we go above this
+Game_Common.RAMlimit = 0xFFFFFFFF
+-- "ideal" screen width/height (at or nearest to 1:1 scale in the game)
+Game_Common.basicWidth = 1
+Game_Common.basicHeight = 1
 
 -- pass a result from detectgame.findSupportedGame() as the "source" param
 function Game_Common:new(source)
@@ -18,11 +25,19 @@ function Game_Common:new(source)
 	source.pointerBuf = winutil.ptrBufType() -- used by readPtr()
 	source.rectBuf = winutil.rectBufType()
 	source.pointBuf = winutil.pointBufType()
-	-- used by nextFrame()
-	source.captureCo = coroutine.create(self.captureState)
-	source.renderCo = coroutine.create(self.renderState)
+	-- values to be set at runtime
+	source.width = 1
+	source.height = 1
+	source.xScale = 1
+	source.yScale = 1
 
+	source:extraInit()
 	return source
+end
+
+-- to be (optionally) overridden by derived objects
+function Game_Common:extraInit()
+	return
 end
 
 function Game_Common:close()
@@ -41,21 +56,34 @@ function Game_Common:setupOverlay(directx)
 end
 
 function Game_Common:read(address, buffer)
-	self.addressBuf.i = address + self.RAMbase
+	local newAddress = address + self.RAMbase
+	assert(newAddress < self.RAMlimit, RAM_LIMIT_EXCEEDED)
+	self.addressBuf.i = newAddress
 	local result = winprocess.read(self.gameHandle, self.addressBuf, buffer)
-	return result
+	return result, newAddress
 end
 
 function Game_Common:readPtr(address)
-	self.pointerBuf.i = address + self.RAMbase
+	local newAddress = address + self.RAMbase
+	assert(newAddress < self.RAMlimit, RAM_LIMIT_EXCEEDED)
+	self.pointerBuf.i = newAddress
 	winprocess.read(self.gameHandle, self.pointerBuf, self.pointerBuf)
-	return self.pointerBuf.i
+	return self.pointerBuf.i, newAddress
+end
+
+function Game_Common:getGameWindowSize()
+	window.getClientRect(self.gameHwnd, self.rectBuf)
+	self.width, self.height = self.rectBuf[0].right, self.rectBuf[0].bottom
+	self.xScale = self.width / self.basicWidth
+	self.yScale = self.height / self.basicHeight
+	self.directx.setScissor(self.width, self.height)
 end
 
 function Game_Common:repositionOverlay()
 	window.move(
 		self.overlayHwnd, self.gameHwnd,
 		self.rectBuf, self.pointBuf, false) -- TODO: don't resize for now
+	self:getGameWindowSize()
 end
 
 function Game_Common:rect(...)
@@ -80,32 +108,22 @@ function Game_Common:shouldRenderFrame()
 	return false
 end
 
--- to be overridden by objects that inherit from this prototype
+-- to be overridden by derived objects
 function Game_Common:captureState()
-	while true do coroutine.yield() end
+	return
 end
 
--- to be overridden by objects that inherit from this prototype
+-- to be overridden by derived objects
 function Game_Common:renderState()
-	while true do coroutine.yield() end
+	return
 end
 
 function Game_Common:nextFrame()
-	--[=[
-	print("capture", coroutine.resume(self.captureCo, self))
-	--]=]
-	---[=[
-	coroutine.resume(self.captureCo, self)
-	--]=]
+	self:captureState()
 	if self:shouldRenderFrame() then
 		self:repositionOverlay()
 		self.directx.beginFrame()
-		--[=[
-		print("render", coroutine.resume(self.renderCo, self))
-		--]=]
-		---[=[
-		coroutine.resume(self.renderCo, self)
-		--]=]
+		self:renderState()
 	else
 		self.directx.beginFrame()
 	end
