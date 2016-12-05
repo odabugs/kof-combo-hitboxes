@@ -1,10 +1,15 @@
+local luautil = require("luautil")
 local window = require("window")
 local winprocess = require("winprocess")
 local winutil = require("winutil")
 local color = require("render.colors")
+local draw = require("game.draw")
 local Game_Common = {}
+-- Import variables and methods from "draw" into this class.
+-- If you see something being used that's not defined here, look in there.
+luautil.extend(Game_Common, draw)
 
-local RAM_LIMIT_EXCEEDED = "Attempted to exceed the upper limit of the RAM range."
+local RAM_RANGE_EXCEEDED = "Attempted to step outside the limits of the RAM range."
 
 -- value added to address parameter in every call to read()/write()
 Game_Common.RAMbase = 0
@@ -30,6 +35,8 @@ function Game_Common:new(source)
 	source.height = 1
 	source.xScale = 1
 	source.yScale = 1
+	source.xOffset = 0
+	source.yOffset = 0
 
 	source:extraInit()
 	return source
@@ -56,19 +63,19 @@ function Game_Common:setupOverlay(directx)
 end
 
 function Game_Common:read(address, buffer)
-	local newAddress = address + self.RAMbase
-	assert(newAddress < self.RAMlimit, RAM_LIMIT_EXCEEDED)
-	self.addressBuf.i = newAddress
+	address = address + self.RAMbase
+	assert(address >= self.RAMbase and address < self.RAMlimit, RAM_RANGE_EXCEEDED)
+	self.addressBuf.i = address
 	local result = winprocess.read(self.gameHandle, self.addressBuf, buffer)
-	return result, newAddress
+	return result, address
 end
 
 function Game_Common:readPtr(address)
-	local newAddress = address + self.RAMbase
-	assert(newAddress < self.RAMlimit, RAM_LIMIT_EXCEEDED)
-	self.pointerBuf.i = newAddress
+	address = address + self.RAMbase
+	assert(address >= self.RAMbase and address < self.RAMlimit, RAM_RANGE_EXCEEDED)
+	self.pointerBuf.i = address
 	winprocess.read(self.gameHandle, self.pointerBuf, self.pointerBuf)
-	return self.pointerBuf.i, newAddress
+	return self.pointerBuf.i, address
 end
 
 function Game_Common:getGameWindowSize()
@@ -84,18 +91,6 @@ function Game_Common:repositionOverlay()
 		self.overlayHwnd, self.gameHwnd,
 		self.rectBuf, self.pointBuf, false) -- TODO: don't resize for now
 	self:getGameWindowSize()
-end
-
-function Game_Common:rect(...)
-	self.directx.rect(...)
-end
-
-function Game_Common:getColor()
-	return self.directx.getColor()
-end
-
-function Game_Common:setColor(newColor)
-	return self.directx.setColor(newColor)
 end
 
 function Game_Common:shouldRenderFrame()
