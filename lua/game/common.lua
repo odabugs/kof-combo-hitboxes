@@ -2,7 +2,6 @@ local luautil = require("luautil")
 local window = require("window")
 local winprocess = require("winprocess")
 local winutil = require("winutil")
-local color = require("render.colors")
 local draw = require("game.draw")
 local Game_Common = {}
 -- Import variables and methods from "draw" into this class.
@@ -59,7 +58,6 @@ function Game_Common:setupOverlay(directx)
 	--self.overlayDC = window.getDC(self.overlayHwnd)
 	-- TODO: change directx code on the C side to support multiple instances
 	self.directx.setupD3D(self.overlayHwnd)
-	self:setColor(color.rgba(255,0,0))
 end
 
 function Game_Common:read(address, buffer)
