@@ -1,14 +1,9 @@
 local ffi = require("ffi")
 local types = require("winapi.types")
-local winerror = require("winerror")
 local winutil = require("winutil")
-local luautil = require("luautil")
-local ffiutil = require("ffiutil")
 local detectgame = require("detectgame")
 local window = require("window")
-local winprocess = require("winprocess")
 local hk = require("hotkey")
-local colors = require("render.colors")
 
 ffi.cdef[[
 typedef struct tagMSG {
@@ -34,16 +29,6 @@ local C = ffi.C
 
 local PM_REMOVE = 0x01 -- used by PeekMessage()
 
-do
-	local message = ffi.new("MSG[1]")
-	function messagePump()
-		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
-			C.TranslateMessage(message)
-			C.DispatchMessageW(message)
-		end
-	end
-end
-
 -- if KOF XI is currently running in PCSX2,
 -- open it and print the pivot coordinates of player 1's lead character
 ---[[
@@ -54,25 +39,12 @@ function main(hInstance, dxLib)
 	end
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
-	if detected then
+	if detected and detected.module == "pcsx2.kof_xi" then
 		for k,v in pairs(detected) do print(k,v) end
 
 		local game = detectgame.moduleForGame(detected)
 		game:setupOverlay(dxLib)
-		
-		local running = true
-		while running do
-			messagePump()
-			game:nextFrame()
-			if hk.down(hk.VK_Q) and window.isForeground(detected.consoleHwnd) then
-				winutil.flushConsoleInput()
-				io.write("\n")
-				running = false
-			end
-			C.Sleep(10)
-		end
-		game:close()
-		os.exit(0)
+		return mainLoop(game)
 	else
 		print(detected)
 	end
@@ -81,6 +53,27 @@ end
 
 --[[
 function main(hInstance)
-	return nil
+	return 0
 end
 --]]
+
+function mainLoop(game)
+	local message = ffi.new("MSG[1]")
+	local running = true
+	while running do
+		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
+			C.TranslateMessage(message)
+			C.DispatchMessageW(message)
+		end
+
+		game:nextFrame()
+		if hk.down(hk.VK_Q) and window.isForeground(game.consoleHwnd) then
+			winutil.flushConsoleInput()
+			io.write("\n")
+			running = false
+		end
+		C.Sleep(5)
+	end
+	game:close()
+	return 0
+end
