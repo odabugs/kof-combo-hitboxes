@@ -16,6 +16,8 @@ local KOF_XI = PCSX2_Common:new()
 -- PCSX2_Common.RAMbase (see game/pcsx2/common.lua) in order to get the
 -- "real" absolute address in PCSX2's memory space.  This also applies when
 -- dereferencing pointer values within the game's emulated RAM space.
+-- intptr_t is generally used in place of actual pointer types, in order to
+-- avoid excess GC overhead induced by frequent use of ffi.cast().
 ffi.cdef[[
 #pragma pack(push, 1)
 typedef int8_t byte;
@@ -121,6 +123,7 @@ typedef struct {
 
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
+KOF_XI.absoluteYOffset = 34
 -- game-specific variables
 KOF_XI.teamPtrs = { 0x008A9690, 0x008A98D8 }
 KOF_XI.playerTablePtr = 0x008A26E0
@@ -140,27 +143,8 @@ end
 
 function KOF_XI:activeCharacter(which)
 	local activeIndex = self.teams[which].point
-	return self.players[which][activeIndex]
+	return self.players[which][activeIndex], activeIndex
 end
-
---[[
-function KOF_XI:captureState()
-	local address = 0x0081EBC4
-	local buffer = ffi.new("coordPair")
-	--[=[
-	io.write("\n")
-	--]=]
-	while true do
-		self:read(address, buffer)
-		---[=[
-		io.write(string.format("\rresult at 0x%08X is { x=0x%04X, y=0x%04X }        ",
-		address + self.RAMbase, buffer.x, buffer.y))
-		--]=]
-		io.flush()
-		coroutine.yield()
-	end
-end
---]]
 
 function KOF_XI:captureState()
 	self:read(self.cameraPtr, self.camera)
@@ -173,21 +157,25 @@ function KOF_XI:captureState()
 		end
 	end
 
-	local active = self:activeCharacter(1)
+	local active, activeIndex = self:activeCharacter(1)
 	---[=[
-	io.write(string.format("\rP1 active character's position is { x=0x%04X, y=0x%04X }        ",
-	active.position.x, active.position.y))
+	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
+	activeIndex, active.position.x, active.position.y, self.playerTable.p[0][activeIndex] + self.RAMbase))
 	--]=]
 	io.flush()
 end
 
+function KOF_XI:drawPlayer(which)
+	local active = self:activeCharacter(which)
+	local cam = self.camera.position
+	local pivotX = active.position.x - cam.x
+	local pivotY = active.position.y - cam.y
+	self:pivot(pivotX, pivotY)
+end
+
 function KOF_XI:renderState()
-	self:setColor(color.rgb(255, 0, 0, 128))
-	local pos = self.camera.position
-	local s, cx, cy = 50, pos.x, pos.y
-	local by = 500-cy
-	--self:rect(100, 120, 200, 250)
-	self:rect(cx, by, cx+s, by+s)
+	self:setColor(color.rgb(255, 0, 0))
+	for i = 1, 2 do self:drawPlayer(i) end
 end
 
 return KOF_XI
