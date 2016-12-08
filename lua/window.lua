@@ -286,9 +286,11 @@ function window.getPosition(hwnd, result, rectBuffer, pointBuffer)
 end
 
 -- move target window to overlap with source window
-function window.move(target, source, rectBuffer, pointBuffer, resize)
+function window.move(
+	target, source, rectBuffer, pointBuffer, xOffset, yOffset, resize)
 	pointBuffer = window.clientToScreen(source, pointBuffer)
-	local newX, newY = pointBuffer[0].x, pointBuffer[0].y
+	local newX = pointBuffer[0].x + (xOffset or 0)
+	local newY = pointBuffer[0].y + (yOffset or 0)
 	local sizeSource = (resize and source) or target
 	rectBuffer = window.getClientRect(sizeSource, rectBuffer)
 	local newW, newH = rectBuffer[0].right, rectBuffer[0].bottom

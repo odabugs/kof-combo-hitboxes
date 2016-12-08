@@ -10,13 +10,16 @@ luautil.extend(Game_Common, draw)
 
 local RAM_RANGE_EXCEEDED = "Attempted to step outside the limits of the RAM range."
 
--- value added to address parameter in every call to read()/write()
+-- value added to address parameter in every call to read()
 Game_Common.RAMbase = 0
 -- upper limit for valid RAM addresses; it is an error if we go above this
 Game_Common.RAMlimit = 0xFFFFFFFF
 -- "ideal" screen width/height (at or nearest to 1:1 scale in the game)
 Game_Common.basicWidth = 1
 Game_Common.basicHeight = 1
+-- rule for handling aspect ratios that differ from the "ideal" aspect;
+-- values: "stretch", "letterbox", "pillarbox", "center"
+Game_Common.aspectMode = "stretch"
 
 -- pass a result from detectgame.findSupportedGame() as the "source" param
 function Game_Common:new(source)
@@ -24,18 +27,20 @@ function Game_Common:new(source)
 	setmetatable(source, self)
 	self.__index = self
 
+	-- values that are set once during init, but may vary based on
+	-- other variables set in the calling object
+	source.basicAspect = source.basicWidth / source.basicHeight
 	-- resources that MUST always be unique instances are init'd here
 	source.addressBuf = winutil.ptrBufType() -- used by read()
 	source.pointerBuf = winutil.ptrBufType() -- used by readPtr()
 	source.rectBuf = winutil.rectBufType()
 	source.pointBuf = winutil.pointBufType()
 	-- values to be set at runtime
-	source.width = 1
-	source.height = 1
-	source.xScale = 1
-	source.yScale = 1
-	source.xOffset = 0
-	source.yOffset = 0
+	source.width, source.height = 1, 1
+	source.xScale, source.yScale = 1, 1
+	source.xOffset, source.yOffset = 0, 0
+	source.xScissor, source.yScissor = 1, 1
+	source.aspect = 1
 
 	source:extraInit()
 	return source
@@ -74,31 +79,6 @@ function Game_Common:readPtr(address)
 	self.pointerBuf.i = address
 	winprocess.read(self.gameHandle, self.pointerBuf, self.pointerBuf)
 	return self.pointerBuf.i, address
-end
-
-function Game_Common:getGameWindowSize()
-	window.getClientRect(self.gameHwnd, self.rectBuf)
-	self.width, self.height = self.rectBuf[0].right, self.rectBuf[0].bottom
-	self.xScale = self.width / self.basicWidth
-	self.yScale = self.height / self.basicHeight
-	self.directx.setScissor(self.width, self.height)
-end
-
-function Game_Common:repositionOverlay()
-	window.move(
-		self.overlayHwnd, self.gameHwnd,
-		self.rectBuf, self.pointBuf, false) -- TODO: don't resize for now
-	self:getGameWindowSize()
-end
-
-function Game_Common:shouldRenderFrame()
-	local fg = window.foreground()
-	if fg == self.gameHwnd then
-		return true
-	elseif fg == self.overlayHwnd and window.isVisible(self.gameHwnd) then
-		return true
-	end
-	return false
 end
 
 -- to be overridden by derived objects

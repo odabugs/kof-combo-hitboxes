@@ -34,13 +34,13 @@ local PM_REMOVE = 0x01 -- used by PeekMessage()
 ---[[
 function main(hInstance, dxLib)
 	if type(dxLib) == "table" then
-		for k,v in pairs(dxLib) do print(k,v) end
+		--for k,v in pairs(dxLib) do print(k,v) end
 		_G.directx = dxLib
 	end
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected and detected.module == "pcsx2.kof_xi" then
-		for k,v in pairs(detected) do print(k,v) end
+		--for k,v in pairs(detected) do print(k,v) end
 
 		local game = detectgame.moduleForGame(detected)
 		game:setupOverlay(dxLib)
