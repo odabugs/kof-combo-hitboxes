@@ -22,4 +22,11 @@ function colors.setAlpha(color, a)
 	return result
 end
 
+local c = colors.rgb
+colors.WHITE       = c(255, 255, 255)
+colors.BLACK       = c(000, 000, 000)
+colors.RED         = c(255, 000, 000)
+colors.GREEN       = c(000, 255, 000)
+colors.BLUE        = c(000, 000, 255)
+
 return colors
