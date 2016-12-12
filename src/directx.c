@@ -31,7 +31,7 @@ d3dRenderOption_t renderStateOptions[] = {
 
 void setupD3D(HWND hwnd)
 {
-	printf("hwnd = 0x%08p\n", hwnd);
+	//printf("hwnd = 0x%08p\n", hwnd);
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	D3DPRESENT_PARAMETERS presentParams;
 	memset(&presentParams, 0, sizeof(presentParams));
@@ -83,7 +83,6 @@ void setupD3D(HWND hwnd)
 static int l_setupD3D(lua_State *L)
 {
 	HWND *hwnd = (HWND*)lua_topointer(L, -1);
-	printf("hwnd = 0x%08p, *hwnd = 0x%08p\n", hwnd, *hwnd);
 	setupD3D(*hwnd);
 	return 0;
 }
@@ -128,8 +127,7 @@ static int l_DXRectangle(lua_State *L)
 
 	D3DCOLOR newColor = 0, oldColor = currentColor;
 	// if we got a 5th argument for the color, use it then restore old color after
-	int ltype = lua_type(L, 5);
-	if (ltype != LUA_TNONE && ltype != LUA_TNIL)
+	if (lua_isnoneornil(L, 5) == 0)
 	{
 		newColor = (D3DCOLOR)luaL_checkint(L, 5);
 		setColor(newColor);
