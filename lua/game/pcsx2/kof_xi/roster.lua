@@ -1,5 +1,5 @@
 local roster = {
-	count = 0x31, -- excludes 0x28
+	count = 0x2F, -- excludes 0x28
 	[0x00] = "Ash",
 	[0x01] = "Oswald",
 	[0x02] = "Shen",

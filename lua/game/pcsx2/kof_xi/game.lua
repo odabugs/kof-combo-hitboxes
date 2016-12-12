@@ -1,4 +1,5 @@
 local ffi = require("ffi")
+local types = require("types")
 local ffiutil = require("ffiutil")
 local luautil = require("luautil")
 local winerror = require("winerror")
@@ -6,7 +7,7 @@ local winutil = require("winutil")
 local winprocess = require("winprocess")
 local window = require("window")
 --local hk = require("hotkey")
-local color = require("render.colors")
+local colors = require("render.colors")
 local PCSX2_Common = require("game.pcsx2.common")
 local KOF_XI = PCSX2_Common:new()
 
@@ -19,7 +20,7 @@ local KOF_XI = PCSX2_Common:new()
 -- intptr_t is generally used in place of actual pointer types, in order to
 -- avoid excess GC overhead induced by frequent use of ffi.cast().
 ffi.cdef[[
-#pragma pack(push, 1)
+#pragma pack(push, 1) /* DO NOT REMOVE THIS */
 typedef int8_t byte;
 typedef uint8_t ubyte;
 typedef int16_t word;
@@ -29,6 +30,7 @@ typedef uint32_t udword;
 
 static const int PLAYERS = 2;
 static const int CHARS_PER_TEAM = 3;
+static const int BOXCOUNT = 7;
 
 // 16.16 fixed point coordinate
 typedef union {
@@ -47,8 +49,35 @@ typedef struct {
 	// Y is equal to 00E0h when both players are standing on solid ground.
 	// Y decreases as the camera moves upward.
 	coordPair position;       // +000h: X/Y world position (4 bytes)
+	// Strange things happen with players bumping into invisible walls if
+	// this value is less than +1.0, or walking off the edge of the screen
+	// if this value is greater than +1.0.  Never seems to change normally.
 	float restrictor;         // +004h: Always equal to +1.0?
 } camera;
+
+// Multiple instances of this struct are embedded in "playerMain" below.
+// Things will break if this struct is not 0Ah (decimal 10) bytes wide.
+typedef struct {
+	// Hitbox position is expressed in terms of the center of the hitbox.
+	// X offset projects forward from player origin, based on the direction
+	// the player is facing.  Y offset projects upward from player origin.
+	coordPair position;       // +000h: X/Y offset from player origin
+	byte padding01[0x003];    // +004h to +007h: Unknown
+	// Width is added to the hitbox on both sides, so that the width given
+	// in the struct itself is half of the hitbox's "effective width".
+	// The same principle applies for the hitbox's height.
+	byte width;               // +007h: Hitbox width (in both directions)
+	byte height;              // +008h: Hitbox height (in both directions)
+	byte padding02[0x001];    // +009h: Unknown (DO NOT REMOVE THIS)
+} hitbox;
+
+// This struct is embedded in "playerMain" struct starting at +268h.
+// Exact struct size unknown, but known so far to be at least 0x23 bytes.
+typedef struct {
+	byte padding01[0x01B];    // +000h to +023h: Unknown
+	byte boxesActive;         // +01Bh: Collision box active + misc flags
+	byte padding02[0x007];    // +01Ch to +023h: Unknown
+} playerFlags;
 
 // Game allocates 6 of this struct (3 per player, 1 per character in play).
 // "playerMainTable" struct contains pointers to instances of this struct.
@@ -67,9 +96,14 @@ typedef struct {
 	byte facing;              // +08Ch: Facing (00h = left, 02h = right)
 	byte padding03[0x133];    // +08Dh to +1C0h: Unknown
 	uword unknown02;          // +1C0h: Unknown status word
-	byte padding04[0x32E];    // +1C2h to +4F0h: Unknown
+	byte padding04[0x0A6];    // +1C2h to +268h: Unknown
+	playerFlags flags;        // +268h: Various status flags
+	byte padding05[0x089];    // +28Bh to +314h: Unknown
+	hitbox hitboxes[6];       // +314h: Hitbox set (TODO: May be larger?)
+	hitbox collisionBox;      // +350h: Collision hitbox
+	byte padding06[0x196];    // +35Ah to +4F0h: Unknown
 	ubyte unknown03;          // +4F0h: Unknown status byte
-	byte padding05[0x091];    // +4F1h to +582h: Unknown
+	byte padding07[0x091];    // +4F1h to +582h: Unknown
 	word stunTimer;           // +582h: Stun state timer (-1 = not stunned)
 } playerMain;
 
@@ -139,6 +173,19 @@ function KOF_XI:extraInit()
 
 	self.playerTable = ffi.new("playerMainTable") -- shared by both players
 	self.camera = ffi.new("camera")
+	
+	---[=[
+	self:read(self.playerTablePtr, self.playerTable)
+	print()
+	for i = 1, 2 do
+		for j = 0, 2 do
+			print(string.format(
+				"Player %d, character %d pointer: 0x%08X",
+				i, j, self.playerTable.p[i-1][j]))
+		end
+	end
+	print()
+	--]=]
 end
 
 function KOF_XI:activeCharacter(which)
@@ -157,24 +204,65 @@ function KOF_XI:captureState()
 		end
 	end
 
-	local active, activeIndex = self:activeCharacter(1)
+	local n = 1
+	local active, activeIndex = self:activeCharacter(n)
 	---[=[
 	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
-	activeIndex, active.position.x, active.position.y, self.playerTable.p[0][activeIndex] + self.RAMbase))
+	activeIndex, active.position.x, active.position.y, self.playerTable.p[n-1][activeIndex] + self.RAMbase))
 	--]=]
 	io.flush()
 end
 
+-- return -1 if player is facing left, or +1 if player is facing right
+function KOF_XI:facingMultiplier(player)
+	return ((player.facing == 0) and -1) or 1
+end
+
+-- translate a hitbox's position into coordinates suitable for drawing
+function KOF_XI:deriveBoxPosition(player, hitbox, camera)
+	local facing = self:facingMultiplier(player)
+	local playerX, playerY = player.position.x, player.position.y
+	playerX = playerX - camera.position.x
+	playerY = playerY - camera.position.y
+	local centerX, centerY = hitbox.position.x * 2, hitbox.position.y * 2
+	centerX = playerX + (centerX * facing) -- positive offsets move forward
+	centerY = playerY - centerY -- positive offsets move upward
+	local w, h = hitbox.width * 2, hitbox.height * 2
+	local x1, x2 = centerX - w, centerX + w
+	local y1, y2 = centerY - h, centerY + h
+	--[=[
+	print(string.format("(%d, %d) to (%d, %d)", x1, x2, y1, y2))
+	--]=]
+	return x1, y1, x2, y2, centerX, centerY
+end
+
+function KOF_XI:renderBox(player, hitbox, color)
+	local x1, y1, x2, y2, cx, cy = self:deriveBoxPosition(
+		player, hitbox, self.camera)
+	self:box(x1, y1, x2, y2, color)
+	---[=[
+	self:pivot(cx, cy, 5, color)
+	--]=]
+end
+
 function KOF_XI:drawPlayer(which)
 	local active = self:activeCharacter(which)
+	local flags = active.flags
 	local cam = self.camera.position
 	local pivotX = active.position.x - cam.x
 	local pivotY = active.position.y - cam.y
+	for i = 0, 5 do
+		local hitbox = active.hitboxes[i]
+		self:renderBox(active, hitbox, colors.RED)
+	end
+	if bit.band(flags.boxesActive, 0x10) == 0 then
+		self:renderBox(active, active.collisionBox, colors.WHITE)
+	end
 	self:pivot(pivotX, pivotY)
 end
 
 function KOF_XI:renderState()
-	self:setColor(color.rgb(255, 0, 0))
+	self:setColor(colors.BLACK)
 	for i = 1, 2 do self:drawPlayer(i) end
 end
 
