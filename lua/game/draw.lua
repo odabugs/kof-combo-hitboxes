@@ -11,12 +11,14 @@ local colors = require("render.colors")
 -- These methods expect the following to be defined on the calling object:
 -- - basicWidth, basicHeight, width, height
 -- - xOffset, yOffset, xScissor, yScissor, aspectMode
--- - pivotSize (for draw:pivot())
 local draw = {}
 
 -- all draw calls are shifted upward by this amount (before scaling)
 draw.absoluteYOffset = 0
 draw.pivotSize = 20
+draw.pivotColor = colors.rgb(255, 255, 255)
+draw.boxEdgeAlpha = 255
+draw.boxFillAlpha = 48
 
 function draw:getColor()
 	return self.directx.getColor()
@@ -54,8 +56,9 @@ function draw:rect(x1, y1, x2, y2, color)
 	self:rawRect(x1, y1, x2, y2, color)
 end
 
-function draw:pivot(x, y, color)
-	local p = self.pivotSize
+function draw:pivot(x, y, size, color)
+	local p = (size or self.pivotSize)
+	color = (color or self.pivotColor)
 	self:rect(x - p, y, x + p + 1, y, color)
 	self:rect(x, y - p, x, y + p + 1, color)
 end
@@ -68,7 +71,7 @@ function draw:box(x1, y1, x2, y2, color)
 	x1, x2 = self:ensureMinThickness(x1, x2)
 	y1, y2 = self:ensureMinThickness(y1, y2)
 
-	self:setColor(colors.setAlpha(color, 255))
+	self:setColor(colors.setAlpha(color, self.boxEdgeAlpha))
 	-- draw left edge
 	self:rawRect(x1, y1, x1 + 1, y2)
 	-- draw right edge
@@ -78,7 +81,7 @@ function draw:box(x1, y1, x2, y2, color)
 	-- draw bottom edge
 	self:rawRect(x1 + 1, y2 - 1, x2 - 1, y2)
 	-- draw fill
-	self:setColor(colors.setAlpha(color, 128))
+	self:setColor(colors.setAlpha(color, self.boxFillAlpha))
 	self:rawRect(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
 	self:setColor(oldColor)
 end
@@ -132,6 +135,9 @@ end
 
 function draw:shouldRenderFrame()
 	local fg = window.foreground()
+	--[=[
+	if window.isVisible(self.gameHwnd) then return true end
+	--]=]
 	if fg == self.gameHwnd then
 		return true
 	elseif fg == self.overlayHwnd and window.isVisible(self.gameHwnd) then
