@@ -74,8 +74,10 @@ typedef struct {
 // This struct is embedded in "playerMain" struct starting at +268h.
 // Exact struct size unknown, but known so far to be at least 0x23 bytes.
 typedef struct {
-	byte padding01[0x01B];    // +000h to +023h: Unknown
-	byte boxesActive;         // +01Bh: Collision box active + misc flags
+	byte padding01[0x01A];    // +000h to +01Ah: Unknown
+	// TODO: This is not a reliable test for the attack box's "activeness".
+	byte attackBoxActive;     // +01Ah: Attack box active?
+	byte collisionActive;     // +01Bh: Collision box active?
 	byte padding02[0x007];    // +01Ch to +023h: Unknown
 } playerFlags;
 
@@ -99,13 +101,24 @@ typedef struct {
 	byte padding04[0x0A6];    // +1C2h to +268h: Unknown
 	playerFlags flags;        // +268h: Various status flags
 	byte padding05[0x089];    // +28Bh to +314h: Unknown
-	hitbox hitboxes[6];       // +314h: Hitbox set (TODO: May be larger?)
-	hitbox collisionBox;      // +350h: Collision hitbox
+	union {
+		struct {
+			hitbox attackBox;    // +314h: Attack hitbox
+			hitbox vulnBox1;     // +31Eh: Vulnerable hitbox (also atttack?)
+			hitbox vulnBox2;     // +328h: Vulnerable hitbox
+			hitbox vulnBox3;     // +332h: Vulnerable hitbox
+			hitbox grabBox;      // +33Ch: Grab "attack" hitbox
+			hitbox hb6;          // +34Ch: Unused?
+			hitbox collisionBox; // +350h: Collision hitbox
+		};
+		hitbox hitboxes[7]; // +314h: Hitboxes list
+	};
 	byte padding06[0x196];    // +35Ah to +4F0h: Unknown
 	ubyte unknown03;          // +4F0h: Unknown status byte
 	byte padding07[0x091];    // +4F1h to +582h: Unknown
 	word stunTimer;           // +582h: Stun state timer (-1 = not stunned)
 } playerMain;
+typedef playerMain projectile;
 
 // this struct exists at 0x008A26E0 in game RAM
 typedef struct {
@@ -118,6 +131,7 @@ typedef struct {
 
 // Game allocates 6 of this struct (3 per player, 1 per character in play).
 // "teamMain" structs contain embedded instances of this struct.
+// Things will break if this struct is not 20h (decimal 32) bytes wide.
 typedef struct {
 	byte charID;              // +000h: Character ID (see roster.lua)
 	byte isSelected;          // +001h: Character selected? -1 = no, 0 = yes
@@ -146,9 +160,15 @@ typedef struct {
 	byte padding04[0x00D];    // +02Bh to +038h: Unknown
 	udword super;             // +038h: Super meter (0x70 = 1 full bar)
 	udword skillStock;        // +03Ch: Skill stock (0x70 = 1 full stock)
-	byte padding05[0x110];    // +040h to +150h: Unknown
+	byte padding05[0x080];    // +040h to +0C0h: Unknown
+	// There's a layer of indirection between the pointer addresses in this
+	// list and the actual locations of the projectile structs: Follow this
+	// pointer, then follow the pointer at the target address + 0x10.
+	// The last entry in this list is always NULL as a loop sentinel value.
+	intptr_t projectiles[16]; // +0C0h: Indirect pointers to projectiles
+	byte padding05[0x050];    // +100h to +150h: Unknown
 	playerExtra p[CHARS_PER_TEAM]; // +150h: "playerExtra" struct instances
-	byte padding06[0x090];    // +1B0h to +240h: Unknown
+	byte padding07[0x090];    // +1B0h to +240h: Unknown
 	word currentX;            // +240h: Current point character's X position
 } teamMain;
 
@@ -162,17 +182,23 @@ KOF_XI.absoluteYOffset = 34
 KOF_XI.teamPtrs = { 0x008A9690, 0x008A98D8 }
 KOF_XI.playerTablePtr = 0x008A26E0
 KOF_XI.cameraPtr = 0x008A9660
+KOF_XI.projCount = 16 -- per player (team)
 
 function KOF_XI:extraInit()
 	self.players = {}
+	self.projectiles = {}
+	self.projectilesActive = { {}, {} }
 	self.teams = {}
 	for i = 1, 2 do
 		self.players[i] = ffiutil.ntypes("playerMain", 3, 0)
+		self.projectiles[i] = ffiutil.ntypes("projectile", self.projCount, 0)
 		self.teams[i] = ffi.new("teamMain")
+		self:clearActiveProjectiles(i) -- init self.projectilesActive
 	end
 
 	self.playerTable = ffi.new("playerMainTable") -- shared by both players
 	self.camera = ffi.new("camera")
+	self.projPtrBuf = ffi.new("projectilePtr")
 	
 	---[=[
 	self:read(self.playerTablePtr, self.playerTable)
@@ -193,24 +219,54 @@ function KOF_XI:activeCharacter(which)
 	return self.players[which][activeIndex], activeIndex
 end
 
+function KOF_XI:clearActiveProjectiles(which)
+	local target = self.projectilesActive[which]
+	for i = 0, self.projCount - 1 do
+		target[i] = false
+	end
+end
+
+function KOF_XI:capturePlayerState(which)
+	local team = self.teams[which]
+	self:read(self.teamPtrs[which], team)
+	-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
+	for i = 0, 2 do
+		self:read(self.playerTable.p[which-1][i], self.players[which][i])
+	end
+
+	-- capture active projectiles
+	self:clearActiveProjectiles(which)
+	local projs = self.projectiles[which]
+	local projsActive = self.projectilesActive[which]
+	local projPtrs = team.projectiles
+	for i = 0, self.projCount - 1 do
+		local target = projPtrs[i]
+		--print("Read ", target)
+		if target ~= 0 then
+			target = self:readPtr(target + 0x10)
+			--print("- Read ", target)
+			if target ~= 0 then
+				self:read(target, projs[i])
+				projsActive[i] = true
+			end
+		end
+	end
+end
+
 function KOF_XI:captureState()
 	self:read(self.cameraPtr, self.camera)
 	self:read(self.playerTablePtr, self.playerTable)
 	for i = 1, 2 do
-		self:read(self.teamPtrs[i], self.teams[i])
-		-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
-		for j = 0, 2 do
-			self:read(self.playerTable.p[i-1][j], self.players[i][j])
-		end
+		self:capturePlayerState(i)
 	end
 
+	---[=[
 	local n = 1
 	local active, activeIndex = self:activeCharacter(n)
-	---[=[
 	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
 	activeIndex, active.position.x, active.position.y, self.playerTable.p[n-1][activeIndex] + self.RAMbase))
-	--]=]
 	io.flush()
+	--]=]
 end
 
 -- return -1 if player is facing left, or +1 if player is facing right
@@ -228,22 +284,34 @@ function KOF_XI:deriveBoxPosition(player, hitbox, camera)
 	centerX = playerX + (centerX * facing) -- positive offsets move forward
 	centerY = playerY - centerY -- positive offsets move upward
 	local w, h = hitbox.width * 2, hitbox.height * 2
-	local x1, x2 = centerX - w, centerX + w
-	local y1, y2 = centerY - h, centerY + h
 	--[=[
 	print(string.format("(%d, %d) to (%d, %d)", x1, x2, y1, y2))
 	--]=]
-	return x1, y1, x2, y2, centerX, centerY
+	return centerX, centerY, w, h
 end
 
 function KOF_XI:renderBox(player, hitbox, color)
-	local x1, y1, x2, y2, cx, cy = self:deriveBoxPosition(
+	if hitbox.width == 0 or hitbox.height == 0 then return end
+	local cx, cy, w, h = self:deriveBoxPosition(
 		player, hitbox, self.camera)
-	self:box(x1, y1, x2, y2, color)
+	self:box(cx - w, cy - h, cx + w, cy + h, color)
 	---[=[
 	self:pivot(cx, cy, 5, color)
 	--]=]
 end
+
+-- TODO: Boxes are currently colored according to their location in memory.
+-- "Proper" box type and active/inactive state checks are forthcoming.
+-- For now, inactive boxes will simply linger onscreen after they're done.
+local colormap = {
+	colors.RED,
+	colors.GREEN,
+	colors.BLUE,
+	colors.YELLOW,
+	colors.MAGENTA,
+	colors.CYAN,
+	colors.WHITE,
+}
 
 function KOF_XI:drawPlayer(which)
 	local active = self:activeCharacter(which)
@@ -253,12 +321,31 @@ function KOF_XI:drawPlayer(which)
 	local pivotY = active.position.y - cam.y
 	for i = 0, 5 do
 		local hitbox = active.hitboxes[i]
-		self:renderBox(active, hitbox, colors.RED)
+		self:renderBox(active, hitbox, colormap[i+1])
 	end
-	if bit.band(flags.boxesActive, 0x10) == 0 then
+	--[=[
+	if flags.attackBoxActive ~= 0 then
+		self:renderBox(active, active.attackBox, colors.RED)
+	end
+	--]=]
+	if bit.band(flags.collisionActive, 0x10) == 0 then
 		self:renderBox(active, active.collisionBox, colors.WHITE)
 	end
 	self:pivot(pivotX, pivotY)
+
+	-- draw active projectiles
+	local projs = self.projectiles[which]
+	local projsActive = self.projectilesActive[which]
+	for i = 0, self.projCount - 1 do
+		if projsActive[i] then
+			local proj = projs[i]
+			local px, py = proj.position.x, proj.position.y
+			for j = 0, 5 do
+				self:renderBox(proj, proj.hitboxes[j], colormap[j+1])
+			end
+			self:pivot(px - cam.x, py - cam.y, 20, colors.GREEN)
+		end
+	end
 end
 
 function KOF_XI:renderState()
