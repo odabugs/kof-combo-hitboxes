@@ -198,7 +198,6 @@ function KOF_XI:extraInit()
 
 	self.playerTable = ffi.new("playerMainTable") -- shared by both players
 	self.camera = ffi.new("camera")
-	self.projPtrBuf = ffi.new("projectilePtr")
 	
 	---[=[
 	self:read(self.playerTablePtr, self.playerTable)
