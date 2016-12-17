@@ -28,5 +28,8 @@ colors.BLACK       = c(000, 000, 000)
 colors.RED         = c(255, 000, 000)
 colors.GREEN       = c(000, 255, 000)
 colors.BLUE        = c(000, 000, 255)
+colors.YELLOW      = c(255, 255, 000)
+colors.MAGENTA     = c(255, 000, 255)
+colors.CYAN        = c(000, 255, 255)
 
 return colors
