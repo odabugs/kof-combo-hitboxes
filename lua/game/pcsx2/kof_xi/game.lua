@@ -113,9 +113,13 @@ typedef struct {
 		};
 		hitbox hitboxes[7]; // +314h: Hitboxes list
 	};
-	byte padding06[0x196];    // +35Ah to +4F0h: Unknown
+	byte padding06[0x044];    // +35Ah to +39Eh: Unknown
+	// The collision box is treated separately from the other hitboxes.
+	// Use "collisionActive" in the "playerFlags" struct for that one.
+	byte hitboxesActive;      // +39Eh: Hitbox active state flags
+	byte padding07[0x151];    // +39Fh to +4F0h: Unknown
 	ubyte unknown03;          // +4F0h: Unknown status byte
-	byte padding07[0x091];    // +4F1h to +582h: Unknown
+	byte padding08[0x091];    // +4F1h to +582h: Unknown
 	word stunTimer;           // +582h: Stun state timer (-1 = not stunned)
 } playerMain;
 typedef playerMain projectile;
@@ -283,9 +287,6 @@ function KOF_XI:deriveBoxPosition(player, hitbox, camera)
 	centerX = playerX + (centerX * facing) -- positive offsets move forward
 	centerY = playerY - centerY -- positive offsets move upward
 	local w, h = hitbox.width * 2, hitbox.height * 2
-	--[=[
-	print(string.format("(%d, %d) to (%d, %d)", x1, x2, y1, y2))
-	--]=]
 	return centerX, centerY, w, h
 end
 
@@ -318,9 +319,12 @@ function KOF_XI:drawPlayer(which)
 	local cam = self.camera.position
 	local pivotX = active.position.x - cam.x
 	local pivotY = active.position.y - cam.y
+	local boxstate = active.hitboxesActive
 	for i = 0, 5 do
-		local hitbox = active.hitboxes[i]
-		self:renderBox(active, hitbox, colormap[i+1])
+		if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
+			local hitbox = active.hitboxes[i]
+			self:renderBox(active, hitbox, colormap[i+1])
+		end
 	end
 	--[=[
 	if flags.attackBoxActive ~= 0 then
@@ -338,9 +342,12 @@ function KOF_XI:drawPlayer(which)
 	for i = 0, self.projCount - 1 do
 		if projsActive[i] then
 			local proj = projs[i]
+			boxstate = proj.hitboxesActive
 			local px, py = proj.position.x, proj.position.y
 			for j = 0, 5 do
-				self:renderBox(proj, proj.hitboxes[j], colormap[j+1])
+				if bit.band(boxstate, bit.lshift(1, j)) ~= 0 then
+					self:renderBox(proj, proj.hitboxes[j], colormap[j+1])
+				end
 			end
 			self:pivot(px - cam.x, py - cam.y, 20, colors.GREEN)
 		end
