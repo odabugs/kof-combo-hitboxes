@@ -313,43 +313,43 @@ local colormap = {
 	colors.WHITE,
 }
 
-function KOF_XI:drawPlayer(which)
-	local active = self:activeCharacter(which)
-	local flags = active.flags
+function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
+	pivotColor = (pivotColor or colors.WHITE)
 	local cam = self.camera.position
-	local pivotX = active.position.x - cam.x
-	local pivotY = active.position.y - cam.y
-	local boxstate = active.hitboxesActive
-	for i = 0, 5 do
-		if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
-			local hitbox = active.hitboxes[i]
-			self:renderBox(active, hitbox, colormap[i+1])
+	local pivotX = target.position.x - cam.x
+	local pivotY = target.position.y - cam.y
+	local boxstate = target.hitboxesActive
+	if boxstate ~= 0 then
+		for i = 0, 5 do
+			if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
+				local hitbox = target.hitboxes[i]
+				self:renderBox(target, hitbox, colormap[i+1])
+			end
+		end
+		if isProjectile then
+			self:pivot(pivotX, pivotY, 20, pivotColor)
 		end
 	end
-	--[=[
-	if flags.attackBoxActive ~= 0 then
-		self:renderBox(active, active.attackBox, colors.RED)
+	-- always draw pivot cross for players (but not projectiles),
+	-- and don't draw collision box for projectiles
+	if not isProjectile then
+		if bit.band(target.flags.collisionActive, 0x10) == 0 then
+			self:renderBox(target, target.collisionBox, colors.WHITE)
+		end
+		self:pivot(pivotX, pivotY, 20, pivotColor)
 	end
-	--]=]
-	if bit.band(flags.collisionActive, 0x10) == 0 then
-		self:renderBox(active, active.collisionBox, colors.WHITE)
-	end
-	self:pivot(pivotX, pivotY)
+end
 
+function KOF_XI:drawPlayer(which)
+	local active = self:activeCharacter(which)
+	self:drawCharacter(active)
 	-- draw active projectiles
 	local projs = self.projectiles[which]
 	local projsActive = self.projectilesActive[which]
 	for i = 0, self.projCount - 1 do
 		if projsActive[i] then
 			local proj = projs[i]
-			boxstate = proj.hitboxesActive
-			local px, py = proj.position.x, proj.position.y
-			for j = 0, 5 do
-				if bit.band(boxstate, bit.lshift(1, j)) ~= 0 then
-					self:renderBox(proj, proj.hitboxes[j], colormap[j+1])
-				end
-			end
-			self:pivot(px - cam.x, py - cam.y, 20, colors.GREEN)
+			self:drawCharacter(proj, colors.GREEN, true)
 		end
 	end
 end
