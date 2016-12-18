@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include "boxtypes.h"
 
 #undef max
 #undef min
@@ -18,7 +19,8 @@
 #define DIGIT_CHAR_SET "0123456789"
 #define UPPER_ALPHA_CHAR_SET "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define LOWER_ALPHA_CHAR_SET "abcdefghijklmnopqrstuvwxyz"
-#define ALPHA_CHAR_SET (UPPER_ALPHA_CHAR_SET LOWER_ALPHA_CHAR_SET)
+#define ALPHA_CHAR_SET (UPPER_ALPHA_CHAR_SET LOWER_ALPHA_CHAR_SET "_")
+#define HEX_DIGIT_SET (DIGIT_CHAR_SET "abcdef" "ABCDEF")
 #define WHITESPACE_CHAR_SET " \t" /* single-line whitespace */
 
 extern void timestamp();

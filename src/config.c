@@ -236,9 +236,18 @@ int handleColorsSection(gamedef_t *gamedef, const char *name, const char *value)
 	return result;
 }
 
+#define MATCH_BOX_TYPE_NAME(n, v) \
+	/*printf(#v " = %d, value = %s\n", v, value);*/ \
+	if ((valueByte == -1) && (stricmp(n, value) == 0)) { \
+		valueByte = (unsigned long)v; \
+		if (valueByte < 0 || valueByte >= totalBoxTypes) { \
+			whine(); \
+			return -1; \
+		} \
+	}
 int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
 {
-	unsigned long boxID, valueByte;
+	unsigned long boxID, valueByte = -1;
 	char *pos;
 
 	currentName = name;
@@ -251,12 +260,27 @@ int handleBoxIDsSection(gamedef_t *gamedef, const char *name, const char *value)
 
 	boxID = strtoul((boxIDstr + 1), &pos, 16);
 	RANGE_CHECK(boxID, 0x100);
+	boxID &= 0xFF;
 
-	valueByte = strtoul(value, &pos, 10);
-	RANGE_CHECK(valueByte, validBoxTypes);
+	MATCH_BOX_TYPE_NAME("dummy", b_x);
+	MATCH_BOX_TYPE_NAME("collision", b_c);
+	MATCH_BOX_TYPE_NAME("vulnerable", b_v);
+	MATCH_BOX_TYPE_NAME("counterVulnerable", b_vc);
+	MATCH_BOX_TYPE_NAME("anywhereJuggleVulnerable", b_va);
+	MATCH_BOX_TYPE_NAME("otgVulnerable", b_vo);
+	MATCH_BOX_TYPE_NAME("guard", b_g);
+	MATCH_BOX_TYPE_NAME("attack", b_a);
+	MATCH_BOX_TYPE_NAME("projectileVulnerable", b_pv);
+	MATCH_BOX_TYPE_NAME("projectileAttack", b_pa);
+	MATCH_BOX_TYPE_NAME("throwable", b_tv);
+	MATCH_BOX_TYPE_NAME("throw", b_t);
+	if (valueByte == -1)
+	{
+		valueByte = strtoul(value, &pos, 10);
+		RANGE_CHECK(valueByte, validBoxTypes);
+	}
 
 	timestamp();
-	boxID &= 0xFF;
 	printf("Setting box ID %02X to value %02X\n", boxID, valueByte);
 	currentGame->boxTypeMap[boxID] = (boxtype_t)valueByte;
 
