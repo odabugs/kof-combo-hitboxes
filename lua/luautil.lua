@@ -45,4 +45,28 @@ function luautil.extend(t, ...)
 	return t
 end
 
+function luautil.insertn(t, start, ...)
+	t = (t or {})
+	local n = start
+	local current
+	for i = 1, select("#", ...) do
+		current = select(i, ...)
+		t[n] = current
+		--io.write("Inserting ", current, " at index ", n, " in ", tostring(t), "\n")
+		n = n + 1
+	end
+	return t
+end
+
+function luautil.inserter(t, n)
+	n = (n or 1)
+	local f = luautil.insertn
+	return function(...)
+		local count = select("#", ...)
+		local result = f(t, n, ...)
+		n = n + count
+		return t
+	end
+end
+
 return luautil
