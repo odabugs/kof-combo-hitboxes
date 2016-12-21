@@ -9,6 +9,7 @@ local window = require("window")
 --local hk = require("hotkey")
 local colors = require("render.colors")
 local PCSX2_Common = require("game.pcsx2.common")
+local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
 local KOF_XI = PCSX2_Common:new()
 
 -- Game-specific struct definitions assume a little-endian memory layout.
@@ -62,21 +63,20 @@ typedef struct {
 	// X offset projects forward from player origin, based on the direction
 	// the player is facing.  Y offset projects upward from player origin.
 	coordPair position;       // +000h: X/Y offset from player origin
-	byte padding01[0x003];    // +004h to +007h: Unknown
+	byte boxID;               // +007h: Hitbox type (hittable, attack, etc.)
+	byte padding01[0x002];    // +005h to +007h: Unknown
 	// Width is added to the hitbox on both sides, so that the width given
 	// in the struct itself is half of the hitbox's "effective width".
 	// The same principle applies for the hitbox's height.
-	byte width;               // +007h: Hitbox width (in both directions)
-	byte height;              // +008h: Hitbox height (in both directions)
+	ubyte width;              // +007h: Hitbox width (in both directions)
+	ubyte height;             // +008h: Hitbox height (in both directions)
 	byte padding02[0x001];    // +009h: Unknown (DO NOT REMOVE THIS)
 } hitbox;
 
 // This struct is embedded in "playerMain" struct starting at +268h.
 // Exact struct size unknown, but known so far to be at least 0x23 bytes.
 typedef struct {
-	byte padding01[0x01A];    // +000h to +01Ah: Unknown
-	// TODO: This is not a reliable test for the attack box's "activeness".
-	byte attackBoxActive;     // +01Ah: Attack box active?
+	byte padding01[0x01B];    // +000h to +01Bh: Unknown
 	byte collisionActive;     // +01Bh: Collision box active?
 	byte padding02[0x007];    // +01Ch to +023h: Unknown
 } playerFlags;
@@ -244,10 +244,8 @@ function KOF_XI:capturePlayerState(which)
 	local projPtrs = team.projectiles
 	for i = 0, self.projCount - 1 do
 		local target = projPtrs[i]
-		--print("Read ", target)
 		if target ~= 0 then
 			target = self:readPtr(target + 0x10)
-			--print("- Read ", target)
 			if target ~= 0 then
 				self:read(target, projs[i])
 				projsActive[i] = true
@@ -263,7 +261,7 @@ function KOF_XI:captureState()
 		self:capturePlayerState(i)
 	end
 
-	---[=[
+	--[=[
 	local n = 1
 	local active, activeIndex = self:activeCharacter(n)
 	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
@@ -312,6 +310,10 @@ local colormap = {
 	colors.CYAN,
 	colors.WHITE,
 }
+local pboxes = {
+	[0] = "attack",
+	[4] = "grab",
+}
 
 function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 	pivotColor = (pivotColor or colors.WHITE)
@@ -323,9 +325,30 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 		for i = 0, 5 do
 			if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
 				local hitbox = target.hitboxes[i]
+				--[=[
+				if pboxes[i] ~= nil then
+					print(string.format(
+						"Active %s hitbox (ID: 0x%02X)",
+						pboxes[i], bit.band(hitbox.boxID, 0xFF)))
+				end
+				--]=]
+				--[=[
 				self:renderBox(target, hitbox, colormap[i+1])
+				--]=]
+				---[=[
+				local boxtype = boxtypes.typeForID(hitbox.boxID)
+				self:renderBox(target, hitbox, boxtypes.colorForType(boxtype))
+				--]=]
 			end
 		end
+		-- draw attack box on top of the others
+		--[=[
+		if  bit.band(boxstate, 1) ~= 0 then
+			local hitbox = target.attackBox
+			self:renderBox(target, hitbox, boxtypes.colorForID(hitbox.boxID))
+		end
+		--]=]
+		self:renderBox(target, target.hitboxes[5], colormap[6])
 		if isProjectile then
 			self:pivot(pivotX, pivotY, 20, pivotColor)
 		end
@@ -342,6 +365,7 @@ end
 
 function KOF_XI:drawPlayer(which)
 	local active = self:activeCharacter(which)
+	--if which == 1 then self:drawCharacter(active) end
 	self:drawCharacter(active)
 	-- draw active projectiles
 	local projs = self.projectiles[which]

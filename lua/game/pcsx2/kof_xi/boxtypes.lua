@@ -1,0 +1,92 @@
+local luautil = require("luautil")
+local colors = require("render.colors")
+local boxtypes = {}
+
+local add = luautil.inserter(boxtypes, 0)
+local b_xx = "dummy"
+local b_co = "collision"
+local b_c  = "counter"
+local b_v  = "vulnerable"
+local b_vc = "counterVuln"
+local b_va = "anywhereVuln"
+local b_vo = "otgVuln"
+local b_g  = "guard"
+local b_a  = "attack"
+local b_cl = "clash"
+local b_pv = "projVuln"
+local b_pa = "projAttack"
+local b_tv = "throwable"
+local b_t  = "throw"
+
+--  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
+add(b_xx, b_v , b_v , b_vc,  b_vc, b_v , b_vc, b_v ) -- 00h-07h
+add(b_xx, b_xx, b_xx, b_v ,  b_xx, b_xx, b_xx, b_xx) -- 08h-0Fh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 10h-17h
+add(b_xx, b_xx, b_xx, b_xx,  b_g , b_g , b_g , b_v ) -- 18h-1Fh
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 20h-27h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 28h-2Fh
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 30h-37h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 38h-3Fh
+--  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 40h-47h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 48h-4Fh
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 50h-57h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 58h-5Fh
+add(b_a , b_v , b_v , b_v ,  b_v , b_v , b_v , b_xx) -- 60h-67h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 68h-6Fh
+add(b_co, b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 70h-77h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 78h-7Fh
+--  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
+add(b_cl, b_cl, b_cl, b_cl,  b_xx, b_xx, b_xx, b_xx) -- 80h-87h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 88h-8Fh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 90h-97h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 98h-9Fh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- A0h-A7h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- A8h-AFh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- B0h-B7h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- B8h-BFh
+--  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_v ) -- C0h-C7h
+add(b_v , b_v , b_xx, b_xx,  b_v , b_v , b_v , b_v ) -- C8h-CFh
+add(b_v , b_v , b_v , b_v ,  b_xx, b_xx, b_xx, b_v ) -- D0h-D7h
+add(b_v , b_xx, b_v , b_v ,  b_xx, b_xx, b_xx, b_xx) -- D8h-DFh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- E0h-E7h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- E8h-EFh
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- F0h-F7h
+add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- F8h-FFh
+
+local colormap = {
+	[b_xx] = colors.rgba(000, 000, 000, 000),
+	[b_co] = colors.WHITE,
+	[b_c]  = colors.CYAN,
+	[b_v]  = colors.BLUE,
+	[b_vc] = colors.BLUE,
+	[b_va] = colors.BLUE,
+	[b_vo] = colors.BLUE,
+	[b_g]  = colors.CYAN,
+	[b_a]  = colors.RED,
+	[b_cl] = colors.BLACK,
+	[b_pv] = colors.YELLOW,
+	[b_pa] = colors.RED,
+	[b_tv] = colors.WHITE,
+	[b_t]  = colors.MAGENTA,
+}
+
+function boxtypes.typeForID(id)
+	return boxtypes[bit.band(id, 0xFF)]
+end
+
+function boxtypes.colorForID(id)
+	local boxtype = boxtypes[bit.band(id, 0xFF)]
+	return colormap[boxtype]
+end
+
+function boxtypes.colorForType(boxtype)
+	return colormap[boxtype]
+end
+
+--[[
+for k,v in pairs(boxtypes) do print(k,v) end
+for k,v in pairs(boxtypes.colormap) do print(k,v) end
+--]]
+return boxtypes
