@@ -25,12 +25,14 @@
 
 void mainLoop();
 void printHeader();
+static int traceback(lua_State *L);
 
 int WINAPI WinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpArgv, int nShowCmd)
 {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
+	lua_pushcfunction(L, traceback);
 	//SetCurrentDirectoryW(_T("lua"));
 	int status = luaL_loadfile(L, "lua/main.lua");
 	if (status != 0) {
@@ -38,7 +40,7 @@ int WINAPI WinMain(
 		exit(1);
 	}
 	// parse Lua scripts
-	int result = lua_pcall(L, 0, 0, 0);
+	int result = lua_pcall(L, 0, 0, 1);
 	if (result != 0) {
 		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
 		exit(1);
@@ -49,7 +51,7 @@ int WINAPI WinMain(
 	lua_createtable(L, 0, DIRECTX_LUA_FUNCTIONS_COUNT);
 	l_registerDirectX(L);
 	//printf("hInstance = 0x%08p\n", hInstance);
-	result = lua_pcall(L, 2, LUA_MULTRET, 0);
+	result = lua_pcall(L, 2, LUA_MULTRET, 1);
 	if (result != 0) {
 		printf("Error occurred inside Lua script: %s\n", lua_tostring(L, -1));
 		exit(1);
@@ -71,6 +73,29 @@ int WINAPI WinMain(
 	mainLoop();
 	cleanupProgram();
 	return 0;
+}
+static int traceback(lua_State *L)
+{
+	if (!lua_isstring(L, 1))  // 'message' not a string?
+	{
+		return 1;  // keep it intact
+	}
+	lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+	if (!lua_istable(L, -1))
+	{
+		lua_pop(L, 1);
+		return 1;
+	}
+	lua_getfield(L, -1, "traceback");
+	if (!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 2);
+		return 1;
+	}
+	lua_pushvalue(L, 1);  // pass error message
+	lua_pushinteger(L, 2);  // skip this function and traceback
+	lua_call(L, 2, 1);  // call debug.traceback
+	return 1;
 }
 
 void printHeader()
