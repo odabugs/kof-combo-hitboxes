@@ -113,8 +113,7 @@ function KOF_XI:worldToScreen(x, y)
 end
 
 -- translate a hitbox's position into coordinates suitable for drawing
-function KOF_XI:deriveBoxPosition(player, hitbox, camera)
-	local facing = self:facingMultiplier(player)
+function KOF_XI:deriveBoxPosition(player, hitbox, facing)
 	local playerX, playerY = player.position.x, player.position.y
 	playerX, playerY = self:worldToScreen(playerX, playerY)
 	local centerX, centerY = hitbox.position.x * 2, hitbox.position.y * 2
@@ -124,10 +123,9 @@ function KOF_XI:deriveBoxPosition(player, hitbox, camera)
 	return centerX, centerY, w, h
 end
 
-function KOF_XI:renderBox(player, hitbox, color)
+function KOF_XI:renderBox(player, hitbox, color, facing)
 	if hitbox.width == 0 or hitbox.height == 0 then return end
-	local cx, cy, w, h = self:deriveBoxPosition(
-		player, hitbox, self.camera)
+	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
 	self:box(cx - w, cy - h, cx + w, cy + h, color)
 	self:pivot(cx, cy, 5, color)
 end
@@ -137,11 +135,12 @@ local pboxes = {
 	[4] = "grab",
 }
 
-function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
+function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 	pivotColor = (pivotColor or colors.WHITE)
 	local rawX, rawY = target.position.x, target.position.y
 	local pivotX, pivotY = self:worldToScreen(rawX, rawY)
 	local boxstate = target.hitboxesActive
+	local boxtype = "dummy"
 	if boxstate ~= 0 then
 		--[=[
 		if isProjectile then
@@ -164,7 +163,6 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 						pboxes[i], bit.band(hitbox.boxID, 0xFF)))
 				end
 				--]=]
-				local boxtype
 				if i == 4 then -- use fixed color for "throw" hitboxes
 					boxtype = "throw"
 				else
@@ -182,7 +180,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 				end
 				--]=]
 				local boxcolor = boxtypes.colorForType(boxtype)
-				self:renderBox(target, hitbox, boxcolor)
+				self:renderBox(target, hitbox, boxcolor, facing)
 			end
 		end
 		if isProjectile then
@@ -193,7 +191,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 	-- and don't draw collision box for projectiles
 	if not isProjectile then
 		if bit.band(target.flags.collisionActive, 0x10) == 0 then
-			self:renderBox(target, target.collisionBox, colors.WHITE)
+			self:renderBox(target, target.collisionBox, colors.WHITE, facing)
 		end
 		self:pivot(pivotX, pivotY, 20, pivotColor)
 	end
@@ -201,15 +199,20 @@ end
 
 function KOF_XI:drawPlayer(which)
 	local active = self.players[which]
+	local facing = self:facingMultiplier(active)
 	--if which == 1 then self:drawCharacter(active) end
-	self:drawCharacter(active)
+	self:drawCharacter(active, colors.WHITE, false, facing)
 	-- draw active projectiles
 	local projs = self.projectiles[which]
 	local projsActive = self.projectilesActive[which]
 	for i = 0, self.projCount - 1 do
 		if projsActive[i] then
 			local proj = projs[i]
-			self:drawCharacter(proj, colors.GREEN, true)
+			-- Some projectiles (e.g., K' qcf+P) have the facing always set
+			-- to the same value, regardless of the player's actual facing.
+			-- This can result in projectiles appearing behind the player
+			-- when facing to the left, so we use the player's facing.
+			self:drawCharacter(proj, colors.GREEN, true, facing)
 		end
 	end
 end
