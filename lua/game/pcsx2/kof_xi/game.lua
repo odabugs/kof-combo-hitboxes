@@ -28,7 +28,7 @@ function KOF_XI:extraInit()
 	self.projectilesActive = { {}, {} }
 	self.teams = {}
 	for i = 1, 2 do
-		self.players[i] = ffiutil.ntypes("playerMain", 3, 0)
+		self.players[i] = ffi.new("playerMain")
 		self.projectiles[i] = ffiutil.ntypes("projectile", self.projCount, 0)
 		self.teams[i] = ffi.new("teamMain")
 		self:clearActiveProjectiles(i) -- init self.projectilesActive
@@ -67,9 +67,7 @@ function KOF_XI:capturePlayerState(which)
 	local team = self.teams[which]
 	self:read(self.teamPtrs[which], team)
 	-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
-	for i = 0, 2 do
-		self:read(self.playerTable.p[which-1][i], self.players[which][i])
-	end
+	self:read(self.playerTable.p[which-1][team.point], self.players[which])
 
 	-- capture active projectiles
 	self:clearActiveProjectiles(which)
@@ -202,7 +200,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile)
 end
 
 function KOF_XI:drawPlayer(which)
-	local active = self:activeCharacter(which)
+	local active = self.players[which]
 	--if which == 1 then self:drawCharacter(active) end
 	self:drawCharacter(active)
 	-- draw active projectiles
