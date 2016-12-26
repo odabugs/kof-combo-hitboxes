@@ -36,12 +36,16 @@ function draw:ensureMinThickness(l, r)
 	end
 end
 
--- to be overridden by derived objects of draw
 function draw:scaleCoords(x, y)
-	local newX = math.floor(x * self.xScale) + self.xOffset
-	local newY = math.floor(y * self.yScale) + self.yOffset
-	newY = newY - self.absoluteYOffset
-	return newX, newY
+	x = math.floor(x * self.xScale) + self.xOffset
+	y = math.floor(y * self.yScale) + self.yOffset
+	y = y - self.absoluteYOffset
+	return x, y
+end
+
+-- to be overridden by derived objects of draw
+function draw:worldToScreen(x, y)
+	return x, y
 end
 
 function draw:rawRect(x1, y1, x2, y2, color)
