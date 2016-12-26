@@ -60,17 +60,25 @@ end
 function mainLoop(game)
 	local message = ffi.new("MSG[1]")
 	local running = true
+	local drawing = true
+	local fg
 	while running do
+		fg = window.foreground()
 		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
 			C.TranslateMessage(message)
 			C.DispatchMessageW(message)
 		end
 
-		game:nextFrame()
-		if hk.down(hk.VK_Q) and window.isForeground(game.consoleHwnd) then
-			winutil.flushConsoleInput()
-			io.write("\n")
-			running = false
+		game:nextFrame(drawing)
+		if fg == game.consoleHwnd then
+			if hk.down(hk.VK_Q) then
+				winutil.flushConsoleInput()
+				io.write("\n")
+				running = false
+			end
+		end
+		if fg == game.consoleHwnd or fg == game.overlayHwnd or fg == game.gameHwnd then
+			if hk.pressed(0x20) then drawing = not drawing end
 		end
 		C.Sleep(5)
 	end

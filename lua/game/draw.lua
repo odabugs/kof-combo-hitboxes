@@ -139,7 +139,7 @@ end
 
 function draw:shouldRenderFrame()
 	local fg = window.foreground()
-	--[=[
+	---[=[
 	if window.isVisible(self.gameHwnd) then return true end
 	--]=]
 	if fg == self.gameHwnd then
