@@ -11,7 +11,6 @@ local PCSX2_Common = require("game.pcsx2.common")
 local types = require("game.pcsx2.kof_xi.types")
 local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
 local KOF_XI = PCSX2_Common:new()
-types:export(ffi)
 
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
@@ -21,8 +20,12 @@ KOF_XI.teamPtrs = { 0x008A9690, 0x008A98D8 }
 KOF_XI.playerTablePtr = 0x008A26E0
 KOF_XI.cameraPtr = 0x008A9660
 KOF_XI.projCount = 16 -- per player (team)
+KOF_XI.playersPerTeam = 3
+KOF_XI.whoami = "KOF_XI"
 
-function KOF_XI:extraInit()
+function KOF_XI:extraInit(noExport)
+	if not noExport then types:export(ffi) end
+	self.boxtypes = boxtypes
 	self.players = {}
 	self.projectiles = {}
 	self.projectilesActive = { {}, {} }
@@ -41,7 +44,7 @@ function KOF_XI:extraInit()
 	self:read(self.playerTablePtr, self.playerTable)
 	print()
 	for i = 1, 2 do
-		for j = 0, 2 do
+		for j = 0, self.playersPerTeam - 1 do
 			print(string.format(
 				"Player %d, character %d pointer: 0x%08X",
 				i, j, self.playerTable.p[i-1][j]))
@@ -49,11 +52,6 @@ function KOF_XI:extraInit()
 	end
 	print()
 	--]=]
-end
-
-function KOF_XI:activeCharacter(which)
-	local activeIndex = self.teams[which].point
-	return self.players[which][activeIndex], activeIndex
 end
 
 function KOF_XI:clearActiveProjectiles(which)
@@ -70,12 +68,12 @@ function KOF_XI:capturePlayerState(which)
 	self:read(self.playerTable.p[which-1][team.point], self.players[which])
 
 	-- capture active projectiles
-	self:clearActiveProjectiles(which)
 	local projs = self.projectiles[which]
 	local projsActive = self.projectilesActive[which]
 	local projPtrs = team.projectiles
 	for i = 0, self.projCount - 1 do
 		local target = projPtrs[i]
+		projsActive[i] = false
 		if target ~= 0 then
 			target = self:readPtr(target + 0x10)
 			if target ~= 0 then
@@ -95,7 +93,8 @@ function KOF_XI:captureState()
 
 	--[=[
 	local n = 1
-	local active, activeIndex = self:activeCharacter(n)
+	local activeIndex = self.teams[which].point
+	local active = self.players[which][activeIndex]
 	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
 	activeIndex, active.position.x, active.position.y, self.playerTable.p[n-1][activeIndex] + self.RAMbase))
 	io.flush()
@@ -140,7 +139,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 	local rawX, rawY = target.position.x, target.position.y
 	local pivotX, pivotY = self:worldToScreen(rawX, rawY)
 	local boxstate = target.hitboxesActive
-	local boxtype = "dummy"
+	local bt, boxtype = self.boxtypes, "dummy"
 	if boxstate ~= 0 then
 		--[=[
 		if isProjectile then
@@ -166,9 +165,9 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 				if i == 4 then -- use fixed color for "throw" hitboxes
 					boxtype = "throw"
 				else
-					boxtype = boxtypes.typeForID(hitbox.boxID)
+					boxtype = bt.typeForID(hitbox.boxID)
 					if isProjectile then
-						boxtype = boxtypes.asProjectile(boxtype)
+						boxtype = bt.asProjectile(boxtype)
 					end
 				end
 
@@ -179,7 +178,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 						i, bit.band(hitbox.boxID, 0xFF)))
 				end
 				--]=]
-				local boxcolor = boxtypes.colorForType(boxtype)
+				local boxcolor = bt.colorForType(boxtype)
 				self:renderBox(target, hitbox, boxcolor, facing)
 			end
 		end

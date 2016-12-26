@@ -29,8 +29,6 @@ local C = ffi.C
 
 local PM_REMOVE = 0x01 -- used by PeekMessage()
 
--- if KOF XI is currently running in PCSX2,
--- open it and print the pivot coordinates of player 1's lead character
 ---[[
 function main(hInstance, dxLib)
 	if type(dxLib) == "table" then
@@ -40,9 +38,8 @@ function main(hInstance, dxLib)
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected and detected.module == "pcsx2.kof_xi" then
-		--for k,v in pairs(detected) do print(k,v) end
-
 		local game = detectgame.moduleForGame(detected)
+		game:extraInit()
 		game:setupOverlay(dxLib)
 		return mainLoop(game)
 	else

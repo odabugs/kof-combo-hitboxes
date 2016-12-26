@@ -20,12 +20,14 @@ Game_Common.basicHeight = 1
 -- rule for handling aspect ratios that differ from the "ideal" aspect;
 -- values: "stretch", "letterbox", "pillarbox", "center"
 Game_Common.aspectMode = "stretch"
+Game_Common.whoami = "Game_Common"
 
 -- pass a result from detectgame.findSupportedGame() as the "source" param
 function Game_Common:new(source)
 	source = (source or {})
 	setmetatable(source, self)
 	self.__index = self
+	if source.parent == nil then source.parent = self end
 
 	-- values that are set once during init, but may vary based on
 	-- other variables set in the calling object
@@ -42,7 +44,6 @@ function Game_Common:new(source)
 	source.xScissor, source.yScissor = 1, 1
 	source.aspect = 1
 
-	source:extraInit()
 	return source
 end
 
@@ -91,9 +92,9 @@ function Game_Common:renderState()
 	return
 end
 
-function Game_Common:nextFrame()
+function Game_Common:nextFrame(drawing)
 	self:captureState()
-	if self:shouldRenderFrame() then
+	if drawing and self:shouldRenderFrame() then
 		self:repositionOverlay()
 		self.directx.beginFrame()
 		self:renderState()
