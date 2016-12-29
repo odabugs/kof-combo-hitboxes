@@ -1,0 +1,137 @@
+local commontypes = require("game.commontypes")
+local types = commontypes:new()
+
+-- Game-specific struct definitions assume a little-endian memory layout.
+-- "Absolute" address references are given relative to the start of PCSX2's
+-- emulated game RAM area, unless otherwise noted.  Add the value of
+-- PCSX2_Common.RAMbase (see game/pcsx2/common.lua) in order to get the
+-- "real" absolute address in PCSX2's memory space.  This also applies when
+-- dereferencing pointer values within the game's emulated RAM space.
+-- intptr_t is generally used in place of actual pointer types, in order to
+-- avoid excess GC overhead induced by frequent use of ffi.cast().
+types.typedefs = [[
+#pragma pack(push, 1) /* DO NOT REMOVE THIS */
+typedef int8_t byte;
+typedef uint8_t ubyte;
+typedef int16_t word;
+typedef uint16_t uword;
+typedef int32_t dword;
+typedef uint32_t udword;
+
+static const int PLAYERS = 2;
+static const int CHARS_PER_TEAM = 2;
+static const int BOXCOUNT = 7;
+
+// 16.16 fixed point coordinate
+typedef union {
+	struct {
+		uword part;           // +000h: Subpixels
+		word whole;           // +002h: Whole pixels
+	};
+	dword value;              // +000h: Complete value
+} fixed;
+typedef struct { fixed x; fixed y; } fixedPair;
+typedef struct { word x; word y; } coordPair;
+
+// this struct exists at 0x004399E0 in game RAM
+typedef struct {
+	// Use the distance between left and right camera edges to derive
+	// the current "zoom factor".  When the camera is fully zoomed in,
+	// this distance will be 640, and it will increase as the camera
+	// gradually zooms out.
+	word leftEdge;            // +000h: Left edge of visible area
+	word rightEdge;           // +002h: Right edge of visible area
+	byte padding01[0x00C];    // +004h to +010h: Unknown
+	word hCenter;             // +010h: Center between left/right edges
+	// Y = 0 when players are on solid ground.
+	// Y decreases as camera moves upward.
+	word y;                   // +012h: Y position
+} camera;
+
+// Multiple instances of this struct are embedded in "playerMain" below.
+// Things will break if this struct is not 0Ah (decimal 10) bytes wide.
+typedef struct {
+	byte boxID;               // +000h: Hitbox type (hittable, attack, etc.)
+	byte padding01[0x003];    // +001h to +004h: Unknown
+	// Hitbox position is expressed in terms of the center of the hitbox.
+	// X offset projects forward from player origin, based on the direction
+	// the player is facing.  Y offset projects upward from player origin.
+	coordPair position;       // +004h: X/Y offset from player origin
+	// Width is added to the hitbox on both sides, so that the width given
+	// in the struct itself is half of the hitbox's "effective width".
+	// The same principle applies for the hitbox's height.
+	ubyte width;              // +008h: Hitbox width (in both directions)
+	ubyte height;             // +009h: Hitbox height (in both directions)
+} hitbox;
+
+// This struct is embedded in "playerMain" struct starting at +260h.
+// Exact struct size is currently unknown.
+typedef struct {
+	byte padding01[0x01B];    // +000h to +01Bh: Unknown
+	byte collisionActive;     // +01Bh: Collision box active?
+} playerFlags;
+
+// Game allocates 4 of this struct (2 per player, 1 per character in play).
+// "playerMainTable" struct contains pointers to instances of this struct.
+typedef struct {
+	coordPair position;       // +000h: X/Y world position (4 bytes)
+	float unknown01;          // +004h: Unknown float
+	byte padding01[0x010];    // +008h to +018h: Unknown
+	// Positive X velocity moves forward; negative moves backward.
+	// Use the player facing to derive the "absolute" left/right velocity.
+	// Positive Y velocity moves upward; negative moves downward.
+	fixedPair velocity;       // +018h: X/Y velocity (8 bytes)
+	byte padding02[0x06C];    // +020h to +08Ch: Unknown
+	byte facing;              // +08Ch: Facing (00h = left, 02h = right)
+	byte padding03[0x1D3];    // +08Dh to +260h: Unknown
+	playerFlags flags;        // +260h: Various status flags
+	byte padding04[0x09C];    // +27Ch to +318h: Unknown
+	union {
+		struct {
+			hitbox attackBox;    // +318h: Attack hitbox
+			hitbox vulnBox1;     // +322h: Vulnerable hitbox (also atttack?)
+			hitbox vulnBox2;     // +32Ch: Vulnerable hitbox
+			hitbox vulnBox3;     // +336h: Vulnerable hitbox
+			hitbox grabBox;      // +340h: Grab "attack" hitbox
+			hitbox hb6;          // +34Ah: Unused?
+			hitbox collisionBox; // +354h: Collision hitbox
+		};
+		hitbox hitboxes[7]; // +318h: Hitboxes list
+	};
+	byte padding05[0x034];    // +35Eh to +392h: Unknown
+	byte hitboxesActive;      // +392h: Hitbox active state flags
+} playerMain;
+typedef playerMain projectile;
+
+// this struct exists at 0x004006D0 in game RAM
+typedef struct {
+	// 2x2 two-dimensional array of pointers to "playerMain" structs.
+	// First pair points to player 1's characters, second to player 2's.
+	// Each pair is ordered based on the player's first/second picks.
+	// See "teamMain" struct to find which char is currently on point.
+	intptr_t p[PLAYERS][CHARS_PER_TEAM]; // +000h: Pointers array
+} playerMainTable;
+
+// struct locations: 0x00439A00 (player 1), 0x00439BB4 (player 2)
+typedef struct {
+	byte padding01[0x003];    // +000h to +003h: Unknown
+	byte point;               // +003h: Current "point" character (0 or 1)
+	byte padding01[0x094];    // +004h to +098h: Unknown
+	// There's a layer of indirection between the pointer addresses in this
+	// list and the actual locations of the projectile structs: Follow this
+	// pointer, then follow the pointer at the target address + 0x10.
+	// The last entry in this list is always NULL as a loop sentinel value.
+	intptr_t projectiles[8];  // +098h: Indirect pointers to projectiles
+} teamMain;
+
+// this struct exists at 0x003857A0 in game RAM
+typedef struct {
+	// Value is equal to +1.0 when camera is zoomed in normally.
+	// Value increases as camera zooms outward.
+	double value;             // +000h: Zoom factor
+} zoom;
+
+#pragma pack(pop)
+]]
+
+return types
