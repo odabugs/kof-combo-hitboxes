@@ -1,6 +1,7 @@
 local luautil = require("luautil")
 local colors = require("render.colors")
-local boxtypes = {}
+local Boxtypes_Common = require("game.boxtypes_common")
+local boxtypes = Boxtypes_Common:new()
 
 local add = luautil.inserter(boxtypes, 0)
 local b_xx = "dummy"
@@ -75,22 +76,5 @@ boxtypes.asProjectileMap = {
 	[b_a]  = b_pa,
 	[b_v]  = b_pv,
 }
-boxtypes.idMask = 0xFF
 
-function boxtypes:typeForID(id)
-	return self[bit.band(id, self.idMask)]
-end
-
-function boxtypes:colorForType(boxtype)
-	return self.colormap[boxtype]
-end
-
-function boxtypes:asProjectile(boxtype)
-	return self.asProjectileMap[boxtype] or boxtype
-end
-
---[[
-for k,v in pairs(boxtypes) do print(k,v) end
-for k,v in pairs(boxtypes.colormap) do print(k,v) end
---]]
 return boxtypes
