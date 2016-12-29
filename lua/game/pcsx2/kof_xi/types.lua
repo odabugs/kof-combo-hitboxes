@@ -27,7 +27,7 @@ typedef struct {
 	float restrictor;         // +004h: Always equal to +1.0?
 } camera;
 
-// Multiple instances of this struct are embedded in "playerMain" below.
+// Multiple instances of this struct are embedded in "player" below.
 // Things will break if this struct is not 0Ah (decimal 10) bytes wide.
 typedef struct {
 	// Hitbox position is expressed in terms of the center of the hitbox.
@@ -44,7 +44,7 @@ typedef struct {
 	byte padding02[0x001];    // +009h: Unknown (DO NOT REMOVE THIS)
 } hitbox;
 
-// This struct is embedded in "playerMain" struct starting at +268h.
+// This struct is embedded in "player" struct starting at +268h.
 // Exact struct size unknown, but known so far to be at least 0x23 bytes.
 typedef struct {
 	byte padding01[0x01B];    // +000h to +01Bh: Unknown
@@ -53,9 +53,9 @@ typedef struct {
 } playerFlags;
 
 // Game allocates 6 of this struct (3 per player, 1 per character in play).
-// "playerMainTable" struct contains pointers to instances of this struct.
+// "playerTable" struct contains pointers to instances of this struct.
 // Not all essential information about each character is contained in this
-// struct; see "teamMain" and "playerExtra" structs below.
+// struct; see "team" and "playerExtra" structs below.
 typedef struct {
 	// Ground level Y = 0x02A0.  Y decreases as player moves upward.
 	coordPair position;       // +000h: X/Y world position (4 bytes)
@@ -92,20 +92,20 @@ typedef struct {
 	ubyte unknown03;          // +4F0h: Unknown status byte
 	byte padding08[0x091];    // +4F1h to +582h: Unknown
 	word stunTimer;           // +582h: Stun state timer (-1 = not stunned)
-} playerMain;
-typedef playerMain projectile;
+} player;
+typedef player projectile;
 
 // this struct exists at 0x008A26E0 in game RAM
 typedef struct {
-	// 2x3 two-dimensional array of pointers to "playerMain" structs.
+	// 2x3 two-dimensional array of pointers to "player" structs.
 	// First set of 3 points to player 1's characters, second to player 2's.
 	// Each set of 3 is ordered in the order the characters were selected.
-	// See "teamMain" struct to find which char is currently on point.
+	// See "team" struct to find which char is currently on point.
 	intptr_t p[PLAYERS][CHARS_PER_TEAM]; // +000h: Pointers array
-} playerMainTable;
+} playerTable;
 
 // Game allocates 6 of this struct (3 per player, 1 per character in play).
-// "teamMain" structs contain embedded instances of this struct.
+// "team" structs contain embedded instances of this struct.
 // Things will break if this struct is not 20h (decimal 32) bytes wide.
 typedef struct {
 	byte charID;              // +000h: Character ID (see roster.lua)
@@ -145,7 +145,7 @@ typedef struct {
 	playerExtra p[CHARS_PER_TEAM]; // +150h: "playerExtra" struct instances
 	byte padding07[0x090];    // +1B0h to +240h: Unknown
 	word currentX;            // +240h: Current point character's X position
-} teamMain;
+} team;
 
 #pragma pack(pop)
 ]]

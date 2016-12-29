@@ -11,27 +11,9 @@ local types = commontypes:new()
 -- avoid excess GC overhead induced by frequent use of ffi.cast().
 types.typedefs = [[
 #pragma pack(push, 1) /* DO NOT REMOVE THIS */
-typedef int8_t byte;
-typedef uint8_t ubyte;
-typedef int16_t word;
-typedef uint16_t uword;
-typedef int32_t dword;
-typedef uint32_t udword;
-
 static const int PLAYERS = 2;
 static const int CHARS_PER_TEAM = 2;
 static const int BOXCOUNT = 7;
-
-// 16.16 fixed point coordinate
-typedef union {
-	struct {
-		uword part;           // +000h: Subpixels
-		word whole;           // +002h: Whole pixels
-	};
-	dword value;              // +000h: Complete value
-} fixed;
-typedef struct { fixed x; fixed y; } fixedPair;
-typedef struct { word x; word y; } coordPair;
 
 // this struct exists at 0x004399E0 in game RAM
 typedef struct {
@@ -48,14 +30,14 @@ typedef struct {
 	word y;                   // +012h: Y position
 } camera;
 
-// Multiple instances of this struct are embedded in "playerMain" below.
+// Multiple instances of this struct are embedded in "player" below.
 // Things will break if this struct is not 0Ah (decimal 10) bytes wide.
 typedef struct {
 	byte boxID;               // +000h: Hitbox type (hittable, attack, etc.)
 	byte padding01[0x003];    // +001h to +004h: Unknown
 	// Hitbox position is expressed in terms of the center of the hitbox.
 	// X offset projects forward from player origin, based on the direction
-	// the player is facing.  Y offset projects upward from player origin.
+	// the player is facing.  Y offset projects downward from player origin.
 	coordPair position;       // +004h: X/Y offset from player origin
 	// Width is added to the hitbox on both sides, so that the width given
 	// in the struct itself is half of the hitbox's "effective width".
@@ -64,7 +46,7 @@ typedef struct {
 	ubyte height;             // +009h: Hitbox height (in both directions)
 } hitbox;
 
-// This struct is embedded in "playerMain" struct starting at +260h.
+// This struct is embedded in "player" struct starting at +260h.
 // Exact struct size is currently unknown.
 typedef struct {
 	byte padding01[0x01B];    // +000h to +01Bh: Unknown
@@ -72,7 +54,7 @@ typedef struct {
 } playerFlags;
 
 // Game allocates 4 of this struct (2 per player, 1 per character in play).
-// "playerMainTable" struct contains pointers to instances of this struct.
+// "playerTable" struct contains pointers to instances of this struct.
 typedef struct {
 	coordPair position;       // +000h: X/Y world position (4 bytes)
 	float unknown01;          // +004h: Unknown float
@@ -100,17 +82,17 @@ typedef struct {
 	};
 	byte padding05[0x034];    // +35Eh to +392h: Unknown
 	byte hitboxesActive;      // +392h: Hitbox active state flags
-} playerMain;
-typedef playerMain projectile;
+} player;
+typedef player projectile;
 
 // this struct exists at 0x004006D0 in game RAM
 typedef struct {
-	// 2x2 two-dimensional array of pointers to "playerMain" structs.
+	// 2x2 two-dimensional array of pointers to "player" structs.
 	// First pair points to player 1's characters, second to player 2's.
 	// Each pair is ordered based on the player's first/second picks.
-	// See "teamMain" struct to find which char is currently on point.
+	// See "team" struct to find which char is currently on point.
 	intptr_t p[PLAYERS][CHARS_PER_TEAM]; // +000h: Pointers array
-} playerMainTable;
+} playerTable;
 
 // struct locations: 0x00439A00 (player 1), 0x00439BB4 (player 2)
 typedef struct {
@@ -122,7 +104,7 @@ typedef struct {
 	// pointer, then follow the pointer at the target address + 0x10.
 	// The last entry in this list is always NULL as a loop sentinel value.
 	intptr_t projectiles[8];  // +098h: Indirect pointers to projectiles
-} teamMain;
+} team;
 
 // this struct exists at 0x003857A0 in game RAM
 typedef struct {

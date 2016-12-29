@@ -7,10 +7,10 @@ local winprocess = require("winprocess")
 local window = require("window")
 --local hk = require("hotkey")
 local colors = require("render.colors")
-local PCSX2_Common = require("game.pcsx2.common")
 local types = require("game.pcsx2.kof_xi.types")
 local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
-local KOF_XI = PCSX2_Common:new()
+local PCSX2_Common = require("game.pcsx2.common")
+local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
 
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
@@ -21,26 +21,23 @@ KOF_XI.playerTablePtr = 0x008A26E0
 KOF_XI.cameraPtr = 0x008A9660
 KOF_XI.projCount = 16 -- per player (team)
 KOF_XI.playersPerTeam = 3
-KOF_XI.whoami = "KOF_XI"
 
 function KOF_XI:extraInit(noExport)
 	if not noExport then types:export(ffi) end
 	self.boxtypes = boxtypes
-	self.players = {}
+	self.players = ffiutil.ntypes("player", 2, 1)
+	self.teams = ffiutil.ntypes("team", 2, 1)
 	self.projectiles = {}
 	self.projectilesActive = { {}, {} }
-	self.teams = {}
 	for i = 1, 2 do
-		self.players[i] = ffi.new("playerMain")
 		self.projectiles[i] = ffiutil.ntypes("projectile", self.projCount, 0)
-		self.teams[i] = ffi.new("teamMain")
 		local target = self.projectilesActive[i]
 		for j = 0, self.projCount - 1 do
 			target[j] = false
 		end
 	end
 
-	self.playerTable = ffi.new("playerMainTable") -- shared by both players
+	self.playerTable = ffi.new("playerTable") -- shared by both players
 	self.camera = ffi.new("camera")
 	
 	---[=[
