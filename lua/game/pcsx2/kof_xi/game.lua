@@ -34,7 +34,10 @@ function KOF_XI:extraInit(noExport)
 		self.players[i] = ffi.new("playerMain")
 		self.projectiles[i] = ffiutil.ntypes("projectile", self.projCount, 0)
 		self.teams[i] = ffi.new("teamMain")
-		self:clearActiveProjectiles(i) -- init self.projectilesActive
+		local target = self.projectilesActive[i]
+		for j = 0, self.projCount - 1 do
+			target[j] = false
+		end
 	end
 
 	self.playerTable = ffi.new("playerMainTable") -- shared by both players
@@ -54,23 +57,15 @@ function KOF_XI:extraInit(noExport)
 	--]=]
 end
 
-function KOF_XI:clearActiveProjectiles(which)
-	local target = self.projectilesActive[which]
-	for i = 0, self.projCount - 1 do
-		target[i] = false
-	end
+function KOF_XI:captureWorldState()
+	self:read(self.cameraPtr, self.camera)
+	self:read(self.playerTablePtr, self.playerTable)
 end
 
-function KOF_XI:capturePlayerState(which)
-	local team = self.teams[which]
-	self:read(self.teamPtrs[which], team)
-	-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
-	self:read(self.playerTable.p[which-1][team.point], self.players[which])
-
-	-- capture active projectiles
+function KOF_XI:capturePlayerProjectiles(which)
 	local projs = self.projectiles[which]
 	local projsActive = self.projectilesActive[which]
-	local projPtrs = team.projectiles
+	local projPtrs = self.teams[which].projectiles
 	for i = 0, self.projCount - 1 do
 		local target = projPtrs[i]
 		projsActive[i] = false
@@ -84,19 +79,28 @@ function KOF_XI:capturePlayerState(which)
 	end
 end
 
+function KOF_XI:capturePlayerState(which)
+	local team = self.teams[which]
+	self:read(self.teamPtrs[which], team)
+	-- mixed 0- and 1-based indexing cause WE'RE LIVIN' DANGEROUSLY
+	self:read(self.playerTable.p[which-1][team.point], self.players[which])
+	self:capturePlayerProjectiles(which)
+end
+
 function KOF_XI:captureState()
-	self:read(self.cameraPtr, self.camera)
-	self:read(self.playerTablePtr, self.playerTable)
+	self:captureWorldState()
 	for i = 1, 2 do
 		self:capturePlayerState(i)
 	end
 
-	--[=[
+	---[=[
 	local n = 1
-	local activeIndex = self.teams[which].point
-	local active = self.players[which][activeIndex]
-	io.write(string.format("\rP1 active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
-	activeIndex, active.position.x, active.position.y, self.playerTable.p[n-1][activeIndex] + self.RAMbase))
+	local activeIndex = self.teams[n].point
+	local active = self.players[n]
+	io.write(string.format(
+		"\rP%d active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
+		n, activeIndex, active.position.x, active.position.y,
+		self.playerTable.p[n-1][activeIndex] + self.RAMbase))
 	io.flush()
 	--]=]
 end
@@ -165,9 +169,9 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 				if i == 4 then -- use fixed color for "throw" hitboxes
 					boxtype = "throw"
 				else
-					boxtype = bt.typeForID(hitbox.boxID)
+					boxtype = bt:typeForID(hitbox.boxID)
 					if isProjectile then
-						boxtype = bt.asProjectile(boxtype)
+						boxtype = bt:asProjectile(boxtype)
 					end
 				end
 
@@ -178,7 +182,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 						i, bit.band(hitbox.boxID, 0xFF)))
 				end
 				--]=]
-				local boxcolor = bt.colorForType(boxtype)
+				local boxcolor = bt:colorForType(boxtype)
 				self:renderBox(target, hitbox, boxcolor, facing)
 			end
 		end

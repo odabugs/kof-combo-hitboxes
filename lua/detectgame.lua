@@ -108,6 +108,15 @@ local detectedGames = {
 		rawTitle = true,
 		targetProcessName = "pcsx2.exe",
 	},
+	{
+		module = "pcsx2.ngbc",
+		detectMethod = checkWindowTitleAndProcessName,
+		postprocess = findGameWindowByParentPID,
+		targetWindowTitle = "NeoGeo Battle Coliseum (NTSC-U)",
+		gameWindowTitle = "GSdx",
+		rawTitle = true,
+		targetProcessName = "pcsx2.exe",
+	},
 }
 
 function detectgame.findSupportedGame(hInstance, createOverlay)

@@ -55,7 +55,7 @@ add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- E8h-EFh
 add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- F0h-F7h
 add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- F8h-FFh
 
-local colormap = {
+boxtypes.colormap = {
 	[b_xx] = colors.rgba(000, 000, 000, 000),
 	[b_co] = colors.WHITE,
 	[b_c]  = colors.CYAN,
@@ -71,24 +71,22 @@ local colormap = {
 	[b_tv] = colors.WHITE,
 	[b_t]  = colors.MAGENTA,
 }
+boxtypes.asProjectileMap = {
+	[b_a]  = b_pa,
+	[b_v]  = b_pv,
+}
+boxtypes.idMask = 0xFF
 
-function boxtypes.typeForID(id)
-	return boxtypes[bit.band(id, 0xFF)]
+function boxtypes:typeForID(id)
+	return self[bit.band(id, self.idMask)]
 end
 
-function boxtypes.colorForID(id)
-	local boxtype = boxtypes[bit.band(id, 0xFF)]
-	return colormap[boxtype]
+function boxtypes:colorForType(boxtype)
+	return self.colormap[boxtype]
 end
 
-function boxtypes.colorForType(boxtype)
-	return colormap[boxtype]
-end
-
-function boxtypes.asProjectile(boxtype)
-	if boxtype == b_a then return b_pa
-	elseif boxtype == b_v then return b_pv
-	else return boxtype end
+function boxtypes:asProjectile(boxtype)
+	return self.asProjectileMap[boxtype] or boxtype
 end
 
 --[[
