@@ -16,6 +16,9 @@ KOF98.basicWidth = 320
 KOF98.basicHeight = 224
 KOF98.aspectMode = "pillarbox"
 KOF98.absoluteYOffset = 16
+KOF98.pivotSize = 5
+KOF98.boxPivotSize = 2
+KOF98.drawStaleThrowBoxes = true
 -- game-specific constants
 KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
 KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
@@ -86,7 +89,15 @@ function KOF98:renderBox(player, hitbox, color, facing)
 	if hitbox.width == 0 or hitbox.height == 0 then return end
 	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
 	self:box(cx - w, cy - h, cx + w, cy + h, color)
-	self:pivot(cx, cy, 5, color)
+	self:pivot(cx, cy, self.boxPivotSize, color)
+end
+
+function KOF98:throwableBoxIsActive(player, hitbox)
+	if bit.band(player.statusFlags2nd[3], 0x20) ~= 0 then return false
+	elseif bit.band(player.statusFlags[2], 0x03) == 1 then return false
+	elseif player.throwableStatus ~= 0 then return false
+	elseif bit.band(hitbox.boxID, 0x80) ~= 0 then return false
+	else return true end
 end
 
 local colormap = {
@@ -103,23 +114,56 @@ function KOF98:drawCharacter(target, pivotColor, isProjectile, facing)
 	facing = (facing or self:facingMultiplier(target))
 	local pivotX, pivotY = target.screenX, target.screenY
 	local boxstate = target.statusFlags[0]
-	local bt, boxtype = self.boxtypes, "dummy"
+	local bt, boxtype, boxesDrawn = self.boxtypes, "dummy", 0
+	local hitbox, boxColor
+	-- attack/vulnerable boxes
 	for i = 0, 3 do
 		if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
-			local hitbox = target.hitboxes[i]
+			hitbox = target.hitboxes[i]
 			boxtype = bt:typeForID(hitbox.boxID)
+			if i == 1 and boxtype == "attack" then
+				goto continue -- don't draw "ghost boxes" in '02UM
+			end
 			if isProjectile then
 				boxtype = bt:asProjectile(boxtype)
 			end
-			self:renderBox(target, hitbox, bt:colorForType(boxtype), facing)
+			boxColor = bt:colorForType(boxtype)
+			self:renderBox(target, hitbox, boxColor, facing)
+			boxesDrawn = boxesDrawn + 1
 			--self:renderBox(target, hitbox, colormap[i+1], facing)
+			::continue::
 		end
+	end
+	if not isProjectile then
+		-- collision box
+		hitbox = target.collisionBox
+		if hitbox.boxID ~= 0xFF then
+			boxColor = bt:colorForType("collision")
+			self:renderBox(target, hitbox, boxColor, facing)
+		end
+		-- "throw" box
+		hitbox = target.throwBox
+		if self.drawStaleThrowBoxes or (hitbox.boxID ~= 0) then
+			--print(string.format("Active throw box (ID=0x%02X)", hitbox.boxID))
+			boxColor = bt:colorForType("throw")
+			self:renderBox(target, hitbox, boxColor, facing)
+		end
+		-- "throwable" box
+		hitbox = target.throwableBox
+		if self:throwableBoxIsActive(target, hitbox) then
+			boxColor = bt:colorForType("throwable")
+			self:renderBox(target, hitbox, boxColor, facing)
+		end
+		self:pivot(pivotX, pivotY, self.pivotSize, pivotColor)
+	-- don't draw pivot axis for projectile if it has no active hitboxes
+	elseif boxesDrawn > 0 then
+		self:pivot(pivotX, pivotY, self.pivotSize, pivotColor)
 	end
 end
 
 function KOF98:drawPlayer(which)
 	local player = self.players[which]
-	self:drawCharacter(player, colors.WHITE)
+	self:drawCharacter(player)
 end
 
 function KOF98:drawProjectiles()
