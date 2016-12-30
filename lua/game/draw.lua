@@ -38,8 +38,8 @@ end
 
 function draw:scaleCoords(x, y)
 	x = math.floor(x * self.xScale) + self.xOffset
-	y = math.floor(y * self.yScale) + self.yOffset
-	y = y - self.absoluteYOffset
+	y = (y - self.absoluteYOffset) * self.yScale
+	y = math.floor(y) + self.yOffset
 	return x, y
 end
 
