@@ -14,8 +14,6 @@ types.typedefs = [[
 static const int HBLISTSIZE = 4;
 static const int BUTTONCOUNT = 4;
 
-typedef struct { byte x; byte y; } bytePair;
-
 typedef struct {
 	fixed x;                  // +000h: Camera X position
 	byte padding01[0x004];    // +004h to +008h: Unknown
@@ -130,7 +128,7 @@ typedef struct {
 	byte padding22[0x011];    // +07Fh to +090h: unknown
 	hitbox hitboxes[HBLISTSIZE]; // +090h to +0A4h: 1st base hitboxes list
 	hitbox collisionBox;      // +0A4h: Collision box
-	byte padding19[0x00A];    // +0AAh to +0B4h: unknown
+	byte padding19[0x00B];    // +0A9h to +0B4h: unknown
 	// These two point to "struct player"
 	intptr_t opponent;        // +0B4h: Pointer to opponent's main struct
 	intptr_t opponent_alt1;   // +0B8h: Opponent main struct (alt 1)
@@ -156,7 +154,7 @@ typedef struct {
 	byte padding16[0x02E];    // +15Ah to +188h: unknown
 	hitbox throwBox;          // +188h: "Throwing" box
 	hitbox throwableBox;      // +18Dh: "Throwable" box
-	byte padding21[0x011];    // +193h to +1A8h: unknown
+	byte padding21[0x012];    // +192h to +1A8h: unknown
 	// These two point to "struct playerExtra".
 	// This pointer is in different positions depending on the game.
 	intptr_t kof02_extra;     // +1A4h: Pointer to player's "extra" struct
@@ -164,7 +162,7 @@ typedef struct {
 	byte padding17[0x004];    // +1ACh to +1B0h: unknown
 	ubyte comboCounter;     // +1B0h: Combo counter ("belongs to" opponent)
 	byte padding18[0x023];    // +1B1h to +1D4h: unknown
-	ubyte throwableStatus2;   // +1D4h: "Throwable" status flag 2
+	ubyte throwableStatus;    // +1D4h: "Throwable" status flag
 	byte padding24[0x00E];    // +1D5h to +1E3h: unknown
 	ubyte superStocks;        // +1E3h: Whole super meter stocks
 } player;
