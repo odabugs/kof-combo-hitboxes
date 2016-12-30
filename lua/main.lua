@@ -37,13 +37,13 @@ function main(hInstance, dxLib)
 	end
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
-	if detected and detected.module == "pcsx2.kof_xi" or detected.module == "pcsx2.ngbc" then
+	if detected then
 		local game = detectgame.moduleForGame(detected)
 		game:extraInit()
 		game:setupOverlay(dxLib)
 		return mainLoop(game)
 	else
-		print(detected)
+		print("Failed to detect a supported game running.")
 	end
 end
 --]]
