@@ -69,7 +69,7 @@ boxtypes.colormap = {
 	[b_cl] = colors.BLACK,
 	[b_pv] = colors.GREEN,
 	[b_pa] = colors.YELLOW,
-	[b_tv] = colors.WHITE,
+	[b_tv] = colors.CYAN,
 	[b_t]  = colors.MAGENTA,
 }
 boxtypes.asProjectileMap = {
