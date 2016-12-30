@@ -117,7 +117,7 @@ function NGBC:renderBox(player, hitbox, color, facing)
 	local x2, y2 = cx + wz, cy + hz
 	--]=]
 	self:box(x1, y1, x2, y2, color)
-	self:pivot(cx, cy, 5, color)
+	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 
 return NGBC

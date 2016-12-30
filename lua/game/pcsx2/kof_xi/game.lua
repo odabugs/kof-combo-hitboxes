@@ -15,6 +15,8 @@ local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
 KOF_XI.absoluteYOffset = 34
+KOF_XI.pivotSize = 20
+KOF_XI.boxPivotSize = 5
 -- game-specific constants
 KOF_XI.teamPtrs = { 0x008A9690, 0x008A98D8 }
 KOF_XI.playerTablePtr = 0x008A26E0
@@ -127,7 +129,7 @@ function KOF_XI:renderBox(player, hitbox, color, facing)
 	if hitbox.width == 0 or hitbox.height == 0 then return end
 	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
 	self:box(cx - w, cy - h, cx + w, cy + h, color)
-	self:pivot(cx, cy, 5, color)
+	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 
 local pboxes = {
@@ -184,7 +186,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 			end
 		end
 		if isProjectile then
-			self:pivot(pivotX, pivotY, 20, pivotColor)
+			self:pivot(pivotX, pivotY, self.pivotSize, pivotColor)
 		end
 	end
 	-- always draw pivot cross for players (but not projectiles),
@@ -193,7 +195,7 @@ function KOF_XI:drawCharacter(target, pivotColor, isProjectile, facing)
 		if bit.band(target.flags.collisionActive, 0x10) == 0 then
 			self:renderBox(target, target.collisionBox, colors.WHITE, facing)
 		end
-		self:pivot(pivotX, pivotY, 20, pivotColor)
+		self:pivot(pivotX, pivotY, self.pivotSize, pivotColor)
 	end
 end
 
