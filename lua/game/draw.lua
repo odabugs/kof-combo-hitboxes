@@ -59,15 +59,28 @@ function draw:rawRect(x1, y1, x2, y2, color)
 	self.directx.rect(x1, y1, x2, y2, color)
 end
 
+function draw:rect(x1, y1, x2, y2, color)
+	x1, y1 = self:scaleCoords(x1, y1)
+	x2, y2 = self:scaleCoords(x2, y2)
+	x1, x2 = self:ensureMinThickness(x1, x2)
+	y1, y2 = self:ensureMinThickness(y1, y2)
+	self:rawRect(x1, y1, x2, y2, color)
+end
+
 function draw:pivot(x, y, size, color)
 	local p = (size or self.pivotSize)
 	color = (color or self.pivotColor)
-	self:box(x - p, y, x + p, y, color, true)
-	self:box(x, y - p, x, y + p, color, true)
+	if self.useThickLines then
+		self:box(x - p, y, x + p, y, color)
+		self:box(x, y - p, x, y + p, color)
+	else
+		self:rect(x - p, y, x + p + 1, y, color)
+		self:rect(x, y - p, x, y + p + 1, color)
+	end
 end
 
 function draw:box(x1, y1, x2, y2, color, thick)
-	thick = (thick or self.useThickLines)
+	if thick == nil then thick = self.useThickLines end
 	local corner = self.COORD_BOTTOM_RIGHT
 	local sameX, sameY = (x1 == x2), (y1 == y2)
 	local oldColor = self:getColor()
