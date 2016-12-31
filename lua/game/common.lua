@@ -8,7 +8,7 @@ local Game_Common = {}
 -- If you see something being used that's not defined here, look in there.
 luautil.extend(Game_Common, draw)
 
-local RAM_RANGE_EXCEEDED = "Attempted to step outside the limits of the RAM range."
+Game_Common.RAM_RANGE_ERROR = "Target address 0x%08X is outside of the range from 0x%08X (inclusive) to 0x%08X (exclusive)."
 
 -- value added to address parameter in every call to read()
 Game_Common.RAMbase = 0
@@ -68,7 +68,7 @@ end
 
 function Game_Common:read(address, buffer)
 	address = address + self.RAMbase
-	assert(address >= self.RAMbase and address < self.RAMlimit, RAM_RANGE_EXCEEDED)
+	self:pointerRangeCheck(address)
 	self.addressBuf.i = address
 	local result = winprocess.read(self.gameHandle, self.addressBuf, buffer)
 	return result, address
@@ -76,10 +76,19 @@ end
 
 function Game_Common:readPtr(address)
 	address = address + self.RAMbase
-	assert(address >= self.RAMbase and address < self.RAMlimit, RAM_RANGE_EXCEEDED)
+	self:pointerRangeCheck(address)
 	self.pointerBuf.i = address
 	winprocess.read(self.gameHandle, self.pointerBuf, self.pointerBuf)
 	return self.pointerBuf.i, address
+end
+
+function Game_Common:pointerRangeCheck(address)
+	local lower, upper = self.RAMbase, self.RAMlimit
+	if address < lower or address >= upper then
+		local message = string.format(self.RAM_RANGE_ERROR,
+			address, lower, upper)
+		error(message, 2)
+	end
 end
 
 -- to be overridden by derived objects
