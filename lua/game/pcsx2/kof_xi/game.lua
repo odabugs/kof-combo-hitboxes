@@ -14,7 +14,7 @@ local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
 
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
-KOF_XI.absoluteYOffset = 34
+KOF_XI.absoluteYOffset = 35
 KOF_XI.pivotSize = 20
 KOF_XI.boxPivotSize = 5
 -- game-specific constants
@@ -128,7 +128,7 @@ end
 function KOF_XI:renderBox(player, hitbox, color, facing)
 	if hitbox.width == 0 or hitbox.height == 0 then return end
 	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
-	self:box(cx - w, cy - h, cx + w, cy + h, color)
+	self:box(cx - w, cy - h, cx + w - 1, cy + h - 1, color)
 	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 

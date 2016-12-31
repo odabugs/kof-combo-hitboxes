@@ -1,9 +1,3 @@
-local ffi = require("ffi")
-local ffiutil = require("ffiutil")
-local luautil = require("luautil")
-local winerror = require("winerror")
-local winutil = require("winutil")
-local winprocess = require("winprocess")
 local window = require("window")
 local colors = require("render.colors")
 -- This class is not intended to be instantiated directly;
@@ -13,12 +7,19 @@ local colors = require("render.colors")
 -- - xOffset, yOffset, xScissor, yScissor, aspectMode
 local draw = {}
 
--- all draw calls are shifted upward by this amount (before scaling)
+-- all draw calls are shifted upward by this amount
 draw.absoluteYOffset = 0
 draw.pivotSize = 20
 draw.pivotColor = colors.rgb(255, 255, 255)
 draw.boxEdgeAlpha = 255
 draw.boxFillAlpha = 48
+draw.useThickLines = false
+
+-- optional flags to pass when calling draw:scaleCoords
+draw.COORD_RIGHT_EDGE = 0x01
+draw.COORD_BOTTOM_EDGE = 0x02
+draw.COORD_BOTTOM_RIGHT = bit.bor(
+	draw.COORD_RIGHT_EDGE, draw.COORD_BOTTOM_EDGE)
 
 function draw:getColor()
 	return self.directx.getColor()
@@ -29,17 +30,23 @@ function draw:setColor(newColor)
 end
 
 function draw:ensureMinThickness(l, r)
-	if l == r then
-		return l, l + 1
-	else
-		return math.min(l, r), math.max(l, r)
-	end
+	r = (r or l)
+	if l < r then return l, r + 1
+	else return r, l + 1 end
 end
 
-function draw:scaleCoords(x, y)
-	x = math.floor(x * self.xScale) + self.xOffset
-	y = (y - self.absoluteYOffset) * self.yScale
-	y = math.floor(y) + self.yOffset
+function draw:scaleCoords(x, y, flags)
+	flags = (flags or 0)
+	local xAdjust, yAdjust = 0, 0
+	if bit.band(flags, self.COORD_RIGHT_EDGE) ~= 0 then xAdjust = 1 end
+	if bit.band(flags, self.COORD_BOTTOM_EDGE) ~= 0 then yAdjust = 1 end
+
+	x = math.floor((x + xAdjust) * self.xScale) + self.xOffset
+	x = x - xAdjust
+
+	y = ((y + yAdjust) - self.absoluteYOffset) * self.yScale
+	-- Why does this work better when adding 1 extra?  IT IS A MYSTERY
+	y = math.floor(y) - yAdjust + self.yOffset + 1
 	return x, y
 end
 
@@ -52,41 +59,55 @@ function draw:rawRect(x1, y1, x2, y2, color)
 	self.directx.rect(x1, y1, x2, y2, color)
 end
 
-function draw:rect(x1, y1, x2, y2, color)
-	x1, y1 = self:scaleCoords(x1, y1)
-	x2, y2 = self:scaleCoords(x2, y2)
-	x1, x2 = self:ensureMinThickness(x1, x2)
-	y1, y2 = self:ensureMinThickness(y1, y2)
-	self:rawRect(x1, y1, x2, y2, color)
-end
-
 function draw:pivot(x, y, size, color)
 	local p = (size or self.pivotSize)
 	color = (color or self.pivotColor)
-	self:rect(x - p, y, x + p + 1, y, color)
-	self:rect(x, y - p, x, y + p + 1, color)
+	self:box(x - p, y, x + p, y, color, true)
+	self:box(x, y - p, x, y + p, color, true)
 end
 
-function draw:box(x1, y1, x2, y2, color)
+function draw:box(x1, y1, x2, y2, color, thick)
+	thick = (thick or self.useThickLines)
+	local corner = self.COORD_BOTTOM_RIGHT
+	local sameX, sameY = (x1 == x2), (y1 == y2)
 	local oldColor = self:getColor()
 	color = (color or oldColor)
-	x1, y1 = self:scaleCoords(x1, y1)
-	x2, y2 = self:scaleCoords(x2, y2)
-	x1, x2 = self:ensureMinThickness(x1, x2)
-	y1, y2 = self:ensureMinThickness(y1, y2)
+
+	local outerLeftX, outerTopY     = self:scaleCoords(x1, y1)
+	local outerRightX, outerBottomY = self:scaleCoords(x2, y2, corner)
+	local innerLeftX, innerTopY, innerRightX, innerBottomY
+	if thick then
+		innerLeftX, innerTopY      = self:scaleCoords(x1, y1, corner)
+		innerRightX, innerBottomY  = self:scaleCoords(x2, y2)
+		outerLeftX, innerLeftX     = self:ensureMinThickness(outerLeftX, innerLeftX)
+		outerTopY, innerTopY       = self:ensureMinThickness(outerTopY, innerTopY)
+		innerRightX, outerRightX   = self:ensureMinThickness(innerRightX, outerRightX)
+		innerBottomY, outerBottomY = self:ensureMinThickness(innerBottomY, outerBottomY)
+	else
+		outerLeftX, innerLeftX     = self:ensureMinThickness(outerLeftX)
+		outerRightX, innerRightX   = self:ensureMinThickness(outerRightX)
+		outerTopY, innerTopY       = self:ensureMinThickness(outerTopY)
+		innerBottomY, outerBottomY = self:ensureMinThickness(outerBottomY)
+	end
 
 	self:setColor(colors.setAlpha(color, self.boxEdgeAlpha))
 	-- draw left edge
-	self:rawRect(x1, y1, x1 + 1, y2)
+	self:rawRect(outerLeftX, outerTopY, innerLeftX, outerBottomY)
 	-- draw right edge
-	self:rawRect(x2 - 1, y1, x2, y2)
+	if not (sameX and thick) then
+		self:rawRect(innerRightX, outerTopY, outerRightX, outerBottomY)
+	end
 	-- draw top edge
-	self:rawRect(x1 + 1, y1, x2 - 1, y1 + 1)
+	self:rawRect(innerLeftX, outerTopY, innerRightX, innerTopY)
 	-- draw bottom edge
-	self:rawRect(x1 + 1, y2 - 1, x2 - 1, y2)
+	if not (sameY and thick) then
+		self:rawRect(innerLeftX, outerBottomY, innerRightX, innerBottomY)
+	end
 	-- draw fill
-	self:setColor(colors.setAlpha(color, self.boxFillAlpha))
-	self:rawRect(x1 + 1, y1 + 1, x2 - 1, y2 - 1)
+	if not ((sameX or sameY) and thick) then
+		self:setColor(colors.setAlpha(color, self.boxFillAlpha))
+		self:rawRect(innerLeftX, innerTopY, innerRightX, innerBottomY)
+	end
 	self:setColor(oldColor)
 end
 

@@ -17,7 +17,7 @@ local NGBC = KOF_XI:new({ parent = KOF_XI, whoami = "NGBC" })
 NGBC.basicWidth = 640
 NGBC.basicHeight = 448
 ---[[
-NGBC.absoluteYOffset = 23
+NGBC.absoluteYOffset = 22
 NGBC.groundLevel = NGBC.basicHeight - NGBC.absoluteYOffset
 --]]
 -- game-specific constants
@@ -116,7 +116,7 @@ function NGBC:renderBox(player, hitbox, color, facing)
 	local x1, y1 = cx - wz, cy - hz
 	local x2, y2 = cx + wz, cy + hz
 	--]=]
-	self:box(x1, y1, x2, y2, color)
+	self:box(x1, y1, x2 - 1, y2 - 1, color)
 	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 

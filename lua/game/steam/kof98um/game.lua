@@ -19,6 +19,7 @@ KOF98.absoluteYOffset = 16
 KOF98.pivotSize = 5
 KOF98.boxPivotSize = 2
 KOF98.drawStaleThrowBoxes = true
+KOF98.useThickLines = true
 -- game-specific constants
 KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
 KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
@@ -88,7 +89,7 @@ end
 function KOF98:renderBox(player, hitbox, color, facing)
 	if hitbox.width == 0 or hitbox.height == 0 then return end
 	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
-	self:box(cx - w, cy - h, cx + w, cy + h, color)
+	self:box(cx - w, cy - h, cx + w - 1, cy + h - 1, color)
 	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 
