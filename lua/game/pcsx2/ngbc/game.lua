@@ -67,14 +67,7 @@ function NGBC:capturePlayerState(which)
 	local activePtr = self.activePlayerPtrs[which]
 	activePtr = self:readPtr(activePtr)
 	local playerTable = self.playerTable.p[which-1]
-	-- checking whether the retrieved player pointer actually exists
-	-- in the player pointers table reduces player hitboxes "flickering"
-	for i = 0, self.playersPerTeam - 1 do
-		if activePtr == playerTable[i] then
-			self:read(activePtr, self.players[which])
-			break
-		end
-	end
+	self:read(activePtr, self.players[which])
 	self:capturePlayerProjectiles(which)
 end
 
