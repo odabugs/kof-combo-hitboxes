@@ -52,6 +52,25 @@ function Game_Common:extraInit()
 	return
 end
 
+function Game_Common:importRevisionSpecificOptions(overwrite, source)
+	if source == nil then
+		-- don't bother if the game doesn't have multiple revisions anyway
+		if self.revisions == nil then return
+		else
+			-- expects self.revision to be set beforehand by detectgame.lua
+			source = self.revisions[self.revision]
+			if source == nil then
+				error(string.format(
+					"Unrecognized revision (%s) of this game.", self.revision))
+			end
+		end
+	end
+
+	for k, v in pairs(source) do
+		if overwrite or (self[k] == nil) then self[k] = v end
+	end
+end
+
 function Game_Common:close()
 	window.destroy(self.overlayHwnd)
 	window.unregisterClass(self.atom, self.hInstance)
@@ -87,7 +106,7 @@ function Game_Common:pointerRangeCheck(address)
 	if address < lower or address >= upper then
 		local message = string.format(self.RAM_RANGE_ERROR,
 			address, lower, upper)
-		error(message, 2)
+		error(message, 3) -- throw error where read()/readPtr() was called
 	end
 end
 

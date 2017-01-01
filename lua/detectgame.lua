@@ -37,11 +37,29 @@ local function checkWindowTitleAndProcessName(params, hwnd, lParam)
 	local title = window.getWindowTitle(hwnd)
 	local targetTitle = params.targetWindowTitle
 	local raw = params.rawTitle
+	local detectedRevision = nil
 	if string.find(title, targetTitle, 1, raw) == nil then
 		return nil
 	end
+	-- does the target game have multiple revisions we have to check for?
+	if params.revisions ~= nil then
+		for k, v in pairs(params.revisions) do
+			print(string.format(
+				"Checking for \"%s\" in title \"%s\" (v=%s)...",
+				k, title, v))
+			if string.find(title, k, 1, true) ~= nil then
+				detectedRevision = v
+				break
+			end
+		end
+		if detectedRevision == nil then
+			-- TODO: better handling of unsupported revisions of a game
+			return nil
+		end
+	end
 	-- also opens handle on successful match
 	local result = checkClassName(hwnd, params)
+	if detectedRevision ~= nil then result.revision = detectedRevision end
 	return result
 end
 
@@ -101,7 +119,12 @@ local detectedGames = {
 		postprocess = findGameWindowByParentPID,
 		-- PCSX2's CONSOLE window title will start with this line
 		-- (we search for this window first because it has the game title)
-		targetWindowTitle = "King of Fighters XI, The (NTSC-U)",
+		targetWindowTitle = "King of Fighters XI",
+		revisions = {
+			["SLPS-25660"] = "NTSC-J",
+			["SLUS-21687"] = "NTSC-U",
+			["SLES-54437"] = "PAL",
+		},
 		-- PCSX2's GAME DISPLAY window title will contain this line
 		-- (this is the window we really want, not the console window)
 		gameWindowTitle = "GSdx",
@@ -112,7 +135,12 @@ local detectedGames = {
 		module = "pcsx2.ngbc",
 		detectMethod = checkWindowTitleAndProcessName,
 		postprocess = findGameWindowByParentPID,
-		targetWindowTitle = "NeoGeo Battle Coliseum (NTSC-U)",
+		targetWindowTitle = "NeoGeo Battle Coliseum",
+		revisions = {
+			-- TODO: japanese version of NGBC
+			["SLUS-21708"] = "NTSC-U",
+			["SLES-54395"] = "PAL",
+		},
 		gameWindowTitle = "GSdx",
 		rawTitle = true,
 		targetProcessName = "pcsx2.exe",

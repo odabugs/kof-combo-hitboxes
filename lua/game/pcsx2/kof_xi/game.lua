@@ -18,17 +18,35 @@ KOF_XI.absoluteYOffset = 35
 KOF_XI.pivotSize = 20
 KOF_XI.boxPivotSize = 5
 -- game-specific constants
-KOF_XI.teamPtrs = { 0x008A9690, 0x008A98D8 }
-KOF_XI.playerTablePtr = 0x008A26E0
-KOF_XI.cameraPtr = 0x008A9660
 KOF_XI.projCount = 16 -- per player (team)
 KOF_XI.playersPerTeam = 3
+KOF_XI.revisions = {
+	["NTSC-J"] = {
+		teamPtrs = { 0x009BDB50, 0x009BDD98 },
+		playerTablePtr = 0x009B6BC0,
+		cameraPtr = 0x009BDB20,
+	},
+	["NTSC-U"] = {
+		teamPtrs = { 0x008A9690, 0x008A98D8 },
+		playerTablePtr = 0x008A26E0,
+		cameraPtr = 0x008A9660,
+	},
+	["PAL"] = {
+		teamPtrs = { 0x008EF810, 0x008EFA58 },
+		playerTablePtr = 0x008E8860,
+		cameraPtr = 0x008EF7E0,
+	},
+}
 
 function KOF_XI:extraInit(noExport)
-	if not noExport then types:export(ffi) end
+	if not noExport then
+		types:export(ffi)
+		self:importRevisionSpecificOptions(true)
+	end
 	self.boxtypes = boxtypes
 	self.players = ffiutil.ntypes("player", 2, 1)
 	self.teams = ffiutil.ntypes("team", 2, 1)
+	self.camera = ffi.new("camera")
 	self.projectiles = {}
 	self.projectilesActive = { {}, {} }
 	for i = 1, 2 do
@@ -38,22 +56,23 @@ function KOF_XI:extraInit(noExport)
 			target[j] = false
 		end
 	end
-
-	self.playerTable = ffi.new("playerTable") -- shared by both players
-	self.camera = ffi.new("camera")
 	
-	---[=[
-	self:read(self.playerTablePtr, self.playerTable)
-	print()
-	for i = 1, 2 do
-		for j = 0, self.playersPerTeam - 1 do
-			print(string.format(
-				"Player %d, character %d pointer: 0x%08X",
-				i, j, self.playerTable.p[i-1][j]))
+	-- we use the player table for XI, but not for NGBC
+	if self.playerTablePtr ~= nil then
+		self.playerTable = ffi.new("playerTable") -- shared by both players
+		---[=[
+		self:read(self.playerTablePtr, self.playerTable)
+		print()
+		for i = 1, 2 do
+			for j = 0, self.playersPerTeam - 1 do
+				print(string.format(
+					"Player %d, character %d pointer: 0x%08X",
+					i, j, self.playerTable.p[i-1][j]))
+			end
 		end
+		print()
+		--]=]
 	end
-	print()
-	--]=]
 end
 
 function KOF_XI:captureWorldState()
@@ -92,7 +111,7 @@ function KOF_XI:captureState()
 		self:capturePlayerState(i)
 	end
 
-	---[=[
+	--[=[
 	local n = 1
 	local activeIndex = self.teams[n].point
 	local active = self.players[n]

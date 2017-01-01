@@ -21,18 +21,30 @@ NGBC.absoluteYOffset = 22
 NGBC.groundLevel = NGBC.basicHeight - NGBC.absoluteYOffset
 --]]
 -- game-specific constants
-NGBC.teamPtrs = { 0x00439A00, 0x00439BB4 }
-NGBC.playerTablePtr = 0x004006D0
---NGBC.activePlayerPtrs = { 0x018271E0, 0x018271E8 }
-NGBC.activePlayerPtrs = { 0x00385DB0, 0x00385DF0 }
-NGBC.cameraPtr = 0x004399E0
---NGBC.zoomPtr = 0x003857A0
-NGBC.zoomPtr = 0x01FFE2B0
 NGBC.projCount = 8
 NGBC.playersPerTeam = 2
+NGBC.revisions = {
+	-- TODO: revision-specific info for the japanese version of the game
+	["NTSC-U"] = {
+		teamPtrs = { 0x00439A00, 0x00439BB4 },
+		--activePlayerPtrs = { 0x018271E0, 0x018271E8 },
+		activePlayerPtrs = { 0x00385DB0, 0x00385DF0 },
+		cameraPtr = 0x004399E0,
+		--zoomPtr = 0x003857A0,
+		--zoomPtr = 0x01FFE2B0,
+	},
+	["PAL"] = {
+		teamPtrs = { 0x003CA480, 0x003CA634 },
+		activePlayerPtrs = { 0x00318F28, 0x00318F68 },
+		cameraPtr = 0x003CA460,
+	},
+}
 
 function NGBC:extraInit(noExport)
-	if not noExport then types:export(ffi) end
+	if not noExport then
+		types:export(ffi)
+		self:importRevisionSpecificOptions(true)
+	end
 	-- init XI, but using our typedefs instead
 	self.parent.extraInit(self, true)
 	self.zoomBuffer = ffi.new("zoom")
@@ -66,7 +78,6 @@ function NGBC:capturePlayerState(which)
 	self:read(self.teamPtrs[which], team)
 	local activePtr = self.activePlayerPtrs[which]
 	activePtr = self:readPtr(activePtr)
-	local playerTable = self.playerTable.p[which-1]
 	self:read(activePtr, self.players[which])
 	self:capturePlayerProjectiles(which)
 end
