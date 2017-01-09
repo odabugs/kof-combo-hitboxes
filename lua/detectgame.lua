@@ -121,6 +121,7 @@ local detectedGames = {
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
 		revisions = {
+			-- TODO: SLKA-25167, SLPS-25789, NPJD-00071
 			["SLPS-25660"] = "NTSC-J",
 			["SLUS-21687"] = "NTSC-U",
 			["SLES-54437"] = "PAL",
@@ -137,7 +138,7 @@ local detectedGames = {
 		postprocess = findGameWindowByParentPID,
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
-			-- TODO: japanese version of NGBC
+			-- TODO: japanese version (SLPS-25558, SLPS-25737, NPJD-00078)
 			["SLUS-21708"] = "NTSC-U",
 			["SLES-54395"] = "PAL",
 		},
