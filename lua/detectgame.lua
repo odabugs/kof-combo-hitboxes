@@ -121,8 +121,9 @@ local detectedGames = {
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
 		revisions = {
-			-- TODO: SLKA-25167, SLPS-25789, NPJD-00071
+			-- TODO: SLKA-25167, SLPS-25789
 			["SLPS-25660"] = "NTSC-J",
+			["SLPS-25789"] = "NTSC-J", -- TODO: NOT YET TESTED
 			["SLUS-21687"] = "NTSC-U",
 			["SLES-54437"] = "PAL",
 		},
@@ -138,7 +139,9 @@ local detectedGames = {
 		postprocess = findGameWindowByParentPID,
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
-			-- TODO: japanese version (SLPS-25558, SLPS-25737, NPJD-00078)
+			-- Both NTSC-J revisions report as SLPS-25558 in PCSX2 console
+			["SLPS-25558"] = "NTSC-J",
+			["SLPS-25737"] = "NTSC-J", -- PCSX2 thinks this is the same?
 			["SLUS-21708"] = "NTSC-U",
 			["SLES-54395"] = "PAL",
 		},

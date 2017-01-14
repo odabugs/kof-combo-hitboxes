@@ -25,6 +25,11 @@ NGBC.projCount = 8
 NGBC.playersPerTeam = 2
 NGBC.revisions = {
 	-- TODO: revision-specific info for the japanese version of the game
+	["NTSC-J"] = {
+		teamPtrs = { 0x009DDFF0, 0x009DE1A4 },
+		activePlayerPtrs = { 0x009DD8C0, 0x009DD940 },
+		cameraPtr = 0x009DDFD0,
+	},
 	["NTSC-U"] = {
 		teamPtrs = { 0x00439A00, 0x00439BB4 },
 		--activePlayerPtrs = { 0x018271E0, 0x018271E8 },
