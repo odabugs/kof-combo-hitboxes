@@ -25,6 +25,7 @@
 
 void mainLoop();
 void printHeader();
+lua_Integer lRegEntryCount(const luaL_Reg reg[]);
 static int traceback(lua_State *L);
 
 int WINAPI WinMain(
@@ -48,8 +49,9 @@ int WINAPI WinMain(
 	// call main() in Lua, with hInstance as first argument
 	lua_getglobal(L, "main");
 	lua_pushinteger(L, (lua_Integer)hInstance);
-	lua_createtable(L, 0, DIRECTX_LUA_FUNCTIONS_COUNT);
-	l_registerDirectX(L);
+	//lua_createtable(L, 0, DIRECTX_LUA_FUNCTIONS_COUNT);
+	lua_createtable(L, 0, lRegEntryCount(lib_directX));
+	luaL_register(L, NULL, lib_directX);
 	//printf("hInstance = 0x%08p\n", hInstance);
 	result = lua_pcall(L, 2, LUA_MULTRET, 1);
 	if (result != 0) {
@@ -74,6 +76,7 @@ int WINAPI WinMain(
 	cleanupProgram();
 	return 0;
 }
+
 static int traceback(lua_State *L)
 {
 	if (!lua_isstring(L, 1))  // 'message' not a string?
@@ -105,6 +108,21 @@ void printHeader()
 	printf("Note: This tool requires Windows Vista or newer with Windows Aero enabled.\n");
 	printf("Additionally, please ensure that the Desktop Window Manager service is enabled.\n");
 	printf("\n");
+}
+
+lua_Integer lRegEntryCount(const luaL_Reg reg[])
+{
+	int result = 0;
+	if (reg != (luaL_Reg*)NULL)
+	{
+		while ((reg[result].name != (char*)NULL) && (reg[result].func != (lua_CFunction)NULL))
+		{
+			result++;
+		}
+	}
+
+	printf("lRegEntryCount returned %d for 0x%08p\n", result, reg);
+	return (lua_Integer)result;
 }
 
 void mainLoop()

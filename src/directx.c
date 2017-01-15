@@ -6,12 +6,8 @@ LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 UINT screenWidth, screenHeight;
 D3DCOLOR currentColor;
 
-CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE] = {
-	{ 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) },
-	{ 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) },
-	{ 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) },
-	{ 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) }
-};
+CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
+CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE];
 
 d3dRenderOption_t renderStateOptions[] = {
 	{ D3DRS_ZENABLE, FALSE },
@@ -43,6 +39,11 @@ void setupD3D(HWND hwnd)
 	presentParams.BackBufferWidth = screenWidth;
 	presentParams.BackBufferHeight = screenHeight;
 	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
+
+	for (int i = 0; i < BOX_VERTEX_BUFFER_SIZE; i++)
+	{
+		memcpy(&(templateBoxBuffer[i]), &templateVertex, sizeof(templateVertex));
+	}
 
 	IDirect3D9_CreateDevice(
 		d3d,
@@ -225,7 +226,7 @@ static int l_endFrame(lua_State *L)
 	return 0;
 }
 
-static const luaL_Reg lib_directX[] = {
+const luaL_Reg lib_directX[] = {
 	{ "setupD3D", l_setupD3D },
 	{ "rect", l_DXRectangle },
 	{ "getColor", l_getColor },
@@ -236,9 +237,3 @@ static const luaL_Reg lib_directX[] = {
 	{ "endFrame", l_endFrame },
 	{ NULL, NULL } // sentinel
 };
-
-int l_registerDirectX(lua_State *L)
-{
-	luaL_register(L, NULL, lib_directX);
-	return 1;
-}

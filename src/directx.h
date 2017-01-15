@@ -10,9 +10,9 @@
 #include <lauxlib.h>
 
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
-#define BOX_VERTEX_BUFFER_SIZE 4
+// slight overkill, but OK
+#define BOX_VERTEX_BUFFER_SIZE 100
 #define MASK_32BITS 0xFFFFFFFF
-#define DIRECTX_LUA_FUNCTIONS_COUNT 6
 
 typedef struct customVertexFormat {
 	FLOAT x, y, z, rhw;
@@ -32,6 +32,7 @@ extern CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE];
 extern UINT screenWidth, screenHeight;
 extern D3DCOLOR currentColor;
 extern d3dRenderOption_t renderStateOptions[];
+extern const luaL_Reg lib_directX[];
 
 extern void setupD3D(HWND hwnd);
 extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
@@ -40,6 +41,5 @@ extern void setScissor(int width, int height);
 extern void clearFrame();
 extern void beginFrame();
 extern void endFrame();
-extern int l_registerDirectX(lua_State *L);
 
 #endif /* DIRECTX_H */
