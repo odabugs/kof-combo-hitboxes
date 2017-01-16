@@ -27,20 +27,27 @@ VOID Sleep(DWORD ms);
 ]]
 local C = ffi.C
 
-local PM_REMOVE = 0x01 -- used by PeekMessage()
-
 ---[[
-function main(hInstance, dxLib)
-	if type(dxLib) == "table" then
-		--for k,v in pairs(dxLib) do print(k,v) end
-		_G.directx = dxLib
+function main(hInstance, CLibs)
+	--[=[
+	if type(CLibs) == "table" then
+		for k, v in pairs(CLibs) do
+			if _G[k] == nil then
+				_G[k] = v
+				print("Registered " .. k)
+			else
+				print(k .. " already exists")
+			end
+			print(k, v)
+		end
 	end
+	--]=]
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected then
 		local game = detectgame.moduleForGame(detected)
 		game:extraInit()
-		game:setupOverlay(dxLib)
+		game:setupOverlay(CLibs.directx)
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")
@@ -56,9 +63,11 @@ end
 
 function mainLoop(game)
 	local message = ffi.new("MSG[1]")
+	local PM_REMOVE = 0x01
 	local running = true
 	local drawing = true
 	local fg
+
 	while running do
 		fg = window.foreground()
 		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do

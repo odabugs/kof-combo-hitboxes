@@ -12,7 +12,7 @@ DEFINES=-D UNICODE -D _UNICODE
 CFLAGS=-std=c11 -g -mwindows -mconsole $(DEFINES) $(INCLUDES)
 LDFLAGS=$(LIBS) -ld3d9 -lluajit -lShlwapi 
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=directx.o playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
+OBJECTS=luautil.o directx.o playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
 HEADERS=$(subst .o,.h,$(OBJECTS))
 KOF98_HEADERS=kof98_boxtypemap.h kof98_gamedef.h
 KOF02_HEADERS=$(subst 98,02,$(KOF98_HEADERS))
