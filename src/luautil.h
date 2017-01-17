@@ -13,8 +13,6 @@ typedef struct {
 } lRegSet;
 
 extern int lTraceback(lua_State *L);
-extern int lRegEntryCount(const luaL_Reg *reg);
-extern int lRegSetEntryCount(const lRegSet *regs);
 extern int lRegisterAll(lua_State *L, const lRegSet *regs, bool asGlobals);
 
 #endif /* LUAUTIL_H */

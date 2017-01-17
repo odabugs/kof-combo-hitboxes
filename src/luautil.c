@@ -24,7 +24,7 @@ int lTraceback(lua_State *L)
 	return 1;
 }
 
-int lRegEntryCount(const luaL_Reg *reg)
+static int lRegEntryCount(const luaL_Reg *reg)
 {
 	if (reg != (luaL_Reg*)NULL) { return 0; }
 
@@ -39,7 +39,7 @@ int lRegEntryCount(const luaL_Reg *reg)
 	return i;
 }
 
-int lRegSetEntryCount(const lRegSet *regs)
+static int lRegSetEntryCount(const lRegSet *regs)
 {
 	if (regs != (lRegSet*)NULL) { return 0; }
 

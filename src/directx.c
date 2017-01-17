@@ -1,13 +1,18 @@
 #include "directx.h"
 
+#define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
+// slight overkill, but OK
+#define BOX_VERTEX_BUFFER_SIZE 100
+#define MASK_32BITS 0xFFFFFFFF
+
 LPDIRECT3D9 d3d;
 LPDIRECT3DDEVICE9 d3dDevice;
 LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 UINT screenWidth, screenHeight;
 D3DCOLOR currentColor;
+RECT scissorRect = { .right = (LONG)1, .bottom = (LONG)1 };
 
 CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
-CUSTOMVERTEX templateBoxBuffer[BOX_VERTEX_BUFFER_SIZE];
 
 d3dRenderOption_t renderStateOptions[] = {
 	{ D3DRS_ZENABLE, FALSE },
@@ -40,11 +45,6 @@ void setupD3D(HWND hwnd)
 	presentParams.BackBufferHeight = screenHeight;
 	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
 
-	for (int i = 0; i < BOX_VERTEX_BUFFER_SIZE; i++)
-	{
-		memcpy(&(templateBoxBuffer[i]), &templateVertex, sizeof(templateVertex));
-	}
-
 	IDirect3D9_CreateDevice(
 		d3d,
 		D3DADAPTER_DEFAULT,
@@ -72,9 +72,12 @@ void setupD3D(HWND hwnd)
 		&boxBuffer,
 		NULL);
 
-	VOID *pVoid;
+	CUSTOMVERTEX *pVoid;
 	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
-	memcpy(pVoid, templateBoxBuffer, sizeof(templateBoxBuffer));
+	for (int i = 0; i < BOX_VERTEX_BUFFER_SIZE; i++)
+	{
+		memcpy(&(pVoid[i]), &templateVertex, sizeof(templateVertex));
+	}
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 }
 
@@ -88,7 +91,7 @@ static int l_setupD3D(lua_State *L)
 	return 0;
 }
 
-void DXRectangle(int leftX, int topY, int rightX, int bottomY)
+void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY)
 {
 	static VOID *pVoid;
 	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
@@ -98,11 +101,16 @@ void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 		{ leftX,  bottomY, 1.0f, 1.0f, currentColor },
 		{ rightX, bottomY, 1.0f, 1.0f, currentColor }
 	};
-	memcpy(pVoid, vertices, sizeof(CUSTOMVERTEX) * 4);
+	memcpy(pVoid, vertices, sizeof(vertices));
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
-	//printf("(%d, %d) to (%d, %d)\n", leftX, topY, rightX, bottomY);
+	//printf("(%f, %f) to (%f, %f)\n", leftX, topY, rightX, bottomY);
+}
+
+void DXRectangle(int leftX, int topY, int rightX, int bottomY)
+{
+	DXRectangleF((FLOAT)leftX, (FLOAT)topY, (FLOAT)rightX, (FLOAT)bottomY);
 }
 
 // Takes 4 mandatory arguments: Left X, top Y, right X, bottom Y (all integers)
@@ -110,21 +118,8 @@ void DXRectangle(int leftX, int topY, int rightX, int bottomY)
 // Returns 0 values
 static int l_DXRectangle(lua_State *L)
 {
-	int leftX = luaL_checkint(L, 1), topY = luaL_checkint(L, 2);
-	int rightX = luaL_checkint(L, 3), bottomY = luaL_checkint(L, 4);
-	int temp = 0;
-	if (leftX > rightX)
-	{
-		temp = leftX;
-		leftX = rightX;
-		rightX = temp;
-	}
-	if (topY > bottomY)
-	{
-		temp = topY;
-		topY = bottomY;
-		bottomY = temp;
-	}
+	FLOAT leftX  = luaL_checknumber(L, 1), topY    = luaL_checknumber(L, 2);
+	FLOAT rightX = luaL_checknumber(L, 3), bottomY = luaL_checknumber(L, 4);
 
 	D3DCOLOR newColor = 0, oldColor = currentColor;
 	// if we got a 5th argument for the color, use it then restore old color after
@@ -132,13 +127,67 @@ static int l_DXRectangle(lua_State *L)
 	{
 		newColor = (D3DCOLOR)luaL_checkint(L, 5);
 		setColor(newColor);
-		DXRectangle(leftX, topY, rightX, bottomY);
+		DXRectangleF(leftX, topY, rightX, bottomY);
 		setColor(oldColor);
 	}
 	else
 	{
-		DXRectangle(leftX, topY, rightX, bottomY);
+		DXRectangleF(leftX, topY, rightX, bottomY);
 	}
+	return 0;
+}
+
+// create vertices that render as a square when using D3DPT_TRIANGLELIST
+#define squareTriangleList(left, top, right, bottom, color) \
+	{ left,  top,    1.0f, 1.0f, color }, \
+	{ right, top,    1.0f, 1.0f, color }, \
+	{ left,  bottom, 1.0f, 1.0f, color }, \
+	{ right, top,    1.0f, 1.0f, color }, \
+	{ right, bottom, 1.0f, 1.0f, color }, \
+	{ left,  bottom, 1.0f, 1.0f, color }
+
+static void drawHitbox(
+	FLOAT outerLeftX, FLOAT outerTopY, FLOAT outerRightX, FLOAT outerBottomY,
+	FLOAT innerLeftX, FLOAT innerTopY, FLOAT innerRightX, FLOAT innerBottomY,
+	D3DCOLOR edge, D3DCOLOR fill)
+{
+	static VOID *pVoid;
+	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
+	CUSTOMVERTEX vertices[] = {
+		// inside fill
+		squareTriangleList(innerLeftX,  innerTopY,    innerRightX, innerBottomY, fill),
+		// left edge
+		squareTriangleList(outerLeftX,  outerTopY,    innerLeftX,  outerBottomY, edge),
+		// right edge
+		squareTriangleList(innerRightX, outerTopY,    outerRightX, outerBottomY, edge),
+		// top edge
+		squareTriangleList(innerLeftX,  outerTopY,    innerRightX, innerTopY,    edge),
+		// bottom edge
+		squareTriangleList(innerLeftX,  innerBottomY, innerRightX, outerBottomY, edge)
+	};
+	memcpy(pVoid, vertices, sizeof(vertices));
+	IDirect3DVertexBuffer9_Unlock(boxBuffer);
+	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
+	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLELIST, 0, 10);
+}
+
+// Takes 10 arguments:
+// - X/Y of outer top-left corner
+// - X/Y of outer bottom-right corner
+// - X/Y of inner top-left corner
+// - X/Y of inner bottom-right corner
+// - Box edge color
+// - Box fill color
+// Returns 0 values
+static int l_drawHitbox(lua_State *L)
+{
+	drawHitbox(
+		luaL_checknumber(L, 1), luaL_checknumber(L, 2),
+		luaL_checknumber(L, 3), luaL_checknumber(L, 4),
+		luaL_checknumber(L, 5), luaL_checknumber(L, 6),
+		luaL_checknumber(L, 7), luaL_checknumber(L, 8),
+		(D3DCOLOR)luaL_checkint(L, 9), (D3DCOLOR)luaL_checkint(L, 10)
+	);
 	return 0;
 }
 
@@ -170,8 +219,9 @@ static int l_getColor(lua_State *L)
 
 void setScissor(int width, int height)
 {
-	RECT fullscreenRect = { .right = (LONG)width, .bottom = (LONG)height };
-	IDirect3DDevice9_SetScissorRect(d3dDevice, &fullscreenRect);
+	scissorRect.right = (LONG)width;
+	scissorRect.bottom = (LONG)height;
+	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
 }
 
 // Requires 2 arguments: New width/height of scissor clipping area (top-left is {0, 0})
@@ -229,6 +279,7 @@ static int l_endFrame(lua_State *L)
 const luaL_Reg lib_directX[] = {
 	{ "setupD3D", l_setupD3D },
 	{ "rect", l_DXRectangle },
+	{ "hitbox", l_drawHitbox },
 	{ "getColor", l_getColor },
 	{ "setColor", l_setColor },
 	{ "setScissor", l_setScissor },

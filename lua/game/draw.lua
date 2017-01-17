@@ -103,25 +103,11 @@ function draw:box(x1, y1, x2, y2, color, thick)
 		innerBottomY, outerBottomY = self:ensureMinThickness(outerBottomY)
 	end
 
-	self:setColor(colors.setAlpha(color, self.boxEdgeAlpha))
-	-- draw left edge
-	self:rawRect(outerLeftX, outerTopY, innerLeftX, outerBottomY)
-	-- draw right edge
-	if not (sameX and thick) then
-		self:rawRect(innerRightX, outerTopY, outerRightX, outerBottomY)
-	end
-	-- draw top edge
-	self:rawRect(innerLeftX, outerTopY, innerRightX, innerTopY)
-	-- draw bottom edge
-	if not (sameY and thick) then
-		self:rawRect(innerLeftX, outerBottomY, innerRightX, innerBottomY)
-	end
-	-- draw fill
-	if not ((sameX or sameY) and thick) then
-		self:setColor(colors.setAlpha(color, self.boxFillAlpha))
-		self:rawRect(innerLeftX, innerTopY, innerRightX, innerBottomY)
-	end
-	self:setColor(oldColor)
+	self.directx.hitbox(
+		outerLeftX, outerTopY, outerRightX, outerBottomY,
+		innerLeftX, innerTopY, innerRightX, innerBottomY,
+		colors.setAlpha(color, self.boxEdgeAlpha),
+		colors.setAlpha(color, self.boxFillAlpha))
 end
 
 function draw:calculateScreenOffset(actual, baseline, scale)

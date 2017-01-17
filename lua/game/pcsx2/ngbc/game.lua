@@ -11,7 +11,7 @@ local types = require("game.pcsx2.ngbc.types")
 local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
 local KOF_XI = require("game.pcsx2.kof_xi.game")
 -- extraInit() will get stuck and eventually stack overflow
--- if you don't set "parent" on the calling object beforehand
+-- if you don't set "parent" on the table parameter beforehand
 local NGBC = KOF_XI:new({ parent = KOF_XI, whoami = "NGBC" })
 
 NGBC.basicWidth = 640

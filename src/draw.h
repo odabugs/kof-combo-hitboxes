@@ -4,8 +4,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winuser.h>
-#define CINTERFACE
-#include <d3d9.h>
 #include <stdbool.h>
 #include "directx.h"
 #include "playerstruct.h"
