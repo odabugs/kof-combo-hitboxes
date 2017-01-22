@@ -114,6 +114,14 @@ local detectedGames = {
 		targetProcessName = "KingOfFighters2002UM.exe",
 	},
 	{
+		module = "steam.kof_xiii",
+		detectMethod = checkWindowTitleAndProcessName,
+		postprocess = noPostprocess,
+		targetWindowTitle = "The King of Fighters XIII",
+		rawTitle = true,
+		targetProcessName = "kofxiii.exe",
+	},
+	{
 		module = "pcsx2.kof_xi",
 		detectMethod = checkWindowTitleAndProcessName,
 		postprocess = findGameWindowByParentPID,
