@@ -81,7 +81,7 @@ end
 
 function draw:box(x1, y1, x2, y2, color, thick)
 	if thick == nil then thick = self.useThickLines end
-	local corner = self.COORD_BOTTOM_RIGHT
+	local corner = (thick and self.COORD_BOTTOM_RIGHT) or 0
 	local sameX, sameY = (x1 == x2), (y1 == y2)
 	local oldColor = self:getColor()
 	color = (color or oldColor)

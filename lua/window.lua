@@ -28,6 +28,8 @@ typedef struct _MARGINS {
 	int cyBottomHeight;
 } MARGINS, *PMARGINS;
 
+HICON LoadIconW(HINSTANCE hInstance, LPCTSTR lpIconName);
+HCURSOR LoadCursorW(HINSTANCE hInstance, LPCTSTR lpIconName);
 BOOL SetWindowTextW(HWND hWnd, LPCTSTR lpString);
 int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
 int GetWindowTextLengthW(HWND hWnd);
@@ -105,8 +107,8 @@ window.defaultWindowClass = {
 	cbClsExtra = 0,
 	cbWndExtra = 0,
 	hInstance = NULL,
-	hIcon = NULL,
-	hCursor = NULL,
+	hIcon = C.LoadIconW(NULL, ffi.cast("LPCTSTR", 32512)),
+	hCursor = C.LoadCursorW(NULL, ffi.cast("LPCTSTR", 32512)),
 	hbrBackground = NULL,
 	lpszMenuName = window.defaultWindowTitle,
 	lpszClassName = window.defaultWindowTitle,
