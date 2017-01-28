@@ -28,8 +28,6 @@ typedef struct _MARGINS {
 	int cyBottomHeight;
 } MARGINS, *PMARGINS;
 
-HICON LoadIconW(HINSTANCE hInstance, LPCTSTR lpIconName);
-HCURSOR LoadCursorW(HINSTANCE hInstance, LPCTSTR lpIconName);
 BOOL SetWindowTextW(HWND hWnd, LPCTSTR lpString);
 int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
 int GetWindowTextLengthW(HWND hWnd);
@@ -62,6 +60,13 @@ HWND CreateWindowExW(
 	HINSTANCE hInstance,  // optional
 	LPVOID lpParam);
 BOOL DestroyWindow(HWND hWnd);
+HANDLE LoadImageW(
+	HINSTANCE hinst, // optional
+	LPCTSTR lpszName,
+	UINT uType,
+	int cxDesired,
+	int cyDesired,
+	UINT fuLoad);
 
 // functions from dwmapi.dll (supported only in Windows Vista and newer)
 HRESULT DwmIsCompositionEnabled(BOOL *pfEnabled);
@@ -99,6 +104,7 @@ window.extendMarginsPtr = ffi.new("MARGINS[1]", window.extendMargins)
 function window.getDefaultTitle()
 	return ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
 end
+local oemResource = ffi.cast("LPCTSTR", 32512)
 window.defaultWindowTitle = window.getDefaultTitle()
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
@@ -107,12 +113,12 @@ window.defaultWindowClass = {
 	cbClsExtra = 0,
 	cbWndExtra = 0,
 	hInstance = NULL,
-	hIcon = C.LoadIconW(NULL, ffi.cast("LPCTSTR", 32512)),
-	hCursor = C.LoadCursorW(NULL, ffi.cast("LPCTSTR", 32512)),
+	hIcon = C.LoadImageW(NULL, oemResource, 1, 32, 32, 0),
+	hCursor = C.LoadImageW(NULL, oemResource, 2, 32, 32, 0),
 	hbrBackground = NULL,
 	lpszMenuName = window.defaultWindowTitle,
 	lpszClassName = window.defaultWindowTitle,
-	hIconSm = NULL,
+	hIcon = C.LoadImageW(NULL, oemResource, 1, 16, 16, 0),
 }
 window.createWindowExDefaults = {
 	dwExStyle = bit.bor(
