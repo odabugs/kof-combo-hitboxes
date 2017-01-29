@@ -23,6 +23,7 @@ function colors.setAlpha(color, a)
 end
 
 local c = colors.rgb
+colors.CLEAR       = c(000, 000, 000, 000)
 colors.WHITE       = c(255, 255, 255)
 colors.BLACK       = c(000, 000, 000)
 colors.RED         = c(255, 000, 000)
