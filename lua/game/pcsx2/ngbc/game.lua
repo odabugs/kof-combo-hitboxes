@@ -49,7 +49,7 @@ function NGBC:extraInit(noExport)
 		self:importRevisionSpecificOptions(true)
 		self.boxtypes = boxtypes
 		self.boxset = BoxSet:new(
-			self.boxtypes.order, 20, self.boxsetSlotConstructor,
+			self.boxtypes.order, 20, self.boxSlotConstructor,
 			self.boxtypes)
 	end
 	-- init XI, but using our typedefs instead
