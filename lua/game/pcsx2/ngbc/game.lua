@@ -9,6 +9,7 @@ local window = require("window")
 local colors = require("render.colors")
 local types = require("game.pcsx2.ngbc.types")
 local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
+local BoxSet = require("game.boxset")
 local KOF_XI = require("game.pcsx2.kof_xi.game")
 -- extraInit() will get stuck and eventually stack overflow
 -- if you don't set "parent" on the table parameter beforehand
@@ -16,15 +17,12 @@ local NGBC = KOF_XI:new({ parent = KOF_XI, whoami = "NGBC" })
 
 NGBC.basicWidth = 640
 NGBC.basicHeight = 448
----[[
 NGBC.absoluteYOffset = 22
 NGBC.groundLevel = NGBC.basicHeight - NGBC.absoluteYOffset
---]]
 -- game-specific constants
 NGBC.projCount = 8
 NGBC.playersPerTeam = 2
 NGBC.revisions = {
-	-- TODO: revision-specific info for the japanese version of the game
 	["NTSC-J"] = {
 		teamPtrs = { 0x009DDFF0, 0x009DE1A4 },
 		activePlayerPtrs = { 0x009DD8C0, 0x009DD940 },
@@ -49,6 +47,10 @@ function NGBC:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
 		self:importRevisionSpecificOptions(true)
+		self.boxtypes = boxtypes
+		self.boxset = BoxSet:new(
+			self.boxtypes.order, 20, self.boxsetSlotConstructor,
+			self.boxtypes)
 	end
 	-- init XI, but using our typedefs instead
 	self.parent.extraInit(self, true)
@@ -79,12 +81,14 @@ function NGBC:captureWorldState()
 end
 
 function NGBC:capturePlayerState(which)
-	local team = self.teams[which]
+	local team, player = self.teams[which], self.players[which]
 	self:read(self.teamPtrs[which], team)
 	local activePtr = self.activePlayerPtrs[which]
 	activePtr = self:readPtr(activePtr)
-	self:read(activePtr, self.players[which])
-	self:capturePlayerProjectiles(which)
+	self:read(activePtr, player)
+	local facing = self:facingMultiplier(player)
+	self:captureEntity(player, facing, false)
+	self:capturePlayerProjectiles(which, facing)
 end
 
 function NGBC:worldToScreen(x, y)
@@ -98,35 +102,6 @@ function NGBC:worldToScreen(x, y)
 	y = self.basicHeight + y
 	--]=]
 	return x, y
-end
-
--- translate a hitbox's position into coordinates suitable for drawing
-function NGBC:deriveBoxPosition(player, hitbox, facing)
-	local playerX, playerY = player.position.x, player.position.y
-	local centerX, centerY = hitbox.position.x * 2, hitbox.position.y * 2
-	centerX = playerX + (centerX * facing) -- positive offsets move forward
-	centerY = playerY - centerY -- positive offsets move upward
-	local w, h = hitbox.width * 2, hitbox.height * 2
-	return centerX, centerY, w, h
-end
-
-function NGBC:renderBox(player, hitbox, color, facing)
-	if hitbox.width == 0 or hitbox.height == 0 then return end
-	local cx, cy, w, h = self:deriveBoxPosition(player, hitbox, facing)
-	---[=[
-	local x1, y1 = self:worldToScreen(cx - w, cy - h)
-	local x2, y2 = self:worldToScreen(cx + w, cy + h)
-	cx, cy = self:worldToScreen(cx, cy)
-	--]=]
-	--[=[
-	cx, cy = self:worldToScreen(cx, cy)
-	local z = self.zoom
-	local wz, hz = w * z, h * z
-	local x1, y1 = cx - wz, cy - hz
-	local x2, y2 = cx + wz, cy + hz
-	--]=]
-	self:box(x1, y1, x2 - 1, y2 - 1, color)
-	self:pivot(cx, cy, self.boxPivotSize, color)
 end
 
 return NGBC

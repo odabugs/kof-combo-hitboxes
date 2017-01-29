@@ -22,7 +22,6 @@ function BoxSet:new(order, countPerLayer, slotConstructor, ...)
 
 	setmetatable(result, self)
 	self.__index = self
-	for k,v in pairs(result) do print(k,v) end
 	return result
 end
 
