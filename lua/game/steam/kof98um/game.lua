@@ -104,10 +104,8 @@ function KOF98:captureState()
 end
 
 -- return -1 if player is facing left, or +1 if player is facing right
-function KOF98:facingMultiplier(player, inverse)
-	local result = ((player.facing == 0) and 1) or -1
-	if inverse then result = -result end
-	return result
+function KOF98:facingMultiplier(player)
+	return ((player.facing == 0) and 1) or -1
 end
 
 -- translate a hitbox's position into coordinates suitable for drawing
