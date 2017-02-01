@@ -8,6 +8,7 @@ local window = require("window")
 --local hk = require("hotkey")
 local colors = require("render.colors")
 local boxtypes = require("game.steam.kof2002um.boxtypes")
+local BoxSet = require("game.boxset")
 local KOF98 = require("game.steam.kof98um.game")
 local KOF02 = KOF98:new({ parent = KOF98, whoami = "KOF02" })
 
@@ -21,6 +22,8 @@ KOF02.projectilesListInfo = { start = 0x0166DE20, count = 34, step = 0x220 }
 function KOF02:extraInit(noExport)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
 	self.boxtypes = boxtypes
+	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
+		self.boxSlotConstructor, self.boxtypes)
 end
 
 return KOF02

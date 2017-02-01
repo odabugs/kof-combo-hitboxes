@@ -56,8 +56,24 @@ add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- E8h-EFh
 add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- F0h-F7h
 add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- F8h-FFh
 
+boxtypes.order = {
+	b_xx,
+	b_co,
+	b_v,
+	b_vc,
+	b_va,
+	b_vo,
+	b_c,
+	b_g,
+	b_a,
+	b_cl,
+	b_tv,
+	b_t,
+	b_pv,
+	b_pa,
+}
 boxtypes.colormap = {
-	[b_xx] = colors.rgba(000, 000, 000, 000),
+	[b_xx] = colors.CLEAR,
 	[b_co] = colors.WHITE,
 	[b_c]  = colors.CYAN,
 	[b_v]  = colors.BLUE,
