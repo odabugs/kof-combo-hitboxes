@@ -32,7 +32,7 @@ function BoxSet:reset()
 end
 
 function BoxSet:add(slot, addFn, ...)
-	self[slot]:add(addFn, ...)
+	return self[slot]:add(addFn, ...)
 end
 
 function BoxSet:render(renderFn, ...)

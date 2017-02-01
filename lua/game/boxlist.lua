@@ -19,8 +19,9 @@ end
 function BoxList:add(addFn, ...)
 	assert(self.valid < self.count, "Can't add more entries to this list!")
 	local i = self.valid + 1
-	addFn(self[i], ...)
-	self.valid = i
+	local result = addFn(self[i], ...)
+	if result then self.valid = i end
+	return result
 end
 
 function BoxList:render(renderFn, ...)
