@@ -1,5 +1,4 @@
 local luautil = require("luautil")
-local colors = require("render.colors")
 local Boxtypes_Common = require("game.boxtypes_common")
 local boxtypes = Boxtypes_Common:new()
 
@@ -55,42 +54,5 @@ add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- E0h-E7h
 add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- E8h-EFh
 add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- F0h-F7h
 add(b_x , b_x , b_x , b_x ,  b_x , b_x , b_x , b_x ) -- F8h-FFh
-
-boxtypes.order = {
-	b_xx,
-	b_co,
-	b_v,
-	b_vc,
-	b_va,
-	b_vo,
-	b_c,
-	b_g,
-	b_a,
-	b_cl,
-	b_tv,
-	b_t,
-	b_pv,
-	b_pa,
-}
-boxtypes.colormap = {
-	[b_xx] = colors.CLEAR,
-	[b_co] = colors.WHITE,
-	[b_c]  = colors.CYAN,
-	[b_v]  = colors.BLUE,
-	[b_vc] = colors.BLUE,
-	[b_va] = colors.BLUE,
-	[b_vo] = colors.BLUE,
-	[b_g]  = colors.CYAN,
-	[b_a]  = colors.RED,
-	[b_cl] = colors.BLACK,
-	[b_pv] = colors.GREEN,
-	[b_pa] = colors.YELLOW,
-	[b_tv] = colors.CYAN,
-	[b_t]  = colors.MAGENTA,
-}
-boxtypes.asProjectileMap = {
-	[b_a]  = b_pa,
-	[b_v]  = b_pv,
-}
 
 return boxtypes
