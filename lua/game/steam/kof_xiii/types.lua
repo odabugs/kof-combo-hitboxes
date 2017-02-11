@@ -62,37 +62,26 @@ typedef struct {
 	teamEntry entries[3];     // +028h: Character selections in team
 } team;
 
-// Hitbox structs come in two flavors, with slightly different handling.
-// Both types are stored as linked lists, with the "head" pointers for
-// each list stored in the "hitboxSet" struct below.
+// Each player has multiple linked lists storing that player's hitboxes.
+// The choice of whether to follow a given list via "nextPtr" or "nextPtr2"
+// depends on which hitbox list we're processing.  See the comments in the
+// "hitboxListHead" struct below to know when to follow one or the other.
 typedef struct {
-	intptr_t next;            // +000h: Pointer to next linked list entry
-	intptr_t next2;           // +004h: Duplicate of "next"?
-	byte padding01[0x004];    // +008h to +00Ch: Unknown
+	intptr_t nextPtr1;        // +000h: Pointer to next linked list entry
+	intptr_t unknown;         // +004h: Unknown pointer
+	intptr_t nextPtr2;        // +008h: Alternative "next" pointer
 	// Hitbox position is given in terms of the box's bottom-left corner.
 	floatPair position;       // +00Ch: X/Y position
 	// Hitbox width/height "project" rightward and upward from box position.
 	floatPair size;           // +014h: Width and height
 	byte padding02[0x004];    // +01Ch to +020h: Unknown
 	ubyte boxID;              // +020h: Hitbox type ID
-} hitbox1;
+} hitbox;
 
-typedef struct {
-	intptr_t next;            // +000h: Pointer to next linked list entry
-	// Hitbox position is given in terms of the box's bottom-left corner.
-	floatPair position;       // +004h: X/Y position
-	// Hitbox width/height "project" rightward and upward from box position.
-	floatPair size;           // +00Ch: Width and height
-	byte padding01[0x004];    // +014h to +018h: Unknown
-	ubyte boxID;              // +018h: Hitbox type ID
-} hitbox2;
-
-// Instances of this struct are embedded inside "hitboxSet" below.
-// See the comments in "hitboxListHead" below to find out which instances
-// point to a "hitbox1" list and which ones point to a "hitbox2" list.
-// Note that in both cases, there is a layer of indirection between the
-// pointer stored here and the actual list head; i.e., "head" is actually
-// a pointer-to-pointer.
+// Instances of this struct are embedded inside "hitboxListHead" below.
+// Note that there is a layer of indirection between the pointer stored
+// here and the actual first hitbox in the list; i.e., "head" here is
+// actually a pointer-to-pointer.
 typedef struct {
 	intptr_t head;            // +000h: Pointer to hitboxes linked list head
 	udword count;             // +004h: Number of entries in linked list
@@ -100,13 +89,16 @@ typedef struct {
 } hitboxList;
 
 // Struct locations in game memory: 0x007EAC08 (P1), 0x007EAC44 (P2)
-typedef struct {
-	intptr_t collision;       // +000h: Collision boxes (hitbox2)
-	// Also includes grab boxes and projectile attack/vulnerable boxes
-	intptr_t attack;          // +00Ch: Attack boxes (hitbox1)
-	intptr_t armor;           // +018h: Armor boxes (hitbox1)
-	intptr_t vulnerable;      // +024h: Vulnerable boxes (hitbox1)
-	intptr_t proximity;       // +030h: Proximity boxes (hitbox2)
+typedef union {
+	struct {
+		hitboxList collision;     // +000h: Collision boxes (nextPtr2)
+		// Also includes grab boxes and projectile attack/vulnerable boxes
+		hitboxList attack;        // +00Ch: Attack boxes (nextPtr1)
+		hitboxList armor;         // +018h: Armor boxes (nextPtr1)
+		hitboxList vulnerable;    // +024h: Vulnerable boxes (nextPtr1)
+		hitboxList proximity;     // +030h: Proximity boxes (nextPtr2)
+	};
+	hitboxList listPointers[5];   // +000h: Hitbox list head pointers
 } hitboxListHead;
 
 #pragma pack(pop)
