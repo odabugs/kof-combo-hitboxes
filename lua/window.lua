@@ -100,11 +100,23 @@ window.extendMargins = ffi.new("MARGINS", {
 	cyTopHeight = -1,
 	cyBottomHeight = -1,
 })
+
 window.extendMarginsPtr = ffi.new("MARGINS[1]", window.extendMargins)
 function window.getDefaultTitle()
 	return ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
 end
-local oemResource = ffi.cast("LPCTSTR", 32512)
+
+function window.loadImage(resourceName, resourceType,
+	desiredWidth, desiredHeight, fuLoad, hInstance)
+	hInstance = (hInstance or NULL)
+	local result = C.LoadImageW(hInstance, resourceName, resourceType,
+		desiredWidth, desiredHeight, fuLoad)
+	winerror.checkNotEqual(result, NULL)
+	return result
+end
+
+local oemResource = ffi.cast("LPCTSTR", 32512) -- default OEM icon/cursor
+local fuLoad = 0x8000 -- LR_SHARED
 window.defaultWindowTitle = window.getDefaultTitle()
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
@@ -113,12 +125,12 @@ window.defaultWindowClass = {
 	cbClsExtra = 0,
 	cbWndExtra = 0,
 	hInstance = NULL,
-	hIcon = C.LoadImageW(NULL, oemResource, 1, 32, 32, 0),
-	hCursor = C.LoadImageW(NULL, oemResource, 2, 32, 32, 0),
+	hIcon = window.loadImage(oemResource, 1, 32, 32, fuLoad),
+	hIconSm = window.loadImage(oemResource, 1, 16, 16, fuLoad),
+	hCursor = window.loadImage(oemResource, 2, 32, 32, fuLoad),
 	hbrBackground = NULL,
 	lpszMenuName = window.defaultWindowTitle,
 	lpszClassName = window.defaultWindowTitle,
-	hIcon = C.LoadImageW(NULL, oemResource, 1, 16, 16, 0),
 }
 window.createWindowExDefaults = {
 	dwExStyle = bit.bor(
@@ -151,9 +163,6 @@ window.createWindowExParamsOrder = {
 	"hInstance",
 	"lpParam",
 }
-
--- used by registerClass()/unregisterAllClasses()
-window.registeredClasses = {}
 
 function window.console() return C.GetConsoleWindow() end
 function window.foreground() return C.GetForegroundWindow() end
@@ -261,6 +270,16 @@ function window.getClientRect(hwnd, rectBuffer)
 	return rectBuffer
 end
 
+function window.getDimensions(hwnd, rectBuffer)
+	rectBuffer = window.getClientRect(hwnd, rectBuffer)
+	return rectBuffer[0].right, rectBuffer[0].bottom
+end
+
+function window.getTopLeftCorner(hwnd, pointBuffer)
+	pointBuffer = window.clientToScreen(hwnd, pointBuffer, 0, 0)
+	return pointBuffer[0].x, pointBuffer[0].y
+end
+
 function window.clientToScreen(hwnd, pointBuffer, x, y)
 	pointBuffer = (pointBuffer or winutil.pointBufType())
 	-- POINT struct must always be reset for repeat calls to be correct
@@ -284,28 +303,19 @@ function window.extendFrame(hwnd, margins)
 	return result
 end
 
-function window.getPosition(hwnd, result, rectBuffer, pointBuffer)
-	result = (result or {})
-	pointBuffer = window.clientToScreen(source, pointBuffer)
-	result.x, result.y = pointBuffer[0].x, pointBuffer[0].y
-	rectBuffer = window.getClientRect(target, rectBuffer)
-	result.width, result.height = rectBuffer[0].right, rectBuffer[0].bottom
-	return result
-end
-
 -- move target window to overlap with source window
 function window.move(
 	target, source, rectBuffer, pointBuffer, xOffset, yOffset, resize)
-	pointBuffer = window.clientToScreen(source, pointBuffer)
-	local newX = pointBuffer[0].x + (xOffset or 0)
-	local newY = pointBuffer[0].y + (yOffset or 0)
+	local newX, newY = window.getTopLeftCorner(source, pointBuffer)
+	newX, newY = newX + (xOffset or 0), newY + (yOffset or 0)
 	local sizeSource = (resize and source) or target
-	rectBuffer = window.getClientRect(sizeSource, rectBuffer)
-	local newW, newH = rectBuffer[0].right, rectBuffer[0].bottom
+	local newW, newH = window.getDimensions(sizeSource, rectBuffer)
 	local result = C.MoveWindow(target, newX, newY, newW, newH, true)
 	winerror.checkNotZero(result)
 	return result, newX, newY, newW, newH
 end
+
+window.registeredClasses = {}
 
 function window.registerClass(newWinClass, hInstance)
 	local wndclassEx = ffi.new("WNDCLASSEX")
