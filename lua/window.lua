@@ -28,7 +28,6 @@ typedef struct _MARGINS {
 	int cyBottomHeight;
 } MARGINS, *PMARGINS;
 
-BOOL SetWindowTextW(HWND hWnd, LPCTSTR lpString);
 int GetWindowTextW(HWND hWnd, LPTSTR lpString, int nMaxCount);
 int GetWindowTextLengthW(HWND hWnd);
 DWORD GetWindowThreadProcessId(HWND hWnd, LPDWORD lpdwProcessId);
@@ -100,11 +99,7 @@ window.extendMargins = ffi.new("MARGINS", {
 	cyTopHeight = -1,
 	cyBottomHeight = -1,
 })
-
 window.extendMarginsPtr = ffi.new("MARGINS[1]", window.extendMargins)
-function window.getDefaultTitle()
-	return ffi.cast("LPCTSTR", winapi.wcs("KOF Combo Hitbox Viewer"))
-end
 
 function window.loadImage(resourceName, resourceType,
 	desiredWidth, desiredHeight, fuLoad, hInstance)
@@ -117,18 +112,21 @@ end
 
 local oemResource = ffi.cast("LPCTSTR", 32512) -- default OEM icon/cursor
 local fuLoad = 0x8000 -- LR_SHARED
-window.defaultWindowTitle = window.getDefaultTitle()
+window.luaTitle = "KOF Combo Hitbox Viewer"
+-- allowing this to get garbage collected can cause random startup failures
+window.wcsTitle = winapi.wcs(window.luaTitle)
+window.defaultWindowTitle = ffi.cast("LPCTSTR", window.wcsTitle)
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
 	style = bit.bor(window.CS_HREDRAW, window.CS_VREDRAW),
 	lpfnWndProc = ffi.new("WNDPROC", winutil.WindowProc),
 	cbClsExtra = 0,
 	cbWndExtra = 0,
-	hInstance = NULL,
+	hInstance = ffi.cast("HINSTANCE", NULL),
 	hIcon = window.loadImage(oemResource, 1, 32, 32, fuLoad),
 	hIconSm = window.loadImage(oemResource, 1, 16, 16, fuLoad),
 	hCursor = window.loadImage(oemResource, 2, 32, 32, fuLoad),
-	hbrBackground = NULL,
+	hbrBackground = ffi.cast("HBRUSH", NULL),
 	lpszMenuName = window.defaultWindowTitle,
 	lpszClassName = window.defaultWindowTitle,
 }
@@ -137,7 +135,7 @@ window.createWindowExDefaults = {
 		window.WS_EX_TOPMOST, window.WS_EX_TRANSPARENT,
 		window.WS_EX_LAYERED, window.WS_EX_COMPOSITED),
 	lpClassName = NULL,
-	lpWindowName = NULL,
+	lpWindowName = window.defaultWindowTitle,
 	dwStyle = window.WS_POPUP,
 	x = 0,
 	y = 0,
@@ -217,10 +215,6 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
 		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
 	winerror.checkNotEqual(overlayHwnd, NULL)
-	-- strange things happen with the window title being set to gibberish
-	-- if you don't explicitly use SetWindowTitle() after window creation
-	local setResult = C.SetWindowTextW(overlayHwnd, window.getDefaultTitle())
-	winerror.checkNotZero(setResult)
 
 	window.extendFrame(overlayHwnd, window.extendMarginsPtr)
 	window.show(overlayHwnd)
