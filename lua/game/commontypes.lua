@@ -2,6 +2,7 @@ local commontypes = {}
 
 commontypes.typedefs = [[
 #pragma pack(push, 1) /* DO NOT REMOVE THIS */
+
 typedef int8_t byte;
 typedef uint8_t ubyte;
 typedef int16_t word;
@@ -19,6 +20,8 @@ typedef union {
 } fixed;
 typedef struct { fixed x; fixed y; } fixedPair;
 typedef struct { word x; word y; } coordPair;
+typedef struct { float x; float y; } floatPair;
+typedef struct { float x; float y; float z; } floatTriple;
 
 #pragma pack(pop)
 ]]

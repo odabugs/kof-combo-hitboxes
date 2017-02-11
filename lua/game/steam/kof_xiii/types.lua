@@ -8,17 +8,6 @@ types.typedefs = [[
 #pragma pack(push, 1) /* DO NOT REMOVE THIS */
 static const int PLAYERS = 2;
 
-typedef struct {
-	float x;
-	float y;
-} floatPair;
-
-typedef struct {
-	float x;
-	float y;
-	float z;
-} floatTriple;
-
 // This struct exists at 0x0082F890 in game memory
 typedef struct {
 	byte padding01[0x13C];    // +000h to +13Ch: Unknown

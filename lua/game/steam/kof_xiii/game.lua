@@ -123,16 +123,15 @@ function KOF13:drawHitbox(hitbox, color)
 	local x1, y1 = hitbox.position.x, hitbox.position.y
 	local w, h = hitbox.size.x, hitbox.size.y
 	if w <= 0 or h <= 0 then return end
+	---[=[
+	print(string.format("Origin: (%f, %f), Size: (%f, %f)", x1, y1, w, h))
+	--]=]
 	local x2, y2 = x1 + w - 1, y1 + h - 1
 	x1, y1 = self:worldToScreen(x1, y1)
 	x2, y2 = self:worldToScreen(x2, y2)
-	y1, y2 = y2, y1
+	y1, y2 = y2, y1 -- a hitbox's "origin" is at its bottom-left corner
 	--local color = self.boxtypes:colorForType(boxtype)
 	--print(string.format("(%d, %d) to (%d, %d)", x1, y1, x2, y2))
-	---[=[
-	print(string.format("Origin: (%f, %f), Size: (%.2f, %f)",
-		hitbox.position.x, hitbox.position.y, w, h))
-	--]=]
 	self:box(x1, y1, x2, y2, color)
 end
 
@@ -145,7 +144,7 @@ function KOF13:drawPlayer(which)
 end
 
 function KOF13:renderState()
-	print("-----")
+	--print("-----")
 	for i = 1, 2 do self:drawPlayer(i) end
 end
 
