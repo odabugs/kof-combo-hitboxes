@@ -94,16 +94,29 @@ typedef struct {
 	intptr_t p[PLAYERS][CHARS_PER_TEAM]; // +000h: Pointers array
 } playerTable;
 
+// Instances of this struct are embedded in "team" struct below.
+// Struct size is 0x1C (decimal 28) bytes.
+typedef struct {
+	byte padding01[0x008];    // +000h to +008h: Unknown
+	word health;              // +008h: Health
+	word redHealth;           // +00Ah: Red (recoverable) health
+	word padding02;           // +008h: Unknown
+	word guardGauge;          // +00Ah: Guard gauge
+	byte padding03[0x010];    // +00Ch to +01Ch: Unknown
+} playerExtra;
+
 // struct locations: 0x00439A00 (player 1), 0x00439BB4 (player 2)
 typedef struct {
 	byte padding01[0x003];    // +000h to +003h: Unknown
 	byte point;               // +003h: Current "point" character (0 or 1)
-	byte padding01[0x094];    // +004h to +098h: Unknown
+	byte padding02[0x094];    // +004h to +098h: Unknown
 	// There's a layer of indirection between the pointer addresses in this
 	// list and the actual locations of the projectile structs: Follow this
 	// pointer, then follow the pointer at the target address + 0x10.
 	// The last entry in this list is always NULL as a loop sentinel value.
 	intptr_t projectiles[8];  // +098h: Indirect pointers to projectiles
+	byte padding03[0x028];    // +0B8h to +0E0h: Unknown
+	playerExtra players[2];   // +0E0h: Extra per-character state info
 } team;
 
 // this struct exists at 0x003857A0 in game RAM
