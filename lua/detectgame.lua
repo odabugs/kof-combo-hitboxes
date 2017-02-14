@@ -96,35 +96,49 @@ end
 
 local function noPostprocess(params, game) return game end
 
+local GameTemplate = {}
+function GameTemplate:new(source)
+	setmetatable(source, self)
+	self.__index = self
+	return source
+end
+local SteamGame = GameTemplate:new({
+	detectMethod = checkWindowTitleAndProcessName,
+	postprocess = noPostprocess,
+	rawTitle = true, -- use false if title is a Lua pattern string
+})
+local PS2Game = GameTemplate:new({
+	detectMethod = checkWindowTitleAndProcessName,
+	postprocess = findGameWindowByParentPID,
+	-- PCSX2's GAME DISPLAY window title will contain this line
+	-- (this is the window we really want, not the console window)
+	gameWindowTitle = "GSdx",
+	rawTitle = true,
+	targetProcessName = "pcsx2.exe",
+})
+
 local detectedGames = {
-	{
+	SteamGame:new({
 		module = "steam.kof98um",
-		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = noPostprocess,
+		configSection = "kof98umfe",
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
-		rawTitle = true, -- use false if title is a Lua pattern string
 		targetProcessName = "KingOfFighters98UM.exe",
-	},
-	{
+	}),
+	SteamGame:new({
 		module = "steam.kof2002um",
-		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = noPostprocess,
+		configSection = "kof2002um",
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",
-		rawTitle = true,
 		targetProcessName = "KingOfFighters2002UM.exe",
-	},
-	{
+	}),
+	SteamGame:new({
 		module = "steam.kof_xiii",
-		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = noPostprocess,
+		configSection = "kof-xiii",
 		targetWindowTitle = "The King of Fighters XIII",
-		rawTitle = true,
 		targetProcessName = "kofxiii.exe",
-	},
-	{
+	}),
+	PS2Game:new({
 		module = "pcsx2.kof_xi",
-		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = findGameWindowByParentPID,
+		configSection = "kof-xi",
 		-- PCSX2's CONSOLE window title will start with this line
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
@@ -135,16 +149,10 @@ local detectedGames = {
 			["SLUS-21687"] = "NTSC-U",
 			["SLES-54437"] = "PAL",
 		},
-		-- PCSX2's GAME DISPLAY window title will contain this line
-		-- (this is the window we really want, not the console window)
-		gameWindowTitle = "GSdx",
-		rawTitle = true,
-		targetProcessName = "pcsx2.exe",
-	},
-	{
+	}),
+	PS2Game:new({
 		module = "pcsx2.ngbc",
-		detectMethod = checkWindowTitleAndProcessName,
-		postprocess = findGameWindowByParentPID,
+		configSection = "ngbc",
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
 			-- Both NTSC-J revisions report as SLPS-25558 in PCSX2 console
@@ -153,10 +161,7 @@ local detectedGames = {
 			["SLUS-21708"] = "NTSC-U",
 			["SLES-54395"] = "PAL",
 		},
-		gameWindowTitle = "GSdx",
-		rawTitle = true,
-		targetProcessName = "pcsx2.exe",
-	},
+	}),
 }
 
 function detectgame.findSupportedGame(hInstance, createOverlay)
