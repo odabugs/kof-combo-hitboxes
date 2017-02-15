@@ -162,6 +162,17 @@ local detectedGames = {
 			["SLES-54395"] = "PAL",
 		},
 	}),
+	PS2Game:new({
+		module = "pcsx2.samsho6",
+		configSection = "samsho6",
+		targetWindowTitle = "Samurai Showdown Anthology", -- not a typo
+		revisions = {
+			["SLPS-25839"] = "NTSC-J",
+			["SLPS-25934"] = "NTSC-J", -- TODO: NOT YET TESTED
+			["SLUS-21629"] = "NTSC-U",
+			["SLES-55292"] = "PAL",
+		},
+	}),
 }
 
 function detectgame.findSupportedGame(hInstance, createOverlay)
@@ -183,11 +194,9 @@ function detectgame.findSupportedGame(hInstance, createOverlay)
 	winerror.checkNotZero(successful)
 	if detectedGame ~= nil and hInstance ~= nil then
 		detectedGame.hInstance = hInstance
-		--detectedGame.gameDC = window.getDC(detectedGame.gameHwnd)
 		detectedGame.consoleHwnd = window.console()
 		if createOverlay then
 			detectedGame.overlayHwnd = window.createOverlayWindow(hInstance)
-			--detectedGame.overlayDC = window.getDC(detectedGame.overlayHwnd)
 			directx.setupD3D(detectedGame.overlayHwnd)
 		end
 	end
