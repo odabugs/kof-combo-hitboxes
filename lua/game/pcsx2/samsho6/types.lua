@@ -32,11 +32,15 @@ typedef struct {
 	fixed ySpeed;             // +05Ch: Y velocity
 } player;
 
-// Locations in memory: 0x01E54270 (P1), 0x01E5519C (P2)
+// Locations in memory: 0x01E5424C (P1), 0x01E55178 (P2)
 typedef struct {
-	byte padding01[0x004];    // +000h to +004h: Unknown
-	dword attackMeter;        // +004h: Attack meter (below life bar)
-	dword attackMeterLimit;   // +008h: Max. value of attack meter at +004h
+	byte padding01[0x018];    // +000h to +018h: Unknown
+	dword superMeter;         // +018h: Super meter
+	byte padding01[0x00C];    // +024h to +028h: Unknown
+	dword attackMeter;        // +028h: Attack meter (below life bar)
+	dword attackMeterLimit;   // +02Ch: Max. value of attack meter at +004h
+	byte padding03[0x8F4];    // +030h to +924h: Unknown
+	dword health;             // +924h: Life bar
 } playerExtra;
 
 #pragma pack(pop)

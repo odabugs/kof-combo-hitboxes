@@ -20,7 +20,7 @@ SamSho6.absoluteYOffset = 20 -- TODO
 SamSho6.revisions = {
 	["NTSC-U"] = {
 		playerPtrs = { 0x01E55FC0, 0x01E560F8 },
-		playerExtraPtrs = { 0x01E54270, 0x01E5519C },
+		playerExtraPtrs = { 0x01E5424C, 0x01E55178 },
 		cameraPtr = 0x01E53CB4,
 	},
 	-- TODO: NTSC-J, PAL versions
@@ -47,7 +47,7 @@ end
 function SamSho6:captureState()
 	local cam = self.camera
 	self:read(self.cameraPtr, cam)
-	self.zoom = (320.0 / cam.width)
+	self.zoom = (320.0 / cam.width) * 2
 	self.leftEdge = cam.centerX - (cam.width / 2)
 	self.bottomEdge = cam.y - 120.0
 
@@ -69,18 +69,18 @@ function SamSho6:capturePlayerState(which)
 end
 
 function SamSho6:worldToScreen(x, y)
-	local cam = self.camera
 	local z, l, b = self.zoom, self.leftEdge, self.bottomEdge
-	x = ((x - l) * 2 * z)
-	y = self.basicHeight - ((y - b) * 2 * z)
+	x = ((x - l) * z)
+	y = self.basicHeight - ((y - b) * z)
 	--print(string.format("%f, %f", x, y))
 	return x, y
 end
 
 function SamSho6:renderState()
-	local ps, p = self.players
+	local ps, pxs, p, px = self.players, self.playerExtras
 	for i = 1, 2 do
 		p = ps[i]
+		px = pxs[i]
 		self:pivot(self:worldToScreen(p.position.x, p.position.y))
 	end
 end
