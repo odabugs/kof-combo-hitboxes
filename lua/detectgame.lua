@@ -25,7 +25,6 @@ local function checkClassName(hwnd, params)
 	else
 		return {
 			gameHwnd = hwnd,
-			--gameDC = window.getDC(hwnd),
 			gameHandle = handle,
 			gamePID = parentPID,
 			module = params.module,

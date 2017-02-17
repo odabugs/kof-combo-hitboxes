@@ -42,7 +42,6 @@ BOOL IsWindowVisible(HWND hWnd);
 BOOL UpdateWindow(HWND hWnd);
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
-HDC GetDC(HWND hWnd);
 ATOM RegisterClassExW(WNDCLASSEX *lpwCx);
 BOOL UnregisterClassW(LPCTSTR lpClassName, HINSTANCE hInstance);
 HWND CreateWindowExW(
@@ -186,12 +185,6 @@ function window.show(hwnd, mode)
 	mode = (mode or window.SW_SHOWNORMAL)
 	local result = C.ShowWindow(hwnd, mode)
 	return result ~= 0
-end
-
-function window.getDC(hwnd)
-	local result = C.GetDC(hwnd)
-	winerror.checkNotEqual(result, NULL)
-	return result
 end
 
 function window.createOverlayWindow(hInstance, windowClass, windowOptions)

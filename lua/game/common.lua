@@ -80,7 +80,6 @@ end
 function Game_Common:setupOverlay(directx)
 	self.overlayHwnd, self.atom = window.createOverlayWindow(self.hInstance)
 	self.directx = directx
-	--self.overlayDC = window.getDC(self.overlayHwnd)
 	-- TODO: change directx code on the C side to support multiple instances
 	self.directx.setupD3D(self.overlayHwnd)
 end
