@@ -95,23 +95,25 @@ end
 function KOF_XI:captureEntity(target, facing, isProjectile)
 	local boxset, boxAdder = self.boxset, self.addBox
 	local bt, boxtype = self.boxtypes, "dummy"
-	local boxstate = target.hitboxesActive
-	if boxstate ~= 0 then
-		for i = 0, 5 do
-			if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
-				local hitbox = target.hitboxes[i]
-				if i == 4 then -- use fixed color for "throw" hitboxes
-					boxtype = "throw"
-				else
-					boxtype = bt:typeForID(hitbox.boxID)
-					if isProjectile then
-						boxtype = bt:asProjectile(boxtype)
-					end
+	local boxstate, i, boxesDrawn = target.hitboxesActive, 0, 0
+	local hitbox
+	while boxstate ~= 0 and i <= 5 do
+		if bit.band(boxstate, 1) ~= 0 then
+			hitbox = target.hitboxes[i]
+			if i == 4 then -- use fixed color for "throw" hitboxes
+				boxtype = "throw"
+			else
+				boxtype = bt:typeForID(hitbox.boxID)
+				if isProjectile then
+					boxtype = bt:asProjectile(boxtype)
 				end
-				boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
-					target, hitbox, facing))
 			end
+			boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
+				target, hitbox, facing))
+			boxesDrawn = boxesDrawn + 1
 		end
+		boxstate = bit.rshift(boxstate, 1)
+		i = i + 1
 	end
 	-- always draw pivot cross for players,
 	-- and don't draw collision box for projectiles
@@ -124,7 +126,7 @@ function KOF_XI:captureEntity(target, facing, isProjectile)
 		self.pivots:add(self.addPivot, colors.WHITE, self:worldToScreen(
 			target.position.x, target.position.y))
 	-- only draw pivot cross for projectiles if at least one box was drawn
-	elseif boxstate ~= 0 then
+	elseif boxesDrawn > 0 then
 		self.pivots:add(self.addPivot, colors.GREEN, self:worldToScreen(
 			target.position.x, target.position.y))
 	end
