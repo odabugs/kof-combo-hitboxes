@@ -15,19 +15,27 @@ static const int PLAYERS = 2;
 static const int CHARS_PER_TEAM = 2;
 static const int BOXCOUNT = 7;
 
-// this struct exists at 0x004399E0 in game RAM
+// this struct exists at 0x00439972 in game RAM
 typedef struct {
+	byte padding01[0x038];    // +000h to +038h: Unknown
+	word playerX[2][2];       // +038h: Character X positions
+	word playerY[2][2];       // +040h: Character Y positions
+	byte padding02[0x022];    // +048h to +06Ah: Unknown
+	word bottomEdge;          // +06Ah: Bottom edge of visible area
+	word topEdge;             // +06Ch: Top edge of visible area
 	// Use the distance between left and right camera edges to derive
 	// the current "zoom factor".  When the camera is fully zoomed in,
 	// this distance will be 640, and it will increase as the camera
 	// gradually zooms out.
-	word leftEdge;            // +000h: Left edge of visible area
-	word rightEdge;           // +002h: Right edge of visible area
-	byte padding01[0x00C];    // +004h to +010h: Unknown
-	word hCenter;             // +010h: Center between left/right edges
+	word leftEdge;            // +06Eh: Left edge of visible area
+	word rightEdge;           // +070h: Right edge of visible area
+	byte padding03[0x00C];    // +072h to +07Eh: Unknown
+	// Does NOT account for camera zoom factor.
+	word hCenter;             // +07Eh: Center between left/right edges
 	// Y = 0 when players are on solid ground.
 	// Y decreases as camera moves upward.
-	word y;                   // +012h: Y position
+	word y;                   // +080h: Y position
+	float unknown01;          // +082h: Always +1.0?
 } camera;
 
 // Multiple instances of this struct are embedded in "player" below.
