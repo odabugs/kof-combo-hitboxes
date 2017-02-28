@@ -11,8 +11,6 @@ local draw = {}
 draw.absoluteYOffset = 0
 draw.pivotSize = 20
 draw.pivotColor = colors.rgb(255, 255, 255)
-draw.boxEdgeAlpha = 255
-draw.boxFillAlpha = 48
 draw.useThickLines = false
 
 -- optional flags to pass when calling draw:scaleCoords
@@ -21,18 +19,18 @@ draw.COORD_BOTTOM_EDGE = 0x02
 draw.COORD_BOTTOM_RIGHT = bit.bor(
 	draw.COORD_RIGHT_EDGE, draw.COORD_BOTTOM_EDGE)
 
+local function ensureMinThickness(l, r)
+	r = (r or l)
+	if l < r then return l, r + 1
+	else return r, l + 1 end
+end
+
 function draw:getColor()
 	return self.directx.getColor()
 end
 
 function draw:setColor(newColor)
 	return self.directx.setColor(newColor)
-end
-
-function draw:ensureMinThickness(l, r)
-	r = (r or l)
-	if l < r then return l, r + 1
-	else return r, l + 1 end
 end
 
 function draw:scaleCoords(x, y, flags)
@@ -62,8 +60,8 @@ end
 function draw:rect(x1, y1, x2, y2, color)
 	x1, y1 = self:scaleCoords(x1, y1)
 	x2, y2 = self:scaleCoords(x2, y2)
-	x1, x2 = self:ensureMinThickness(x1, x2)
-	y1, y2 = self:ensureMinThickness(y1, y2)
+	x1, x2 = ensureMinThickness(x1, x2)
+	y1, y2 = ensureMinThickness(y1, y2)
 	self:rawRect(x1, y1, x2, y2, color)
 end
 
@@ -71,19 +69,17 @@ function draw:pivot(x, y, size, color)
 	local p = (size or self.pivotSize)
 	color = (color or self.pivotColor)
 	if self.useThickLines then
-		self:box(x - p, y, x + p, y, color)
-		self:box(x, y - p, x, y + p, color)
+		self:box(x - p, y, x + p, y, color, color)
+		self:box(x, y - p, x, y + p, color, color)
 	else
 		self:rect(x - p, y, x + p + 1, y, color)
 		self:rect(x, y - p, x, y + p + 1, color)
 	end
 end
 
-function draw:box(x1, y1, x2, y2, color, thick)
+function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
 	if thick == nil then thick = self.useThickLines end
 	local corner = (thick and self.COORD_BOTTOM_RIGHT) or 0
-	local sameX, sameY = (x1 == x2), (y1 == y2)
-	color = (color or self:getColor())
 
 	local outerLeftX, outerTopY     = self:scaleCoords(x1, y1)
 	local outerRightX, outerBottomY = self:scaleCoords(x2, y2, corner)
@@ -91,22 +87,21 @@ function draw:box(x1, y1, x2, y2, color, thick)
 	if thick then
 		innerLeftX, innerTopY      = self:scaleCoords(x1, y1, corner)
 		innerRightX, innerBottomY  = self:scaleCoords(x2, y2)
-		outerLeftX, innerLeftX     = self:ensureMinThickness(outerLeftX, innerLeftX)
-		outerTopY, innerTopY       = self:ensureMinThickness(outerTopY, innerTopY)
-		innerRightX, outerRightX   = self:ensureMinThickness(innerRightX, outerRightX)
-		innerBottomY, outerBottomY = self:ensureMinThickness(innerBottomY, outerBottomY)
+		outerLeftX, innerLeftX     = ensureMinThickness(outerLeftX, innerLeftX)
+		outerTopY, innerTopY       = ensureMinThickness(outerTopY, innerTopY)
+		innerRightX, outerRightX   = ensureMinThickness(innerRightX, outerRightX)
+		innerBottomY, outerBottomY = ensureMinThickness(innerBottomY, outerBottomY)
 	else
-		outerLeftX, innerLeftX     = self:ensureMinThickness(outerLeftX)
-		outerRightX, innerRightX   = self:ensureMinThickness(outerRightX)
-		outerTopY, innerTopY       = self:ensureMinThickness(outerTopY)
-		innerBottomY, outerBottomY = self:ensureMinThickness(outerBottomY)
+		outerLeftX, innerLeftX     = ensureMinThickness(outerLeftX)
+		outerRightX, innerRightX   = ensureMinThickness(outerRightX)
+		outerTopY, innerTopY       = ensureMinThickness(outerTopY)
+		innerBottomY, outerBottomY = ensureMinThickness(outerBottomY)
 	end
 
 	self.directx.hitbox(
 		outerLeftX, outerTopY, outerRightX, outerBottomY,
 		innerLeftX, innerTopY, innerRightX, innerBottomY,
-		colors.setAlpha(color, self.boxEdgeAlpha),
-		colors.setAlpha(color, self.boxFillAlpha))
+		edgeColor, fillColor)
 end
 
 function draw:calculateScreenOffset(actual, baseline, scale)
