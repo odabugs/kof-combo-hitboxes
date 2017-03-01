@@ -131,11 +131,11 @@ function KOF98:captureEntity(target, isProjectile, facing)
 	facing = (facing or self:facingMultiplier(target))
 	local pivotX, pivotY = target.screenX, target.screenY
 	local boxstate = target.statusFlags[0]
-	local bt, boxtype, boxesDrawn = self.boxtypes, "dummy", 0
-	local boxset, boxAdder, hitbox = self.boxset, self.addBox
+	local bt, boxtype, boxesDrawn, i = self.boxtypes, "dummy", 0, 0
+	local boxset, boxAdder, hitbox = self.boxset, self.addBox, nil
 	-- attack/vulnerable boxes
-	for i = 0, 3 do
-		if bit.band(boxstate, bit.lshift(1, i)) ~= 0 then
+	while boxstate ~= 0 and i <= 3 do
+		if bit.band(boxstate, 1) ~= 0 then
 			hitbox = target.hitboxes[i]
 			boxtype = bt:typeForID(hitbox.boxID)
 			if i == 1 and boxtype == "attack" then
@@ -149,6 +149,8 @@ function KOF98:captureEntity(target, isProjectile, facing)
 			boxesDrawn = boxesDrawn + 1
 			::continue::
 		end
+		boxstate = bit.rshift(boxstate, 1)
+		i = i + 1
 	end
 	if not isProjectile then
 		-- collision box
