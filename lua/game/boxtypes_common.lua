@@ -22,6 +22,10 @@ Boxtypes_Common.defaultFillAlpha = 48
 Boxtypes_Common.defaultEdgeColor = colors.BLACK
 Boxtypes_Common.defaultFillColor = colors.setAlpha(
 	Boxtypes_Common.defaultEdgeColor, Boxtypes_Common.defaultFillAlpha)
+Boxtypes_Common.defaultColorPair = {
+	Boxtypes_Common.defaultEdgeColor,
+	Boxtypes_Common.defaultFillColor,
+}
 -- mapping of box type names to {edge color, fill color} tuples; "false" is
 -- a placeholder, so that fill colors set manually here won't be overridden
 Boxtypes_Common.colormap = {
@@ -86,12 +90,7 @@ function Boxtypes_Common:typeForID(id)
 end
 
 function Boxtypes_Common:colorForType(boxtype)
-	local result = self.colormap[boxtype]
-	if result then
-		return result[1], result[2]
-	else
-		return self.defaultEdgeColor, self.defaultFillColor
-	end
+	return self.colormap[boxtype] or self.defaultColorPair
 end
 
 function Boxtypes_Common:asProjectile(boxtype)

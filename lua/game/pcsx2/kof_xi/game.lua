@@ -77,10 +77,9 @@ end
 -- Slot constructor function passed to BoxSet:new();
 -- this function MUST return a new table instance with every call
 function KOF_XI.boxSlotConstructor(i, slot, boxtypes)
-	local edge, fill = boxtypes:colorForType(slot)
 	return {
 		centerX = 0, centerY = 0, left = 0, right = 0, top = 0, bottom = 0,
-		edge = edge, fill = fill,
+		colorPair = boxtypes:colorForType(slot),
 	}
 end
 
@@ -218,9 +217,9 @@ function KOF_XI.drawBox(hitbox, parent)
 	local cx, cy = hitbox.centerX, hitbox.centerY
 	local x1, y1 = hitbox.left, hitbox.top
 	local x2, y2 = hitbox.right, hitbox.bottom
-	local edge, fill = hitbox.edge, hitbox.fill
-	parent:box(x1, y1, x2, y2, edge, fill)
-	parent:pivot(cx, cy, parent.boxPivotSize, edge)
+	local colorPair = hitbox.colorPair
+	parent:box(x1, y1, x2, y2, colorPair[1], colorPair[2])
+	parent:pivot(cx, cy, parent.boxPivotSize, colorPair[1])
 	return 1
 end
 
