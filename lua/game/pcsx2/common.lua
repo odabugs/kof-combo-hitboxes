@@ -6,4 +6,10 @@ PCSX2_Common.whoami = "PCSX2_Common"
 PCSX2_Common.RAMbase = 0x20000000
 PCSX2_Common.RAMlimit = 0x22000000
 
+-- for cases where we want to export some values from this class into others
+-- without directly inheriting from this class
+function PCSX2_Common:export(target)
+	target.RAMbase, target.RAMlimit = self.RAMbase, self.RAMlimit
+end
+
 return PCSX2_Common
