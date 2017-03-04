@@ -12,7 +12,9 @@ local boxtypes = require("game.steam.kof98um.boxtypes")
 local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
 local Game_Common = require("game.common")
+local KOF_Common = require("game.kof_common")
 local KOF98 = Game_Common:new({ whoami = "KOF98" })
+luautil.extend(KOF98, KOF_Common)
 
 KOF98.basicWidth = 320
 KOF98.basicHeight = 224
@@ -45,34 +47,6 @@ function KOF98:extraInit(noExport)
 		"pivots", self.projectilesListInfo.count + 2,
 		self.pivotSlotConstructor)
 	self.projBuffer = ffi.new("projectile")
-end
-
--- Slot constructor function passed to BoxSet:new();
--- this function MUST return a new table instance with every call
-function KOF98.boxSlotConstructor(i, slot, boxtypes)
-	return {
-		centerX = 0, centerY = 0, width = 0, height = 0,
-		colorPair = boxtypes:colorForType(slot),
-	}
-end
-
-function KOF98.pivotSlotConstructor()
-	return { x = 0, y = 0, color = colors.WHITE }
-end
-
--- "addFn" passed as parameter to BoxSet:add();
--- this function is responsible for actually writing the new box set entry
-function KOF98.addBox(target, parent, cx, cy, w, h)
-	if w <= 0 or h <= 0 then return false end
-	target.centerX, target.centerY = parent:worldToScreen(cx, cy)
-	target.left,  target.top    = parent:worldToScreen(cx - w, cy - h)
-	target.right, target.bottom = parent:worldToScreen(cx + w - 1, cy + h - 1)
-	return true
-end
-
-function KOF98.addPivot(target, color, x, y)
-	target.color, target.x, target.y = color, x, y
-	return true
 end
 
 function KOF98:capturePlayerState(which)
@@ -179,27 +153,6 @@ function KOF98:captureEntity(target, isProjectile, facing)
 		self.pivots:add(self.addPivot, colors.GREEN, self:worldToScreen(
 			target.screenX, target.screenY))
 	end
-end
-
--- "renderFn" passed as parameter to BoxSet:render()
-function KOF98.drawBox(hitbox, parent)
-	local cx, cy = hitbox.centerX, hitbox.centerY
-	local x1, y1 = hitbox.left, hitbox.top
-	local x2, y2 = hitbox.right, hitbox.bottom
-	local colorPair = hitbox.colorPair
-	parent:box(x1, y1, x2, y2, colorPair[1], colorPair[2])
-	parent:pivot(cx, cy, parent.boxPivotSize, colorPair[1])
-	return 1
-end
-
-function KOF98.drawPivot(pivot, parent)
-	parent:pivot(pivot.x, pivot.y, parent.pivotSize, pivot.color)
-	return 1
-end
-
-function KOF98:renderState()
-	self.boxset:render(self.drawBox, self)
-	self.pivots:render(self.drawPivot, self)
 end
 
 return KOF98

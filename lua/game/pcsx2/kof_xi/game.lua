@@ -12,7 +12,9 @@ local boxtypes = require("game.pcsx2.kof_xi.boxtypes")
 local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
 local PCSX2_Common = require("game.pcsx2.common")
+local KOF_Common = require("game.kof_common")
 local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
+luautil.extend(KOF_XI, KOF_Common)
 
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
@@ -72,19 +74,6 @@ function KOF_XI:extraInit(noExport)
 		print()
 		--]=]
 	end
-end
-
--- Slot constructor function passed to BoxSet:new();
--- this function MUST return a new table instance with every call
-function KOF_XI.boxSlotConstructor(i, slot, boxtypes)
-	return {
-		centerX = 0, centerY = 0, left = 0, right = 0, top = 0, bottom = 0,
-		colorPair = boxtypes:colorForType(slot),
-	}
-end
-
-function KOF_XI.pivotSlotConstructor()
-	return { x = 0, y = 0, color = colors.WHITE }
 end
 
 function KOF_XI:captureWorldState()
@@ -157,21 +146,6 @@ function KOF_XI:capturePlayerState(which)
 	self:capturePlayerProjectiles(which, facing)
 end
 
--- "addFn" passed as parameter to BoxSet:add();
--- this function is responsible for actually writing the new box set entry
-function KOF_XI.addBox(target, parent, cx, cy, w, h)
-	if w <= 0 or h <= 0 then return false end
-	target.centerX, target.centerY = parent:worldToScreen(cx, cy)
-	target.left,  target.top    = parent:worldToScreen(cx - w, cy - h)
-	target.right, target.bottom = parent:worldToScreen(cx + w - 1, cy + h - 1)
-	return true
-end
-
-function KOF_XI.addPivot(target, color, x, y)
-	target.color, target.x, target.y = color, x, y
-	return true
-end
-
 function KOF_XI:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
@@ -210,27 +184,6 @@ function KOF_XI:deriveBoxPosition(player, hitbox, facing)
 	centerY = playerY - centerY -- positive offsets move upward
 	local w, h = hitbox.width * 2, hitbox.height * 2
 	return centerX, centerY, w, h
-end
-
--- "renderFn" passed as parameter to BoxSet:render()
-function KOF_XI.drawBox(hitbox, parent, pivotSize)
-	local cx, cy = hitbox.centerX, hitbox.centerY
-	local x1, y1 = hitbox.left, hitbox.top
-	local x2, y2 = hitbox.right, hitbox.bottom
-	local colorPair = hitbox.colorPair
-	parent:box(x1, y1, x2, y2, colorPair[1], colorPair[2])
-	parent:pivot(cx, cy, parent.boxPivotSize, colorPair[1])
-	return 1
-end
-
-function KOF_XI.drawPivot(pivot, parent, pivotSize)
-	parent:pivot(pivot.x, pivot.y, pivotSize, pivot.color)
-	return 1
-end
-
-function KOF_XI:renderState()
-	self.boxset:render(self.drawBox, self, self.boxPivotSize)
-	self.pivots:render(self.drawPivot, self, self.pivotSize)
 end
 
 return KOF_XI
