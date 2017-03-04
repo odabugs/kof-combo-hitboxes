@@ -39,28 +39,6 @@ typedef struct {
 	ubyte height;             // +004h: Box height
 } hitbox;
 
-//*
-typedef struct {
-	byte padding01[0x006];    // +000h to +006h: unknown
-	word basicStatus;         // +006h: Basic status (< 0 if projectile is not active)
-	uint8_t padding02[0x01C]; // +008h to +024h: unknown
-	// screenX/screenY are pre-adjusted relative to the camera position
-	word screenX;             // +024h: X position onscreen
-	word screenY;             // +026h: Y position onscreen
-	byte padding03[0x010];    // +028h to +038h: unknown
-	ubyte facing;             // +038h: Facing (0 = left, 1 = right)
-	byte padding04[0x043];    // +039h to +07Ch: unknown
-	ubyte statusFlags[3];     // +07Ch to +07Fh: Status flags 1
-	byte padding05[0x005];    // +07Fh to +084h: unknown
-	// This points to "struct player"
-	intptr_t owner;           // +084h: Pointer to projectile's "owner"
-	// These two point to "struct projectile"
-	intptr_t projListStart;   // +088h: Projectiles list start ptr
-	intptr_t projListStart_alt; // +08Ch: Duplicate of +088h
-	hitbox hitboxes[HBLISTSIZE]; // +090h to +0A4h: Hitboxes list
-} projectile;
-//*/
-
 typedef struct {
 	word screenY;             // +024h: Y position onscreen
 	fixed walkSpeed;          // +000h: Walk speed
@@ -104,7 +82,9 @@ typedef struct {
 
 typedef struct {
 	intptr_t statePtr;        // +000h: Player state code pointer
-	byte padding01[0x014];    // +004h to +018h: unknown
+	byte padding01[0x002];    // +004h to +006h: unknown
+	word basicStatus;         // +006h: Projectile status (< 0 if inactive)
+	byte padding25[0x010];    // +008h to +018h: unknown
 	fixed xPivot;             // +018h: World X position
 	fixed yOffset;            // +01Ch: Base offset to world Y
 	fixed yPivot;             // +020h: World Y position
@@ -166,7 +146,7 @@ typedef struct {
 	byte padding24[0x00E];    // +1D5h to +1E3h: unknown
 	ubyte superStocks;        // +1E3h: Whole super meter stocks
 } player;
-//typedef player projectile;
+typedef player projectile;
 
 #pragma pack(pop)
 ]]
