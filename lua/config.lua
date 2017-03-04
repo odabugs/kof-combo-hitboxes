@@ -58,7 +58,8 @@ local function contains(tbl, value)
 end
 
 local function asInt(s)
-	return (type(s) == "number" or s:find("^[+-]?%d+$")) and (s + 0)
+	if (type(s) == "number") or (s:find("^[+-]?%d+$")) then return s + 0
+	else return nil end
 end
 
 function ReadConfig.parseInteger(s)
@@ -99,12 +100,15 @@ function ReadConfig.parseColor(s)
 	return colors.rgba(unpack(packed)), hasAlpha
 end
 
+function ReadConfig.readPath(path, schema)
+	local file, fileErr = io.open(path, "r")
+	if file then return ReadConfig.readFile(file, schema)
+	else return nil, fileErr end
+end
+
 -- schema dictates what config file structure to expect,
 -- and the appropriate handler for each item in that structure
 function ReadConfig.readFile(file, schema)
-	if type(file) == "string" then
-		file = assert(io.open(file, "r"))
-	end
 	local result = { global = {} }
 	local currentSection = "global" -- implicit "default" config section
 	local target, handler = result[currentSection], schema[currentSection]
