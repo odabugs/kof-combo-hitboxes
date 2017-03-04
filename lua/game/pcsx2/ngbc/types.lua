@@ -20,7 +20,13 @@ typedef struct {
 	byte padding01[0x038];    // +000h to +038h: Unknown
 	word playerX[2][2];       // +038h: Character X positions
 	word playerY[2][2];       // +040h: Character Y positions
-	byte padding02[0x022];    // +048h to +06Ah: Unknown
+	byte padding02[0x01A];    // +048h to +062h: Unknown
+	float backgroundScale;    // +062h: Background scale (always +1.0?)
+	byte padding03[0x004];    // +066h to +06Ah: Unknown
+	// When the camera is fully zoomed in, bottomEdge will be -240 and
+	// topEdge will be 240.  When the camera is zoomed out, bottomEdge
+	// will be -295 and topEdge will be 295.  Both of these values
+	// decrease by the same amount as the camera moves upward.
 	word bottomEdge;          // +06Ah: Bottom edge of visible area
 	word topEdge;             // +06Ch: Top edge of visible area
 	// Use the distance between left and right camera edges to derive
@@ -29,12 +35,12 @@ typedef struct {
 	// gradually zooms out.
 	word leftEdge;            // +06Eh: Left edge of visible area
 	word rightEdge;           // +070h: Right edge of visible area
-	byte padding03[0x00C];    // +072h to +07Eh: Unknown
+	byte padding04[0x00C];    // +072h to +07Eh: Unknown
 	// Does NOT account for camera zoom factor.
-	word hCenter;             // +07Eh: Center between left/right edges
+	word centerX;             // +07Eh: Center between left/right edges
 	// Y = 0 when players are on solid ground.
 	// Y decreases as camera moves upward.
-	word y;                   // +080h: Y position
+	word centerY;             // +080h: Center between top/bottom edges
 	float unknown01;          // +082h: Always +1.0?
 } camera;
 
@@ -133,6 +139,10 @@ typedef struct {
 	// Value increases as camera zooms outward.
 	double value;             // +000h: Zoom factor
 } zoom;
+
+typedef struct {
+	float value;
+} zoomFloat;
 
 #pragma pack(pop)
 ]]
