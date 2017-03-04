@@ -213,7 +213,7 @@ function KOF_XI:deriveBoxPosition(player, hitbox, facing)
 end
 
 -- "renderFn" passed as parameter to BoxSet:render()
-function KOF_XI.drawBox(hitbox, parent)
+function KOF_XI.drawBox(hitbox, parent, pivotSize)
 	local cx, cy = hitbox.centerX, hitbox.centerY
 	local x1, y1 = hitbox.left, hitbox.top
 	local x2, y2 = hitbox.right, hitbox.bottom
@@ -223,14 +223,14 @@ function KOF_XI.drawBox(hitbox, parent)
 	return 1
 end
 
-function KOF_XI.drawPivot(pivot, parent)
-	parent:pivot(pivot.x, pivot.y, parent.pivotSize, pivot.color)
+function KOF_XI.drawPivot(pivot, parent, pivotSize)
+	parent:pivot(pivot.x, pivot.y, pivotSize, pivot.color)
 	return 1
 end
 
 function KOF_XI:renderState()
-	self.boxset:render(self.drawBox, self)
-	self.pivots:render(self.drawPivot, self)
+	self.boxset:render(self.drawBox, self, self.boxPivotSize)
+	self.pivots:render(self.drawPivot, self, self.pivotSize)
 end
 
 return KOF_XI
