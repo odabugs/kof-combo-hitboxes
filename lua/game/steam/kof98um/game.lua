@@ -41,8 +41,10 @@ function KOF98:extraInit(noExport)
 	end
 	self.camera = ffi.new("camera")
 	self.players = ffiutil.ntypes("player", 2, 1)
+	--[=[
 	self.playerExtras = ffiutil.ntypes("playerExtra", 2, 1)
 	self.player2ndExtras = ffiutil.ntypes("playerSecondExtra", 2, 1)
+	--]=]
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
 		"pivots", self.projectilesListInfo.count + 2,
 		self.pivotSlotConstructor)
@@ -51,9 +53,11 @@ end
 
 function KOF98:capturePlayerState(which)
 	local player = self.players[which]
-	self:read(self.playerPtrs[which], self.players[which])
+	self:read(self.playerPtrs[which], player)
+	--[=[
 	self:read(self.playerExtraPtrs[which], self.playerExtras[which])
 	self:read(self.player2ndExtraPtrs[which], self.player2ndExtras[which])
+	--]=]
 	self:captureEntity(player, false)
 end
 
