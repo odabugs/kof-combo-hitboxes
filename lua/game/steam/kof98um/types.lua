@@ -40,11 +40,10 @@ typedef struct {
 } hitbox;
 
 typedef struct {
-	word screenY;             // +024h: Y position onscreen
 	fixed walkSpeed;          // +000h: Walk speed
 	fixed jumpMomentum;       // +004h: Jump upward momentum
 	fixed jumpGravity;        // +008h: Jump gravity
-	// These go in order: A, B, C, D
+	// These go in order: A, B, C, D (stand CD has no close/far distinction)
 	ubyte closeRanges[BUTTONCOUNT]; // +00Ch to +010h: Close normal active ranges
 	byte padding01[0x004];    // +010h to +014h: unknown
 	fixed runSpeed;           // +014h: Run speed
