@@ -31,7 +31,7 @@ typedef struct {
 	// X offset projects forward from player origin, based on the direction
 	// the player is facing.  Y offset projects downward from player origin.
 	byte x;                   // +001h: X offset
-	byte y;                   // +001h: Y offset
+	byte y;                   // +002h: Y offset
 	// Width is added to the hitbox on both sides, so that the width given
 	// in the struct itself is half of the hitbox's "effective width".
 	// The same principle applies for the hitbox's height.
@@ -57,27 +57,6 @@ typedef struct {
 	byte padding04[0x001];    // +06Bh to +06Ch: unknown
 	uword frameCounter;       // +06Ch: Frame counter
 } playerExtra;
-
-typedef struct {
-	uword frameCounter;       // +06Ch: Frame counter
-	byte padding01[0x008];    // +000h to +008h: unknown
-	uword miscFlags1;         // +008h: Game state? (purpose still unclear)
-	byte padding02[0x008];    // +010h to +018h: unknown
-	fixed xPivot;             // +018h: World X position
-	fixed yOffset;            // +01Ch: Base offset to world Y
-	fixed yPivot;             // +020h: World Y position
-	// screenX/screenY are pre-adjusted relative to the camera position
-	word screenX;             // +024h: X position onscreen
-	word screenY;             // +026h: Y position onscreen
-	byte padding03[0x010];    // +028h to +038h: unknown
-	ubyte miscFlags2;         // +038h: Facing (bit 0), other stuff too?
-	byte padding04[0x001];    // +039h to +03Ah: unknown
-	ubyte miscFlags3;         // +03Ah: Mystery byte (0xFE during gameplay?)
-	ubyte gameplayState;      // +03Bh: Flags (bit 0 = "in game?")
-	byte padding05[0x048];    // +03Ch to +084h: unknown
-	// This points to "struct player"
-	intptr_t player;          // +084h: Pointer to main player struct
-} playerSecondExtra;
 
 typedef struct {
 	intptr_t statePtr;        // +000h: Player state code pointer

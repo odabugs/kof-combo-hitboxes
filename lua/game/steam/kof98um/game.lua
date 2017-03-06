@@ -28,7 +28,6 @@ KOF98.boxesPerLayer = 20
 -- game-specific constants
 KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
 KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
-KOF98.player2ndExtraPtrs = { 0x01703800, 0x01703A00 }
 KOF98.cameraPtr = 0x0180C938
 KOF98.projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 }
 
@@ -54,10 +53,7 @@ end
 function KOF98:capturePlayerState(which)
 	local player = self.players[which]
 	self:read(self.playerPtrs[which], player)
-	--[=[
 	self:read(self.playerExtraPtrs[which], self.playerExtras[which])
-	self:read(self.player2ndExtraPtrs[which], self.player2ndExtras[which])
-	--]=]
 	self:captureEntity(player, false)
 end
 
