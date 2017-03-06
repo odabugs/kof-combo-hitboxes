@@ -95,12 +95,13 @@ end
 
 local function noPostprocess(params, game) return game end
 
-local GameTemplate = {}
-function GameTemplate:new(source)
-	setmetatable(source, self)
-	self.__index = self
-	return source
-end
+local GameTemplate = {
+	new = function(self, source)
+		setmetatable(source, self)
+		self.__index = self
+		return source
+	end
+}
 local SteamGame = GameTemplate:new({
 	detectMethod = checkWindowTitleAndProcessName,
 	postprocess = noPostprocess,
@@ -131,13 +132,13 @@ local detectedGames = {
 	}),
 	SteamGame:new({
 		module = "steam.kof_xiii",
-		configSection = "kof-xiii",
+		configSection = "kof_xiii",
 		targetWindowTitle = "The King of Fighters XIII",
 		targetProcessName = "kofxiii.exe",
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_xi",
-		configSection = "kof-xi",
+		configSection = "kof_xi",
 		-- PCSX2's CONSOLE window title will start with this line
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
@@ -147,6 +148,27 @@ local detectedGames = {
 			["SLPS-25789"] = "NTSC-J", -- TODO: NOT YET TESTED
 			["SLUS-21687"] = "NTSC-U",
 			["SLES-54437"] = "PAL",
+		},
+	}),
+	PS2Game:new({
+		module = "pcsx2.kof_neowave",
+		configSection = "kof_neowave",
+		targetWindowTitle = "King of Fighters, The - Neo Wave",
+		revisions = {
+			--["SLPS-25525"] = "NTSC-J", -- TODO: Data collection
+			--["SLPS-25712"] = "NTSC-J", -- TODO: Data collection
+			["SLES-53999"] = "PAL",
+		},
+	}),
+	PS2Game:new({
+		module = "pcsx2.kof98um",
+		configSection = "kof98um",
+		targetWindowTitle = "King Of Fighters 98 - Ultimate Match",
+		revisions = {
+			--["SLPS-25783"] = "NTSC-J", -- TODO: Data collection
+			--["SLPS-25935"] = "NTSC-J", -- TODO: Data collection
+			--["SLES-55280"] = "PAL", -- TODO: Data collection
+			["SLUS-21816"] = "NTSC-U",
 		},
 	}),
 	PS2Game:new({
