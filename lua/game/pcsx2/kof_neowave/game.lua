@@ -23,12 +23,12 @@ KOF_Neowave.revisions = {
 	-- TODO: NTSC-J
 	["PAL"] = {
 		playerPtrs = { 0x0051E2E8, 0x0051E500 },
-		playerExtraPtrs = { }, -- TODO
-		player2ndExtraPtrs = { }, -- TODO
-		projectilesListInfo = { -- TODO
-			start = 0x00000000,
-			count = 0,
-			step = 0x200,
+		playerExtraPtrs = { 0x0050E008, 0x0050DDF0 },
+		cameraPtr = 0x00510D78,
+		projectilesListInfo = { -- TODO: Are there more entries than this?
+			start = 0x00512AA8,
+			count = 14,
+			step  = 0x218,
 		},
 	},
 }
