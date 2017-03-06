@@ -40,10 +40,7 @@ function KOF98:extraInit(noExport)
 	end
 	self.camera = ffi.new("camera")
 	self.players = ffiutil.ntypes("player", 2, 1)
-	--[=[
 	self.playerExtras = ffiutil.ntypes("playerExtra", 2, 1)
-	self.player2ndExtras = ffiutil.ntypes("playerSecondExtra", 2, 1)
-	--]=]
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
 		"pivots", self.projectilesListInfo.count + 2,
 		self.pivotSlotConstructor)

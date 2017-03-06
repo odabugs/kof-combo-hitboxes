@@ -39,7 +39,6 @@ function KOF_Neowave:extraInit(noExport)
 	self.boxtypes = boxtypes
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
-	self.parent.extraInit(self, true)
 end
 
 return KOF_Neowave
