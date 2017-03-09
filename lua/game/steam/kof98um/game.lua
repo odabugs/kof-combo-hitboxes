@@ -16,6 +16,7 @@ local KOF_Common = require("game.kof_common")
 local KOF98 = Game_Common:new({ whoami = "KOF98" })
 luautil.extend(KOF98, KOF_Common)
 
+KOF98.configSection = "kof98umfe"
 KOF98.basicWidth = 320
 KOF98.basicHeight = 224
 KOF98.aspectMode = "pillarbox"

@@ -1,17 +1,9 @@
-local ffi = require("ffi")
-local ffiutil = require("ffiutil")
-local luautil = require("luautil")
-local winerror = require("winerror")
-local winutil = require("winutil")
-local winprocess = require("winprocess")
-local window = require("window")
---local hk = require("hotkey")
-local colors = require("render.colors")
 local boxtypes = require("game.steam.kof2002um.boxtypes")
 local BoxSet = require("game.boxset")
 local KOF98 = require("game.steam.kof98um.game")
 local KOF02 = KOF98:new({ parent = KOF98, whoami = "KOF02" })
 
+KOF02.configSection = "kof2002um"
 -- game-specific constants
 KOF02.playerPtrs = { 0x0167C3A0, 0x0167C5C0 }
 KOF02.playerExtraPtrs = { 0x0167EA00, 0x01683240 }

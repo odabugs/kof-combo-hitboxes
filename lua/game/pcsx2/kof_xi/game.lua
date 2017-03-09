@@ -16,6 +16,7 @@ local KOF_Common = require("game.kof_common")
 local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
 luautil.extend(KOF_XI, KOF_Common)
 
+KOF_XI.configSection = "kof_xi"
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
 KOF_XI.absoluteYOffset = 35

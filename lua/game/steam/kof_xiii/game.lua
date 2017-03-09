@@ -14,6 +14,7 @@ local Game_Common = require("game.common")
 --       (this will require replacing the functionality provided by pydbg)
 local KOF13 = Game_Common:new({ whoami = "KOF XIII" })
 
+KOF13.configSection = "kof_xiii"
 -- 854x480 resolution displays player sprites at approximately 1:1 scale
 KOF13.basicWidth = 854
 KOF13.basicHeight = 480

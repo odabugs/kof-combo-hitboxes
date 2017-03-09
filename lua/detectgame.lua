@@ -120,25 +120,21 @@ local PS2Game = GameTemplate:new({
 local detectedGames = {
 	SteamGame:new({
 		module = "steam.kof98um",
-		configSection = "kof98umfe",
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 		targetProcessName = "KingOfFighters98UM.exe",
 	}),
 	SteamGame:new({
 		module = "steam.kof2002um",
-		configSection = "kof2002um",
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",
 		targetProcessName = "KingOfFighters2002UM.exe",
 	}),
 	SteamGame:new({
 		module = "steam.kof_xiii",
-		configSection = "kof_xiii",
 		targetWindowTitle = "The King of Fighters XIII",
 		targetProcessName = "kofxiii.exe",
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_xi",
-		configSection = "kof_xi",
 		-- PCSX2's CONSOLE window title will start with this line
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
@@ -152,7 +148,6 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_neowave",
-		configSection = "kof_neowave",
 		targetWindowTitle = "King of Fighters, The - Neo Wave",
 		revisions = {
 			--["SLPS-25525"] = "NTSC-J", -- TODO: Data collection
@@ -162,7 +157,6 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof98um",
-		configSection = "kof98um",
 		targetWindowTitle = "King Of Fighters 98 - Ultimate Match",
 		revisions = {
 			--["SLPS-25783"] = "NTSC-J", -- TODO: Data collection
@@ -173,7 +167,6 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.ngbc",
-		configSection = "ngbc",
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
 			-- Both NTSC-J revisions report as SLPS-25558 in PCSX2 console
@@ -185,7 +178,6 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.samsho6",
-		configSection = "samsho6",
 		targetWindowTitle = "Samurai Showdown Anthology", -- not a typo
 		revisions = {
 			["SLPS-25839"] = "NTSC-J",

@@ -13,6 +13,7 @@ local types = require("game.pcsx2.samsho6.types")
 local PCSX2_Common = require("game.pcsx2.common")
 local SamSho6 = PCSX2_Common:new({ whoami = "SamSho6" })
 
+SamSho6.configSection = "samsho6"
 SamSho6.basicWidth = 640
 SamSho6.basicHeight = 448
 SamSho6.absoluteYOffset = 20 -- TODO

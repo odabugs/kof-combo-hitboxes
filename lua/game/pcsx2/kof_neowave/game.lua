@@ -1,20 +1,11 @@
-local ffi = require("ffi")
-local ffiutil = require("ffiutil")
-local luautil = require("luautil")
-local winerror = require("winerror")
-local winutil = require("winutil")
-local winprocess = require("winprocess")
-local window = require("window")
---local hk = require("hotkey")
-local colors = require("render.colors")
 local boxtypes = require("game.steam.kof2002um.boxtypes")
 local BoxSet = require("game.boxset")
-local BoxList = require("game.boxlist")
 local KOF98 = require("game.steam.kof98um.game")
 local PCSX2_Common = require("game.pcsx2.common")
 local KOF_Neowave = KOF98:new({ parent = KOF98, whoami = "KOF_Neowave" })
 PCSX2_Common:export(KOF_Neowave)
 
+KOF_Neowave.configSection = "kof_neowave"
 -- this game renders at 640x448, but the "world" is effectively 320x224
 KOF_Neowave.aspectMode = "stretch"
 KOF_Neowave.absoluteYOffset = 18
