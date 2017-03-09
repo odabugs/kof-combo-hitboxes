@@ -15,6 +15,7 @@ local KOF_XI = require("game.pcsx2.kof_xi.game")
 -- if you don't set "parent" on the table parameter beforehand
 local NGBC = KOF_XI:new({ parent = KOF_XI, whoami = "NGBC" })
 
+NGBC.configSection = "ngbc"
 NGBC.basicWidth = 640
 NGBC.basicHeight = 448
 NGBC.absoluteYOffset = 22
