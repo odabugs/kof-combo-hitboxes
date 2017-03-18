@@ -14,8 +14,8 @@ local ERRLINE = "Error on line %d: %s"
 
 -- used by ReadConfig.parseColor()
 local cp = "%s*%d+%s*"
-local rgbPattern = string.format("%%(%s,%s,%s%%)", cp, cp, cp)
-local rgbaPattern = string.format("%%(%s,%s,%s,%s%%)", cp, cp, cp, cp)
+local rgbPattern = string.format("^%%s*%%(%s,%s,%s%%)%%s*$", cp, cp, cp)
+local rgbaPattern = string.format("^%%s*%%(%s,%s,%s,%s%%)%%s*$", cp, cp, cp, cp)
 
 local function trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
@@ -26,22 +26,28 @@ local function stripComment(s)
 	return (index and s:sub(1, index - 1)) or s
 end
 
-local function selectSection(target, section)
+local function selectSection(target, section, create)
 	section = section:lower()
 	for segment in section:gmatch("([%w_]+)(%.?)") do
-		target[segment] = (target[segment] or {})
-		target = target[segment]
+		if target[segment] then
+			target = target[segment]
+		elseif create then
+			target[segment] = {}
+			target = target[segment]
+		else
+			return nil
+		end
 	end
 	return target
 end
 
 local function isSectionMarker(line)
-	local l, r = line:find("%[[%w%._]+%]")
+	local l, r = line:find("^%s*%[[%w%._]+%]%s*$")
 	return (l and r and line:sub(l + 1, r - 1)) or nil
 end
 
 local function isOptionLine(line)
-	local l, r = line:find("[%w_]+%s*=.+")
+	local l, r = line:find("^%s*[%w_]+%s*=.+$")
 	if l and r then
 		local eq = line:find("=", l, true)
 		return trim(line:sub(1, eq - 1)), trim(line:sub(eq + 1))
@@ -76,8 +82,9 @@ function ReadConfig.parseBoolean(s)
 end
 
 function ReadConfig.parseDecimalByte(s)
-	local result = asInt(s)
-	if result ~= nil and result >= 0 and result <= 255 then return result
+	local result, err = asInt(s)
+	if err then return result, err
+	elseif result >= 0 and result <= 255 then return result
 	else return nil, string.format(BYTE_RANGE_ERR, result) end
 end
 
@@ -97,44 +104,51 @@ function ReadConfig.parseColor(s)
 		else return nil, err end -- bail out early on parse error
 	end
 
-	return colors.rgba(unpack(packed)), hasAlpha
+	return { color = colors.rgba(unpack(packed)), hasAlpha = hasAlpha }, nil
 end
 
-function ReadConfig.readPath(path, schema)
+function ReadConfig.readPath(path, schema, target)
 	local file, fileErr = io.open(path, "r")
-	if file then return ReadConfig.readFile(file, schema)
+	if file then return ReadConfig.readFile(file, schema, target)
 	else return nil, fileErr end
 end
 
 -- schema dictates what config file structure to expect,
 -- and the appropriate handler for each item in that structure
-function ReadConfig.readFile(file, schema)
-	local result = { global = {} }
+function ReadConfig.readFile(file, schema, target, sectionPrefix)
+	local result = (target or {})
+	sectionPrefix = (sectionPrefix and sectionPrefix .. ".") or ""
 	local currentSection = "global" -- implicit "default" config section
-	local target, handler = result[currentSection], schema[currentSection]
+	if not result[currentSection] then result[currentSection] = {} end
+	local target = selectSection(
+		result, sectionPrefix .. currentSection, true)
+	local handler = selectSection(schema, currentSection, false)
 	local i = 1 -- current line number
 
 	for line in file:lines() do
 		line = trim(stripComment(line))
-		local sectionMarker -- must be on its own line for the "goto" below
-		if line:len() == 0 then goto continue end
-		-- is the current line a section header?
-		sectionMarker = isSectionMarker(line)
-		if sectionMarker then
-			currentSection = sectionMarker
-			target = selectSection(result, currentSection)
-			handler = selectSection(schema, currentSection)
-		else
-			local key, value = isOptionLine(line)
-			if not key then
-				print(string.format(INVALID_LINE_ERR, i))
-			elseif handler[key] then
-				local result, err = handler[key](value, key)
-				if result ~= nil then
-					target[key] = result
-				else
-					err = string.format(ERRLINE, i, err)
-					print(err)
+		if line:len() > 0 then
+			-- is the current line a section header?
+			local sectionMarker = isSectionMarker(line)
+			if sectionMarker then
+				currentSection = sectionMarker
+				target = selectSection(
+					result, sectionPrefix .. currentSection, true)
+				handler = selectSection(schema, currentSection, false)
+			else
+				local key, value = isOptionLine(line)
+				if not key then
+					print(string.format(INVALID_LINE_ERR, i))
+				elseif not handler then
+					goto continue
+				elseif handler[key] then
+					local result, err = handler[key](value, key)
+					if not err then
+						target[key] = result
+					else
+						err = string.format(ERRLINE, i, err)
+						print(err)
+					end
 				end
 			end
 		end
