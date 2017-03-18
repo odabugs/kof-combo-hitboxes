@@ -21,6 +21,7 @@ NGBC.basicHeight = 448
 NGBC.absoluteYOffset = 22
 NGBC.groundLevel = NGBC.basicHeight - NGBC.absoluteYOffset
 -- game-specific constants
+NGBC.boxtypes = boxtypes
 NGBC.projCount = 8
 NGBC.playersPerTeam = 2
 NGBC.revisions = {
@@ -48,7 +49,6 @@ function NGBC:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
 		self:importRevisionSpecificOptions(true)
-		self.boxtypes = boxtypes
 		self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 			self.boxSlotConstructor, self.boxtypes)
 	end

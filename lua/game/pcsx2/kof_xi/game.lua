@@ -24,6 +24,7 @@ KOF_XI.pivotSize = 20
 KOF_XI.boxPivotSize = 5
 KOF_XI.boxesPerLayer = 20
 -- game-specific constants
+KOF_XI.boxtypes = boxtypes
 KOF_XI.projCount = 16 -- per player (team)
 KOF_XI.playersPerTeam = 3
 KOF_XI.revisions = {
@@ -48,7 +49,6 @@ function KOF_XI:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
 		self:importRevisionSpecificOptions(true)
-		self.boxtypes = boxtypes
 		self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 			self.boxSlotConstructor, self.boxtypes)
 	end

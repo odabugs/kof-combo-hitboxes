@@ -47,6 +47,7 @@ function main(hInstance, CLibs)
 	if detected then
 		local game = detectgame.moduleForGame(detected)
 		game:extraInit()
+		game:loadConfigs()
 		game:setupOverlay(CLibs.directx)
 		return mainLoop(game)
 	else

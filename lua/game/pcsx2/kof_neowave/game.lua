@@ -10,6 +10,7 @@ KOF_Neowave.configSection = "kof_neowave"
 KOF_Neowave.aspectMode = "stretch"
 KOF_Neowave.absoluteYOffset = 18
 -- game-specific constants
+KOF_Neowave.boxtypes = boxtypes
 KOF_Neowave.revisions = {
 	-- TODO: NTSC-J
 	["PAL"] = {
@@ -27,7 +28,6 @@ KOF_Neowave.revisions = {
 function KOF_Neowave:extraInit(noExport)
 	self:importRevisionSpecificOptions(true)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
-	self.boxtypes = boxtypes
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
 end

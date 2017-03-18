@@ -27,6 +27,7 @@ KOF98.drawStaleThrowBoxes = false
 KOF98.useThickLines = true
 KOF98.boxesPerLayer = 20
 -- game-specific constants
+KOF98.boxtypes = boxtypes
 KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
 KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
 KOF98.cameraPtr = 0x0180C938
@@ -35,7 +36,6 @@ KOF98.projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 }
 function KOF98:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
-		self.boxtypes = boxtypes
 		self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 			self.boxSlotConstructor, self.boxtypes)
 	end

@@ -3,6 +3,7 @@ local window = require("window")
 local winprocess = require("winprocess")
 local winutil = require("winutil")
 local draw = require("game.draw")
+local ReadConfig = require("config")
 local Game_Common = {}
 -- Import variables and methods from "draw" into this class.
 -- If you see something being used that's not defined here, look in there.
@@ -129,6 +130,38 @@ function Game_Common:nextFrame(drawing)
 		self.directx.beginFrame()
 	end
 	self.directx.endFrame()
+end
+
+function Game_Common:loadConfigs()
+	local configSection = self.configSection
+	local result = self:getDefaultConfig()
+	self:loadConfigFile(result, "default.ini")
+	self:loadConfigFile(result, configSection .. ".ini", configSection)
+	return result
+end
+
+function Game_Common:loadConfigFile(target, path, sectionPrefix)
+	io.write("Loading config file '", path, "'...\n")
+	local file, fileErr = io.open(path, "r")
+	if fileErr then
+		io.write("Failed to load config file '", path, "': ", fileErr, "\n")
+	else
+		local schema = self.schema or self:getConfigSchema()
+		self.schema = schema
+		target = ReadConfig.readFile(file, schema, target, sectionPrefix)
+		io.write("Finished loading config file '", path, "'.\n")
+		return target
+	end
+end
+
+-- to be overridden by derived objects
+function Game_Common:getDefaultConfig()
+	return {}
+end
+
+-- to be overridden by derived objects
+function Game_Common:getConfigSchema()
+	return {}
 end
 
 return Game_Common

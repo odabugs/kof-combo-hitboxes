@@ -1,5 +1,38 @@
+local luautil = require("luautil")
 local colors = require("render.colors")
+local ReadConfig = require("config")
 local KOF_Common = {}
+
+function KOF_Common:getConfigSchema()
+	local bt = self.boxtypes
+	local function readBoxColor(value, key)
+		local newColor, err = ReadConfig.parseColor(value)
+		if newColor then
+			local boxtypeKey = bt.colorConfigNames[key]
+			local target = bt.colormap[boxtypeKey]
+			local nc = newColor.color
+			-- set edge color
+			target[1] = colors.setAlpha(nc, bt.defaultEdgeAlpha)
+			-- set fill color
+			if not newColor.hasAlpha then
+				nc = colors.setAlpha(nc, bt.defaultFillAlpha)
+			end
+			target[2] = nc
+		end
+		return newColor, err
+	end
+
+	local result = {
+		colors = {},
+	}
+	for colorKey in pairs(bt.colorConfigNames) do
+		result.colors[colorKey] = readBoxColor
+	end
+	-- duplicating the schema sections and nesting them under the game's
+	-- config section name permits INI files to have game-specific sections
+	result[self.configSection] = luautil.extend({}, result)
+	return result
+end
 
 -- slot constructor function passed to BoxSet:new()
 function KOF_Common.boxSlotConstructor(i, slot, boxtypes)
