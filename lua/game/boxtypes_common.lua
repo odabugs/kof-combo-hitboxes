@@ -19,6 +19,7 @@ local b_pr = "proximity"
 
 Boxtypes_Common.idMask = 0xFF
 Boxtypes_Common.defaultFillAlpha = 48
+Boxtypes_Common.defaultEdgeAlpha = 255
 Boxtypes_Common.defaultEdgeColor = colors.BLACK
 Boxtypes_Common.defaultFillColor = colors.setAlpha(
 	Boxtypes_Common.defaultEdgeColor, Boxtypes_Common.defaultFillAlpha)
@@ -45,12 +46,32 @@ Boxtypes_Common.colormap = {
 	[b_t]  = { colors.MAGENTA, false },
 	[b_pr] = { colors.WHITE, false },
 }
+-- mapping of option names used in config files to internal color names
+Boxtypes_Common.colorConfigNames = {
+	vulnerableBox = b_v,
+	counterBox = b_c,
+	counterVulnerableBox = b_vc,
+	anywhereBox = b_va,
+	otgBox = b_vo,
+	attackBox = b_a,
+	guardBox = b_g,
+	projectileAttackBox = b_pa,
+	projectileVulnerableBox = b_pv,
+	throwBox = b_t,
+	throwableBox = b_tv,
+	proximityBox = b_pr,
+	clashBox = b_cl,
+	collisionBox = b_co,
+}
 
 -- populate the fill color values in colormap above
 for _, colorMapping in pairs(Boxtypes_Common.colormap) do
+	local newColor = colorMapping[1]
+	colorMapping[1] = colors.setAlpha(
+		newColor, Boxtypes_Common.defaultEdgeAlpha)
 	if type(colorMapping[2]) ~= "number" then
 		colorMapping[2] = colors.setAlpha(
-			colorMapping[1], Boxtypes_Common.defaultFillAlpha)
+			newColor, Boxtypes_Common.defaultFillAlpha)
 	end
 end
 
