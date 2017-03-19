@@ -1,5 +1,9 @@
 local colors = require("render.colors")
+local luautil = require("luautil")
 local ReadConfig = {}
+
+local trim, contains, asInt = luautil.trim, luautil.contains, luautil.asInt
+local selectSection = luautil.selectSection
 
 ReadConfig.yesValues = {"yes", "y", "true", "t", "on"}
 ReadConfig.noValues = {"no", "n", "false", "f", "off"}
@@ -17,28 +21,9 @@ local cp = "%s*%d+%s*"
 local rgbPattern = string.format("^%%s*%%(%s,%s,%s%%)%%s*$", cp, cp, cp)
 local rgbaPattern = string.format("^%%s*%%(%s,%s,%s,%s%%)%%s*$", cp, cp, cp, cp)
 
-local function trim(s)
-  return (s:gsub("^%s*(.-)%s*$", "%1"))
-end
-
 local function stripComment(s)
 	local index = (s:find(";", 1, true))
 	return (index and s:sub(1, index - 1)) or s
-end
-
-local function selectSection(target, section, create)
-	section = section:lower()
-	for segment in section:gmatch("([%w_]+)(%.?)") do
-		if target[segment] then
-			target = target[segment]
-		elseif create then
-			target[segment] = {}
-			target = target[segment]
-		else
-			return nil
-		end
-	end
-	return target
 end
 
 local function isSectionMarker(line)
@@ -56,18 +41,6 @@ local function isOptionLine(line)
 	end
 end
 
-local function contains(tbl, value)
-	for _, v in ipairs(tbl) do
-		if v == value then return true end
-	end
-	return false
-end
-
-local function asInt(s)
-	if (type(s) == "number") or (s:find("^[+-]?%d+$")) then return s + 0
-	else return nil end
-end
-
 function ReadConfig.parseInteger(s)
 	local result = asInt(s)
 	if result then return result
@@ -82,7 +55,7 @@ function ReadConfig.parseBoolean(s)
 end
 
 function ReadConfig.parseDecimalByte(s)
-	local result, err = asInt(s)
+	local result, err = ReadConfig.parseInteger(s)
 	if err then return result, err
 	elseif result >= 0 and result <= 255 then return result
 	else return nil, string.format(BYTE_RANGE_ERR, result) end
@@ -139,20 +112,16 @@ function ReadConfig.readFile(file, schema, target, sectionPrefix)
 				local key, value = isOptionLine(line)
 				if not key then
 					print(string.format(INVALID_LINE_ERR, i))
-				elseif not handler then
-					goto continue
-				elseif handler[key] then
+				elseif handler and handler[key] then
 					local result, err = handler[key](value, key)
 					if not err then
 						target[key] = result
 					else
-						err = string.format(ERRLINE, i, err)
-						print(err)
+						print(string.format(ERRLINE, i, err))
 					end
 				end
 			end
 		end
-		::continue::
 		i = i + 1
 	end
 

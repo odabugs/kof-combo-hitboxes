@@ -69,4 +69,35 @@ function luautil.inserter(t, n)
 	end
 end
 
+function luautil.trim(s)
+	return (s:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+function luautil.contains(tbl, value)
+	for _, v in ipairs(tbl) do
+		if v == value then return true end
+	end
+	return false
+end
+
+function luautil.asInt(s)
+	if (type(s) == "number") or (s:find("^[+-]?%d+$")) then return s + 0
+	else return nil end
+end
+
+function luautil.selectSection(target, section, create)
+	section = section:lower()
+	for segment in section:gmatch("([%w_]+)(%.?)") do
+		if target[segment] then
+			target = target[segment]
+		elseif create then
+			target[segment] = {}
+			target = target[segment]
+		else
+			return nil
+		end
+	end
+	return target
+end
+
 return luautil
