@@ -9,9 +9,11 @@ local draw = {}
 
 -- all draw calls are shifted upward by this amount
 draw.absoluteYOffset = 0
-draw.pivotSize = 20
-draw.pivotColor = colors.rgb(255, 255, 255)
 draw.useThickLines = false
+draw.pivotSize = 20
+draw.boxPivotSize = 5
+draw.pivotColor = colors.WHITE
+draw.projectilePivotColor = colors.GREEN
 
 -- optional flags to pass when calling draw:scaleCoords
 draw.COORD_RIGHT_EDGE = 0x01
@@ -65,16 +67,24 @@ function draw:rect(x1, y1, x2, y2, color)
 	self:rawRect(x1, y1, x2, y2, color)
 end
 
-function draw:pivot(x, y, size, color)
+function draw:horzLine(x1, x2, y, color, thick)
+	thick = (thick or self.useThickLines)
+	if thick then self:box(x1, y, x2, y, color, color)
+	else self:rect(x1, y, x2, y, color) end
+end
+
+function draw:vertLine(y1, y2, x, color, thick)
+	thick = (thick or self.useThickLines)
+	if thick then self:box(x, y1, x, y2, color, color)
+	else self:rect(x, y1, x, y2, color) end
+end
+
+function draw:pivot(x, y, size, color, thick)
 	local p = (size or self.pivotSize)
 	color = (color or self.pivotColor)
-	if self.useThickLines then
-		self:box(x - p, y, x + p, y, color, color)
-		self:box(x, y - p, x, y + p, color, color)
-	else
-		self:rect(x - p, y, x + p + 1, y, color)
-		self:rect(x, y - p, x, y + p + 1, color)
-	end
+	thick = (thick or self.useThickLines)
+	self:horzLine(x - p, x + p, y, color, thick)
+	self:vertLine(y - p, y + p, x, color, thick)
 end
 
 function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
