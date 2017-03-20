@@ -134,7 +134,7 @@ end
 
 function Game_Common:loadConfigs()
 	local configSection = self.configSection
-	local result = self:getDefaultConfig()
+	local result = {}
 	self:loadConfigFile(result, "default.ini")
 	self:loadConfigFile(result, configSection .. ".ini", configSection)
 	return result
@@ -152,11 +152,6 @@ function Game_Common:loadConfigFile(target, path, sectionPrefix)
 		io.write("Finished loading config file '", path, "'.\n")
 		return target
 	end
-end
-
--- to be overridden by derived objects
-function Game_Common:getDefaultConfig()
-	return {}
 end
 
 -- to be overridden by derived objects
