@@ -43,12 +43,10 @@ function draw:scaleCoords(x, y, flags)
 	if bit.band(flags, self.COORD_RIGHT_EDGE) ~= 0 then xAdjust = 1 end
 	if bit.band(flags, self.COORD_BOTTOM_EDGE) ~= 0 then yAdjust = 1 end
 
-	x = math.floor((x + xAdjust) * self.xScale) + self.xOffset
-	x = x - xAdjust
-
-	y = ((y + yAdjust) - self.absoluteYOffset) * self.yScale
+	x = math.floor((x + xAdjust) * self.xScale) - xAdjust
+	y = math.floor(((y + yAdjust) - self.absoluteYOffset) * self.yScale)
 	-- Why does this work better when adding 1 extra?  IT IS A MYSTERY
-	y = math.floor(y) - yAdjust + self.yOffset + 1
+	y = y - yAdjust + 1
 	return x, y
 end
 
