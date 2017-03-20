@@ -1,5 +1,7 @@
 local luautil = {}
 
+local SECTION_PATTERN = "([%w_]+)(%.?)"
+
 function luautil.collect(iterator, target)
 	target = (target or {})
 	for i in iterator do table.insert(target, i) end
@@ -52,7 +54,6 @@ function luautil.insertn(t, start, ...)
 	for i = 1, select("#", ...) do
 		current = select(i, ...)
 		t[n] = current
-		--io.write("Inserting ", current, " at index ", n, " in ", tostring(t), "\n")
 		n = n + 1
 	end
 	return t
@@ -87,7 +88,7 @@ end
 
 function luautil.selectSection(target, section, create)
 	section = section:lower()
-	for segment in section:gmatch("([%w_]+)(%.?)") do
+	for segment in section:gmatch(SECTION_PATTERN) do
 		if target[segment] then
 			target = target[segment]
 		elseif create then
@@ -98,6 +99,24 @@ function luautil.selectSection(target, section, create)
 		end
 	end
 	return target
+end
+
+-- Variant of "setfield" from https://www.lua.org/pil/14.1.html
+-- that targets an arbitrary "starting point" table instead of _G
+function luautil.assign(target, section, value)
+	for segment, dot in section:gmatch(SECTION_PATTERN) do
+		if dot == "" then -- last field reached
+			target[segment] = value
+		else
+			target[segment] = target[segment] or {}
+			target = target[segment]
+		end
+	end
+	return target
+end
+
+function luautil.identity(x)
+	return x
 end
 
 return luautil

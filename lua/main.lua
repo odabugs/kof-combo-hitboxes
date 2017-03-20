@@ -27,40 +27,19 @@ VOID Sleep(DWORD ms);
 ]]
 local C = ffi.C
 
----[[
 function main(hInstance, CLibs)
-	--[=[
-	if type(CLibs) == "table" then
-		for k, v in pairs(CLibs) do
-			if _G[k] == nil then
-				_G[k] = v
-				print("Registered " .. k)
-			else
-				print(k .. " already exists")
-			end
-			print(k, v)
-		end
-	end
-	--]=]
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected then
 		local game = detectgame.moduleForGame(detected)
-		game:extraInit()
 		game:loadConfigs()
+		game:extraInit()
 		game:setupOverlay(CLibs.directx)
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")
 	end
 end
---]]
-
---[[
-function main(hInstance)
-	return 0
-end
---]]
 
 function mainLoop(game)
 	local message = ffi.new("MSG[1]")
@@ -85,6 +64,7 @@ function mainLoop(game)
 			end
 		end
 		if fg == game.consoleHwnd or fg == game.overlayHwnd or fg == game.gameHwnd then
+			-- space bar toggles rendering on/off (TEMPORARY)
 			if hk.pressed(0x20) then drawing = not drawing end
 		end
 		C.Sleep(5)

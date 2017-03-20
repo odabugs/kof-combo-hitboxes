@@ -10,7 +10,9 @@ local draw = {}
 -- all draw calls are shifted upward by this amount
 draw.absoluteYOffset = 0
 draw.useThickLines = false
+draw.drawPlayerPivot = true
 draw.pivotSize = 20
+draw.drawBoxPivot = true
 draw.boxPivotSize = 5
 draw.pivotColor = colors.WHITE
 draw.projectilePivotColor = colors.GREEN
