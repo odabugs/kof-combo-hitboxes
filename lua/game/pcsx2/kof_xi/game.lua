@@ -20,8 +20,6 @@ KOF_XI.configSection = "kof_xi"
 KOF_XI.basicWidth = 640
 KOF_XI.basicHeight = 448
 KOF_XI.absoluteYOffset = 35
-KOF_XI.pivotSize = 20
-KOF_XI.boxPivotSize = 5
 KOF_XI.boxesPerLayer = 20
 -- game-specific constants
 KOF_XI.boxtypes = boxtypes
@@ -113,12 +111,12 @@ function KOF_XI:captureEntity(target, facing, isProjectile)
 			boxset:add("collision", boxAdder, self, self:deriveBoxPosition(
 				target, hitbox, facing))
 		end
-		self.pivots:add(self.addPivot, colors.WHITE, self:worldToScreen(
+		self.pivots:add(self.addPivot, self.pivotColor, self:worldToScreen(
 			target.position.x, target.position.y))
 	-- only draw pivot cross for projectiles if at least one box was drawn
 	elseif boxesDrawn > 0 then
-		self.pivots:add(self.addPivot, colors.GREEN, self:worldToScreen(
-			target.position.x, target.position.y))
+		self.pivots:add(self.addPivot, self.projectilePivotColor,
+			self:worldToScreen(target.position.x, target.position.y))
 	end
 end
 

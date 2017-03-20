@@ -144,12 +144,12 @@ function KOF98:captureEntity(target, isProjectile, facing)
 			boxset:add("throwable", boxAdder, self, self:deriveBoxPosition(
 				target, hitbox, facing))
 		end
-		self.pivots:add(self.addPivot, colors.WHITE, self:worldToScreen(
+		self.pivots:add(self.addPivot, self.pivotColor, self:worldToScreen(
 			target.screenX, target.screenY))
 	-- don't draw pivot axis for projectile if it has no active hitboxes
 	elseif boxesDrawn > 0 then
-		self.pivots:add(self.addPivot, colors.GREEN, self:worldToScreen(
-			target.screenX, target.screenY))
+		self.pivots:add(self.addPivot, self.projectilePivotColor,
+			self:worldToScreen(target.screenX, target.screenY))
 	end
 end
 
