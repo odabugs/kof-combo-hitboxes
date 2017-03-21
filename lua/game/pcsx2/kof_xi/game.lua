@@ -175,9 +175,13 @@ function KOF_XI:worldToScreen(x, y)
 	return x - cam.x, y - cam.y
 end
 
+function KOF_XI:getPlayerPosition(player)
+	return player.position.x, player.position.y
+end
+
 -- translate a hitbox's position into coordinates suitable for drawing
 function KOF_XI:deriveBoxPosition(player, hitbox, facing)
-	local playerX, playerY = player.position.x, player.position.y
+	local playerX, playerY = self:getPlayerPosition(player)
 	local centerX, centerY = hitbox.position.x * 2, hitbox.position.y * 2
 	centerX = playerX + (centerX * facing) -- positive offsets move forward
 	centerY = playerY - centerY -- positive offsets move upward

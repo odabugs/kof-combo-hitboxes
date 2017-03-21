@@ -123,6 +123,26 @@ function KOF_Common.drawPivot(pivot, parent, pivotSize)
 	return 1
 end
 
+-- to be overridden by derived objects
+function KOF_Common:facingMultiplier(player)
+	return 1
+end
+
+-- to be overridden by derived objects
+function KOF_Common:getPlayerPosition(player)
+	return 0, 0
+end
+
+function KOF_Common:drawRangeMarker(player, range)
+	local originX, originY = self:getPlayerPosition(player)
+	local rangeX = originX + (range * self:facingMultiplier(player))
+	local color = self.rangeMarkerColor
+	originX, originY = self:worldToScreen(originX, originY)
+	rangeX = (self:worldToScreen(rangeX, 0))
+	self:horzLine(originX, rangeX, originY, color)
+	self:vertLine(0, self.height + self.absoluteYOffset, rangeX, color)
+end
+
 function KOF_Common:renderState()
 	self.boxset:render(self.drawBox, self,
 		self.drawBoxPivot, self.boxPivotSize)

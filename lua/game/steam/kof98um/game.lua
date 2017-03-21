@@ -80,9 +80,13 @@ function KOF98:facingMultiplier(player)
 	return ((player.facing == 0) and 1) or -1
 end
 
+function KOF98:getPlayerPosition(player)
+	return player.screenX, player.screenY
+end
+
 -- translate a hitbox's position into coordinates suitable for drawing
 function KOF98:deriveBoxPosition(player, hitbox, facing)
-	local playerX, playerY = player.screenX, player.screenY
+	local playerX, playerY = self:getPlayerPosition(player)
 	local centerX, centerY = hitbox.x, hitbox.y
 	centerX = playerX + (centerX * facing) -- positive offsets move forward
 	centerY = playerY + centerY -- positive offsets move downward

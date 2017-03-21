@@ -16,6 +16,7 @@ draw.drawBoxPivot = true
 draw.boxPivotSize = 5
 draw.pivotColor = colors.WHITE
 draw.projectilePivotColor = colors.GREEN
+draw.rangeMarkerColor = colors.GREEN
 
 -- optional flags to pass when calling draw:scaleCoords
 draw.COORD_RIGHT_EDGE = 0x01
