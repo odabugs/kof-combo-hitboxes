@@ -174,7 +174,6 @@ end
 
 function KOF98:renderState()
 	KOF_Common.renderState(self)
-	local ps = self.players
 	for which = 1, 2 do
 		local rangeIndex = self.drawRangeMarkers[which]
 		local p, px = self.players[which], self.playerExtras[which]
