@@ -5,7 +5,7 @@ local winerror = require("winerror")
 local winutil = require("winutil")
 local winprocess = require("winprocess")
 local window = require("window")
---local hk = require("hotkey")
+local hotkey = require("hotkey")
 local colors = require("render.colors")
 local types = require("game.steam.kof98um.types")
 local boxtypes = require("game.steam.kof98um.boxtypes")
@@ -32,6 +32,9 @@ KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
 KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
 KOF98.cameraPtr = 0x0180C938
 KOF98.projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 }
+
+KOF98.drawRangeMarkers = { false, false }
+KOF98.rangeMarkerHotkeys = { hotkey.VK_F1, hotkey.VK_F2 }
 
 function KOF98:extraInit(noExport)
 	if not noExport then
@@ -78,6 +81,10 @@ end
 -- return -1 if player is facing left, or +1 if player is facing right
 function KOF98:facingMultiplier(player)
 	return ((player.facing == 0) and 1) or -1
+end
+
+function KOF98:rangeMarkerMultiplier(player)
+	return self:facingMultiplier(player) * -1
 end
 
 function KOF98:getPlayerPosition(player)
@@ -154,6 +161,51 @@ function KOF98:captureEntity(target, isProjectile, facing)
 	elseif boxesDrawn > 0 then
 		self.pivots:add(self.addPivot, self.projectilePivotColor,
 			self:worldToScreen(target.screenX, target.screenY))
+	end
+end
+
+function KOF98:advanceRangeMarker(which)
+	local r = self.drawRangeMarkers
+	if r[which] == false then r[which] = 0
+	elseif r[which] >= 3 then r[which] = false
+	else r[which] = r[which] + 1 end
+	return r[which]
+end
+
+function KOF98:renderState()
+	KOF_Common.renderState(self)
+	local ps = self.players
+	for which = 1, 2 do
+		local rangeIndex = self.drawRangeMarkers[which]
+		local p, px = self.players[which], self.playerExtras[which]
+		if rangeIndex and (p.yPivot.value == 0) then
+			-- subtract 1 since the marker line must actually be "behind"
+			-- the opponent's pivot axis to register a close-range attack
+			local range = px.closeRanges[rangeIndex] - 1
+			local active = range >= p.xDistance
+			self:drawRangeMarker(p, range, active)
+		end
+	end
+end
+
+function KOF98:checkInputs()
+	for i = 1, 2 do
+		if hotkey.pressed(self.rangeMarkerHotkeys[i]) then
+			local newState = self:advanceRangeMarker(i)
+			if newState then
+				print(string.format(
+					"Showing close standing %s activation range for player %d.",
+					self.buttonNames[newState + 1], i))
+			else
+				print(string.format(
+					"Disabled close normal range marker for player %d.",
+					i))
+			end
+		end
+	end
+	if hotkey.pressed(hotkey.VK_F6) then
+		self.drawStaleThrowBoxes = not self.drawStaleThrowBoxes
+		print("Toggled drawing \"stale\" throw boxes.")
 	end
 end
 

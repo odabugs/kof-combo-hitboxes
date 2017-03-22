@@ -3,6 +3,8 @@ local colors = require("render.colors")
 local ReadConfig = require("config")
 local KOF_Common = {}
 
+KOF_Common.buttonNames = { "A", "B", "C", "D" }
+
 local function readerGenerator(fn, target, targetKey, postprocess)
 	print(targetKey)
 	postprocess = (postprocess or luautil.identity)
@@ -128,15 +130,21 @@ function KOF_Common:facingMultiplier(player)
 	return 1
 end
 
+-- in some games, this may disagree with the facing multiplier above,
+-- so those games will need to override this function
+function KOF_Common:rangeMarkerMultiplier(player)
+	return self:facingMultiplier(player)
+end
+
 -- to be overridden by derived objects
 function KOF_Common:getPlayerPosition(player)
 	return 0, 0
 end
 
-function KOF_Common:drawRangeMarker(player, range)
+function KOF_Common:drawRangeMarker(player, range, active)
 	local originX, originY = self:getPlayerPosition(player)
-	local rangeX = originX + (range * self:facingMultiplier(player))
-	local color = self.rangeMarkerColor
+	local rangeX = originX + (range * self:rangeMarkerMultiplier(player))
+	local color = (active and self.activeRangeMarkerColor) or self.rangeMarkerColor
 	originX, originY = self:worldToScreen(originX, originY)
 	rangeX = (self:worldToScreen(rangeX, 0))
 	self:horzLine(originX, rangeX, originY, color)

@@ -120,7 +120,13 @@ function Game_Common:renderState()
 	return
 end
 
+-- to be overridden by derived objects
+function Game_Common:checkInputs()
+	return
+end
+
 function Game_Common:nextFrame(drawing)
+	self:checkInputs()
 	self:captureState()
 	if drawing and self:shouldRenderFrame() then
 		self:repositionOverlay()
