@@ -33,6 +33,9 @@ function main(hInstance, CLibs)
 	if detected then
 		local game = detectgame.moduleForGame(detected)
 		game:loadConfigs()
+		print(string.format(
+			"For best visual results, a game window resolution of %dx%d is recommended.",
+			game.basicWidth, game.basicHeight))
 		game:extraInit()
 		game:setupOverlay(CLibs.directx)
 		return mainLoop(game)
