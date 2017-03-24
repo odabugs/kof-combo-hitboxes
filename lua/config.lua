@@ -80,6 +80,17 @@ function ReadConfig.parseColor(s)
 	return { color = colors.rgba(unpack(packed)), hasAlpha = hasAlpha }, nil
 end
 
+function ReadConfig.readerGenerator(fn, target, targetKey, postprocess)
+	postprocess = (postprocess or luautil.identity)
+	return function(value, key)
+		local result, err = fn(value, key)
+		if not err then
+			luautil.assign(target, targetKey, postprocess(result))
+		end
+		return result, err
+	end
+end
+
 function ReadConfig.readPath(path, schema, target)
 	local file, fileErr = io.open(path, "r")
 	if file then return ReadConfig.readFile(file, schema, target)

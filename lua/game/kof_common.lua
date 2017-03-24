@@ -5,18 +5,6 @@ local KOF_Common = {}
 
 KOF_Common.buttonNames = { "A", "B", "C", "D" }
 
-local function readerGenerator(fn, target, targetKey, postprocess)
-	print(targetKey)
-	postprocess = (postprocess or luautil.identity)
-	return function(value, key)
-		local result, err = fn(value, key)
-		if not err then
-			luautil.assign(target, targetKey, postprocess(result))
-		end
-		return result, err
-	end
-end
-
 function KOF_Common:getConfigSchema()
 	local bt = self.boxtypes
 	local function readBoxColor(value, key)
@@ -39,7 +27,7 @@ function KOF_Common:getConfigSchema()
 	local function partialReader(fn, postprocess)
 		local defaultTarget = self
 		return function(targetKey, target)
-			return readerGenerator(
+			return ReadConfig.readerGenerator(
 				fn, (target or defaultTarget), targetKey, postprocess)
 		end
 	end
@@ -59,7 +47,8 @@ function KOF_Common:getConfigSchema()
 		colors = {
 			playerPivot = singleColorReader("pivotColor"),
 			projectilePivot = singleColorReader("projectilePivotColor"),
-			--rangeMarker = singleColorReader("rangeMarkerColor"), -- TODO
+			rangeMarker = singleColorReader("rangeMarkerColor"),
+			activeRangeMarker = singleColorReader("activeRangeMarkerColor"),
 		},
 	}
 	local booleanKeys = {
