@@ -74,11 +74,15 @@ function luautil.trim(s)
 	return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
-function luautil.contains(tbl, value)
-	for _, v in ipairs(tbl) do
-		if v == value then return true end
+function luautil.find(tbl, value)
+	for i, v in ipairs(tbl) do
+		if v == value then return i end
 	end
-	return false
+	return nil
+end
+
+function luautil.contains(tbl, value)
+	return luautil.asBoolean(luautil.find(tbl, value))
 end
 
 function luautil.asInt(s)
