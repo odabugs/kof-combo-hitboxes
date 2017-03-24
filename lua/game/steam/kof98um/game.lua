@@ -49,6 +49,15 @@ function KOF98:extraInit(noExport)
 		"pivots", self.projectilesListInfo.count + 2,
 		self.pivotSlotConstructor)
 	self.projBuffer = ffi.new("projectile")
+
+	for which = 1, 2 do
+		local showing = self.drawRangeMarkers[which]
+		if showing then
+			print(string.format(
+				"Showing close standing %s activation range for player %d.",
+				self.buttonNames[showing + 1], which))
+		end
+	end
 end
 
 function KOF98:capturePlayerState(which)
@@ -204,8 +213,35 @@ function KOF98:checkInputs()
 	end
 	if hotkey.pressed(hotkey.VK_F6) then
 		self.drawStaleThrowBoxes = not self.drawStaleThrowBoxes
-		print("Toggled drawing \"stale\" throw boxes.")
+		print(string.format("%s drawing \"stale\" throw boxes.",
+			(self.drawStaleThrowBoxes and "Enabled") or "Disabled"))
 	end
+end
+
+function KOF98:getConfigSchema()
+	local function rangeMarkerReader(which)
+		return function(key, value)
+			key = key:upper()
+			if key == "NONE" then return false end
+			local result, err
+			local keyIndex = luautil.find(self.buttonNames, key)
+			if keyIndex ~= nil then
+				result = keyIndex - 1 -- we want this to start from 0
+				self.drawRangeMarkers[which] = result
+			else
+				err = string.format(RANGE_PARSE_ERR, key)
+			end
+			return result, err
+		end
+	end
+
+	local schema = KOF_Common.getConfigSchema(self)
+	for i = 1, 2 do
+		schema["player" .. i] = {
+			drawRangeMarker = rangeMarkerReader(i),
+		}
+	end
+	return schema
 end
 
 return KOF98
