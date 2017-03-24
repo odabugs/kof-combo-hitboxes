@@ -93,12 +93,13 @@ function Game_Common:read(address, buffer)
 	return result, address
 end
 
-function Game_Common:readPtr(address)
+function Game_Common:readPtr(address, buffer)
 	address = address + self.RAMbase
 	self:pointerRangeCheck(address)
-	self.pointerBuf.i = address
-	winprocess.read(self.gameHandle, self.pointerBuf, self.pointerBuf)
-	return self.pointerBuf.i, address
+	buffer = (buffer or self.pointerBuf)
+	buffer.i = address
+	winprocess.read(self.gameHandle, buffer, buffer)
+	return buffer.i, address
 end
 
 function Game_Common:pointerRangeCheck(address)
