@@ -119,8 +119,4 @@ function luautil.assign(target, section, value)
 	return target
 end
 
-function luautil.identity(x)
-	return x
-end
-
 return luautil
