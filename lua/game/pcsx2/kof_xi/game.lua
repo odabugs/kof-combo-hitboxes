@@ -84,11 +84,11 @@ function KOF_XI:captureEntity(target, facing, isProjectile)
 	local boxset, boxAdder = self.boxset, self.addBox
 	local bt, boxtype = self.boxtypes, "dummy"
 	local boxstate, i, boxesDrawn = target.hitboxesActive, 0, 0
-	local hitbox
+	local haveDrawnAttackBox, hitbox = false, nil
 	while boxstate ~= 0 and i <= 5 do
 		if bit.band(boxstate, 1) ~= 0 then
 			hitbox = target.hitboxes[i]
-			if i == 4 then -- use fixed color for "throw" hitboxes
+			if i == 4 then -- "throw" hitboxes always occupy this slot
 				boxtype = "throw"
 			else
 				boxtype = bt:typeForID(hitbox.boxID)
@@ -96,8 +96,15 @@ function KOF_XI:captureEntity(target, facing, isProjectile)
 					boxtype = bt:asProjectile(boxtype)
 				end
 			end
-			boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
-				target, hitbox, facing))
+			-- special case handler to hide the spurious "throw" hitbox
+			-- on the first hit of Robert's close standing D
+			if not (boxtype == "throw" and haveDrawnAttackBox) then
+				if boxtype == "attack" then
+					haveDrawnAttackBox = true
+				end
+				boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
+					target, hitbox, facing))
+			end
 			boxesDrawn = boxesDrawn + 1
 		end
 		boxstate = bit.rshift(boxstate, 1)
@@ -153,6 +160,11 @@ function KOF_XI:captureState()
 		self:capturePlayerState(i)
 	end
 
+	--[=[ -- testing code for determining activation range of close normals
+	local p, t = self.players, self.teams
+	local distance = math.abs(p[1].position.x - p[2].position.x)
+	io.write(string.format("\r%04X", distance), "\t", t[1].point, "\t", t[2].point)
+	--]=]
 	--[=[
 	local n = 1
 	local activeIndex = self.teams[n].point
