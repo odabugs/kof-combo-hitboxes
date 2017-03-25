@@ -36,6 +36,7 @@ function main(hInstance, CLibs)
 		print(string.format(
 			"For best visual results, a game window resolution of %dx%d is recommended.",
 			game.basicWidth, game.basicHeight))
+		game:printWindowPosition()
 		game:extraInit()
 		game:setupOverlay(CLibs.directx)
 		return mainLoop(game)

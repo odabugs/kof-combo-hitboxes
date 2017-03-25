@@ -18,6 +18,7 @@ draw.pivotColor = colors.WHITE
 draw.projectilePivotColor = colors.GREEN
 draw.rangeMarkerColor = colors.GREEN
 draw.activeRangeMarkerColor = colors.RED
+draw.gaugeBorderColor = colors.BLACK
 
 -- optional flags to pass when calling draw:scaleCoords
 draw.COORD_RIGHT_EDGE = 0x01
@@ -161,6 +162,16 @@ function draw:repositionOverlay()
 		self.rectBuf, self.pointBuf,
 		self.xOffset, self.yOffset,
 		false) -- TODO: don't resize for now
+end
+
+function draw:printWindowPosition()
+	local gameHwnd = self.gameHwnd
+	local wx, wy = window.getTopLeftCorner(gameHwnd, self.pointBuf)
+	local width, height = window.getDimensions(gameHwnd, self.rectBuf)
+	io.write(
+		"Game window is located at (", wx, ", ", wy,
+		") and its dimensions are (", width, ", ", height, ").\n")
+	return wx, wy, width, height
 end
 
 function draw:shouldRenderFrame()
