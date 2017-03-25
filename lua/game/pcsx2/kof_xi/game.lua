@@ -104,8 +104,8 @@ function KOF_XI:captureEntity(target, facing, isProjectile)
 				end
 				boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
 					target, hitbox, facing))
+				boxesDrawn = boxesDrawn + 1
 			end
-			boxesDrawn = boxesDrawn + 1
 		end
 		boxstate = bit.rshift(boxstate, 1)
 		i = i + 1
