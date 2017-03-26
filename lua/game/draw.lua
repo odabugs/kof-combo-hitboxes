@@ -5,6 +5,7 @@ local colors = require("render.colors")
 -- These methods expect the following to be defined on the calling object:
 -- - basicWidth, basicHeight, width, height
 -- - xOffset, yOffset, xScissor, yScissor, aspectMode
+-- - directx (table of C functions)
 local draw = {}
 
 -- all draw calls are shifted upward by this amount
@@ -90,10 +91,9 @@ function draw:pivot(x, y, size, color, thick)
 	self:vertLine(y - p, y + p, x, color, thick)
 end
 
-function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
+function draw:getBoxCoords(x1, y1, x2, y2, thick)
 	if thick == nil then thick = self.useThickLines end
 	local corner = (thick and self.COORD_BOTTOM_RIGHT) or 0
-
 	local outerLeftX, outerTopY     = self:scaleCoords(x1, y1)
 	local outerRightX, outerBottomY = self:scaleCoords(x2, y2, corner)
 	local innerLeftX, innerTopY, innerRightX, innerBottomY
@@ -110,7 +110,15 @@ function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
 		outerTopY, innerTopY       = ensureMinThickness(outerTopY)
 		innerBottomY, outerBottomY = ensureMinThickness(outerBottomY)
 	end
+	return outerLeftX, outerTopY, outerRightX, outerBottomY,
+		innerLeftX, innerTopY, innerRightX, innerBottomY
+end
 
+function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
+	fillColor = (fillColor or colors.CLEAR)
+	local outerLeftX, outerTopY, outerRightX, outerBottomY,
+		innerLeftX, innerTopY, innerRightX, innerBottomY =
+		self:getBoxCoords(x1, y1, x2, y2, thick)
 	self.directx.hitbox(
 		outerLeftX, outerTopY, outerRightX, outerBottomY,
 		innerLeftX, innerTopY, innerRightX, innerBottomY,
