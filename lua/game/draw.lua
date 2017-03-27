@@ -123,6 +123,7 @@ function draw:box(x1, y1, x2, y2, edgeColor, fillColor, thick)
 		outerLeftX, outerTopY, outerRightX, outerBottomY,
 		innerLeftX, innerTopY, innerRightX, innerBottomY,
 		edgeColor, fillColor)
+	return innerLeftX, innerTopY, innerRightX, innerBottomY
 end
 
 function draw:calculateScreenOffset(actual, baseline, scale)
@@ -193,6 +194,52 @@ function draw:shouldRenderFrame()
 		return true
 	end
 	return false
+end
+
+-- "parent" and "borderColor" are set on Gauge objects upon creation
+local ProtoGauge = {
+	x = 0, y = 0,
+	width = 0, height = 0,
+	minValue = 0, maxValue = 1,
+	direction = "up",
+	fillColor = colors.RED,
+}
+ProtoGauge.__index = ProtoGauge
+
+function ProtoGauge:render(value, borderColor)
+	local r = self.renderer
+	borderColor = (borderColor or r.gaugeBorderColor)
+	-- get "inner" box coords from the box() draw call
+	local x1, y1, x2, y2 = r:box(
+		self.x, self.y, self.rightX, self.bottomY, borderColor)
+
+	local min, max, direction = self.minValue, self.maxValue, self.direction
+	-- "move" value range so that it starts at 0
+	value, max = value - min, max - min
+	local maxFillSize
+	if (direction == "up" or direction == "down") then maxFillSize = y2 - y1
+	else maxFillSize = x2 - x1 end
+	local fillSize = maxFillSize - ((value / max) * maxFillSize)
+	-- bail out if actual value < min value
+	if fillSize >= maxFillSize then return end
+	if fillSize > 0 then -- is actual value < max value?
+		-- no "switch/case" construct in Lua :(
+		if direction == "up" then y1 = y1 + fillSize
+		elseif direction == "down" then y2 = y2 - fillSize
+		elseif direction == "left" then x1 = x1 + fillSize
+		elseif direction == "right" then x2 = x2 - fillSize end
+	end
+	r:rawRect(x1, y1, x2, y2, self.fillColor)
+end
+
+function draw:Gauge(description)
+	description = (description or {})
+	description.renderer = self
+	local x, y = description.x, description.y
+	local w, h = description.width, description.height
+	description.rightX, description.bottomY = x + w, y + h
+	setmetatable(description, ProtoGauge)
+	return description
 end
 
 return draw
