@@ -2,7 +2,7 @@ local window = require("window")
 local colors = require("render.colors")
 -- This class is not intended to be instantiated directly;
 -- instead, use luautil.extend() to add its methods to a game class.
--- These methods expect the following to be defined on the calling object:
+-- These methods expect the following to be defined on derived objects:
 -- - basicWidth, basicHeight, width, height
 -- - xOffset, yOffset, xScissor, yScissor, aspectMode
 -- - directx (table of C functions)
@@ -11,6 +11,7 @@ local draw = {}
 -- all draw calls are shifted upward by this amount
 draw.absoluteYOffset = 0
 draw.useThickLines = false
+draw.drawBoxFills = true
 draw.drawPlayerPivot = true
 draw.pivotSize = 20
 draw.drawBoxPivot = true

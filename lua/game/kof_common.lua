@@ -43,16 +43,19 @@ function KOF_Common:getConfigSchema()
 			boxEdgeOpacity = byteReader("defaultEdgeAlpha", bt),
 			boxFillOpacity = byteReader("defaultFillAlpha", bt),
 		},
-		-- TODO: drawRangeMarker options for each player
 		colors = {
 			playerPivot = singleColorReader("pivotColor"),
 			projectilePivot = singleColorReader("projectilePivotColor"),
 			rangeMarker = singleColorReader("rangeMarkerColor"),
 			activeRangeMarker = singleColorReader("activeRangeMarkerColor"),
+			gaugeBorder = singleColorReader("gaugeBorderColor"),
+			stunGauge = singleColorReader("stunGaugeColor"),
+			stunRecoveryGauge = singleColorReader("stunRecoveryGaugeColor"),
+			guardGauge = singleColorReader("guardGaugeColor"),
 		},
 	}
 	local booleanKeys = {
-		"drawPlayerPivot", "drawBoxPivot", --"drawGauges", -- TODO
+		"drawPlayerPivot", "drawBoxPivot", "drawGauges",
 	}
 	for _, booleanKey in ipairs(booleanKeys) do
 		result.global[booleanKey] = booleanReader(booleanKey)
@@ -96,14 +99,15 @@ function KOF_Common.addPivot(target, color, x, y)
 end
 
 -- "renderFn" passed as parameter to BoxSet:render()
-function KOF_Common.drawBox(hitbox, parent, drawBoxPivot, pivotSize)
+function KOF_Common.drawBox(hitbox, parent, drawBoxPivot, pivotSize, drawFill)
 	local cx, cy = hitbox.centerX, hitbox.centerY
 	local x1, y1 = hitbox.left, hitbox.top
 	local x2, y2 = hitbox.right, hitbox.bottom
 	local colorPair = hitbox.colorPair
-	parent:box(x1, y1, x2, y2, colorPair[1], colorPair[2])
+	local edge, fill = colorPair[1], (drawFill and colorPair[2]) or colors.CLEAR
+	parent:box(x1, y1, x2, y2, edge, fill)
 	if drawBoxPivot then
-		parent:pivot(cx, cy, parent.boxPivotSize, colorPair[1])
+		parent:pivot(cx, cy, parent.boxPivotSize, edge)
 	end
 	return 1
 end
@@ -140,9 +144,10 @@ function KOF_Common:drawRangeMarker(player, range, active)
 	self:vertLine(0, self.height + self.absoluteYOffset, rangeX, color)
 end
 
+-- expects "boxset" and "pivots" to be defined on derived objects
 function KOF_Common:renderState()
 	self.boxset:render(self.drawBox, self,
-		self.drawBoxPivot, self.boxPivotSize)
+		self.drawBoxPivot, self.boxPivotSize, self.drawBoxFills)
 	if self.drawPlayerPivot then
 		self.pivots:render(self.drawPivot, self, self.pivotSize)
 	end
