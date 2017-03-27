@@ -103,9 +103,9 @@ typedef struct {
 	byte padding12[0x04C];    // +0ECh to +138h: unknown
 	uword health;             // +138h: HP
 	byte padding13[0x004];    // +13Ah to +13Eh: unknown
-	uword stunGauge;          // +13Eh: Stun (dizzy) gauge
+	word stunGauge;           // +13Eh: Stun (dizzy) gauge
 	byte padding14[0x005];    // +140h to +145h: unknown
-	ubyte stunRecover;        // +145h: Stun recovery timer
+	ubyte stunRecovery;       // +145h: Stun recovery timer
 	uword guardGauge;         // +146h: Guard crush gauge
 	byte padding15[0x010];    // +148h to +158h: unknown
 	uword currentCharID_alt3; // +158h: Current(?) character ID (alt 3)

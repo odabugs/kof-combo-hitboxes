@@ -35,6 +35,14 @@ KOF98.projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 }
 
 KOF98.drawRangeMarkers = { false, false }
 KOF98.rangeMarkerHotkeys = { hotkey.VK_F1, hotkey.VK_F2 }
+KOF98.gauges = { {}, {} }
+KOF98.drawGauges = true -- "false" here overrides the two values below
+KOF98.drawStunGauge = true -- also applies to the stun recovery gauge
+KOF98.drawGuardGauge = true
+KOF98.gaugeFillAlpha = 0xA0
+KOF98.stunGaugeColor = colors.rgb(0xFF, 0xB0, 0x90)
+KOF98.stunRecoveryGaugeColor = colors.RED
+KOF98.guardGaugeColor = colors.rgb(0xA0, 0xC0, 0xE0)
 
 function KOF98:extraInit(noExport)
 	if not noExport then
@@ -51,12 +59,33 @@ function KOF98:extraInit(noExport)
 	self.projBuffer = ffi.new("projectile")
 
 	for which = 1, 2 do
-		local showing = self.drawRangeMarkers[which]
-		if showing then
-			print(string.format(
-				"Showing close standing %s activation range for player %d.",
-				self.buttonNames[showing + 1], which))
-		end
+		self:printRangeMarkerState(which, true)
+	end
+	self:setupGauges()
+end
+
+function KOF98:setupGauges()
+	local g, a = self.gauges, self.gaugeFillAlpha
+	g[1].stun = self:Gauge({
+		x = 10, y = 51, width = 130, height = 5, direction = "left",
+		fillColor = colors.setAlpha(self.stunGaugeColor, a),
+		minValue = 0, maxValue = 0x77,
+	})
+	-- stun and stun recovery gauges overlap (since we never draw both)
+	g[1].stunRecovery = self:Gauge(luautil.extend({}, g[1].stun, {
+		fillColor = colors.setAlpha(self.stunRecoveryGaugeColor, a),
+		maxValue = 0xF0,
+	}))
+	-- guard gauge appears right below the stun/stun recovery gauge
+	g[1].guard = self:Gauge(luautil.extend({}, g[1].stun, {
+		fillColor = colors.setAlpha(self.guardGaugeColor, a),
+		maxValue = 0x77, y = (g[1].stun.y + g[1].stun.height),
+	}))
+	-- copy the "mirror image" of player 1's gauges to the player 2 side
+	for key, gauge in pairs(g[1]) do
+		g[2][key] = self:Gauge(luautil.extend({}, gauge, {
+			x = gauge.x + 169, direction = "right",
+		}))
 	end
 end
 
@@ -178,14 +207,34 @@ function KOF98:advanceRangeMarker(which)
 	if r[which] == false then r[which] = 0
 	elseif r[which] >= 3 then r[which] = false
 	else r[which] = r[which] + 1 end
-	return r[which]
+	self:printRangeMarkerState(which)
+end
+
+function KOF98:printRangeMarkerState(which, suppressIfDisabled)
+	local showing = self.drawRangeMarkers[which]
+	if showing then
+		io.write(
+			"Showing close standing ", self.buttonNames[showing + 1],
+			" activation range for player ", which, ".\n")
+	elseif not suppressIfDisabled then
+		io.write(
+			"Disabled close normal range marker for player ", which, ".\n")
+	end
+end
+
+function KOF98:shouldShowStunRecoveryGauge(player)
+	local stunMeterFrozen = bit.band(player.statusFlags2nd[0], 0x01) ~= 0
+	local dizzyState = bit.band(player.statusFlags2nd[3], 0x10) ~= 0
+	if not (dizzyState and stunMeterFrozen) then return false
+	else return (player.hitstun > 0 and player.stunRecovery > 0) end
 end
 
 function KOF98:renderState()
 	KOF_Common.renderState(self)
 	for which = 1, 2 do
-		local rangeIndex = self.drawRangeMarkers[which]
 		local p, px = self.players[which], self.playerExtras[which]
+
+		local rangeIndex = self.drawRangeMarkers[which]
 		if rangeIndex and (p.yPivot.value == 0) then
 			-- subtract 1 since the marker line must actually be "behind"
 			-- the opponent's pivot axis to register a close-range attack
@@ -193,22 +242,27 @@ function KOF98:renderState()
 			local active = range >= p.xDistance
 			self:drawRangeMarker(p, range, active)
 		end
+
+		if self.drawGauges then
+			local gauges = self.gauges[which]
+			if self.drawStunGauge then
+				if self:shouldShowStunRecoveryGauge(p) then
+					gauges.stunRecovery:render(p.stunRecovery)
+				else
+					gauges.stun:render(p.stunGauge)
+				end
+			end
+			if self.drawGuardGauge then
+				gauges.guard:render(p.guardGauge)
+			end
+		end
 	end
 end
 
 function KOF98:checkInputs()
 	for i = 1, 2 do
 		if hotkey.pressed(self.rangeMarkerHotkeys[i]) then
-			local newState = self:advanceRangeMarker(i)
-			if newState then
-				print(string.format(
-					"Showing close standing %s activation range for player %d.",
-					self.buttonNames[newState + 1], i))
-			else
-				print(string.format(
-					"Disabled close normal range marker for player %d.",
-					i))
-			end
+			self:advanceRangeMarker(i)
 		end
 	end
 	if hotkey.pressed(hotkey.VK_F6) then
@@ -221,6 +275,7 @@ end
 function KOF98:getConfigSchema()
 	local function rangeMarkerReader(which)
 		return function(key, value)
+			local originalKey = key -- for printing in error messages
 			key = key:upper()
 			if key == "NONE" then return false end
 			local result, err
@@ -229,7 +284,9 @@ function KOF98:getConfigSchema()
 				result = keyIndex - 1 -- we want this to start from 0
 				self.drawRangeMarkers[which] = result
 			else
-				err = string.format(RANGE_PARSE_ERR, key)
+				err = string.format(
+					"Could not interpret '%s' as a range marker value.",
+					originalKey)
 			end
 			return result, err
 		end
