@@ -24,6 +24,7 @@ KOF98.absoluteYOffset = 16
 KOF98.pivotSize = 5
 KOF98.boxPivotSize = 2
 KOF98.drawStaleThrowBoxes = false
+KOF98.drawThrowableBoxes = true
 KOF98.useThickLines = true
 KOF98.boxesPerLayer = 20
 -- game-specific constants
@@ -43,6 +44,14 @@ KOF98.gaugeFillAlpha = 0xA0
 KOF98.stunGaugeColor = colors.rgb(0xFF, 0xB0, 0x90)
 KOF98.stunRecoveryGaugeColor = colors.RED
 KOF98.guardGaugeColor = colors.rgb(0xA0, 0xC0, 0xE0)
+
+KOF98.toggleHotkeys = {
+	{ hotkey.VK_F3, "drawBoxFills", "drawing hitbox fills" },
+	{ hotkey.VK_F4, "drawBoxPivot", "drawing hitbox center axes" },
+	{ hotkey.VK_F5, "drawThrowableBoxes", "drawing \"throwable\" boxes" },
+	{ hotkey.VK_F6, "drawStaleThrowBoxes", "drawing \"stale\" throw boxes" },
+	{ hotkey.VK_F7, "drawGauges", "drawing gauge overlays" },
+}
 
 function KOF98:extraInit(noExport)
 	if not noExport then
@@ -140,7 +149,8 @@ function KOF98:deriveBoxPosition(player, hitbox, facing)
 end
 
 function KOF98:throwableBoxIsActive(player, hitbox)
-	if bit.band(player.statusFlags2nd[3], 0x20) ~= 0 then return false
+	if not self.drawThrowableBoxes then return false
+	elseif bit.band(player.statusFlags2nd[3], 0x20) ~= 0 then return false
 	elseif bit.band(player.statusFlags[2], 0x03) == 1 then return false
 	elseif player.throwableStatus ~= 0 then return false
 	elseif bit.band(hitbox.boxID, 0x80) ~= 0 then return false
@@ -259,16 +269,22 @@ function KOF98:renderState()
 	end
 end
 
+function KOF98:toggleState(target, consoleLine)
+	local v = not self[target]
+	io.write((v and "Enabled ") or "Disabled ", consoleLine, ".\n")
+	self[target] = v
+end
+
 function KOF98:checkInputs()
 	for i = 1, 2 do
 		if hotkey.pressed(self.rangeMarkerHotkeys[i]) then
 			self:advanceRangeMarker(i)
 		end
 	end
-	if hotkey.pressed(hotkey.VK_F6) then
-		self.drawStaleThrowBoxes = not self.drawStaleThrowBoxes
-		print(string.format("%s drawing \"stale\" throw boxes.",
-			(self.drawStaleThrowBoxes and "Enabled") or "Disabled"))
+	for _, toggleKey in ipairs(self.toggleHotkeys) do
+		if hotkey.pressed(toggleKey[1]) then
+			self:toggleState(toggleKey[2], toggleKey[3])
+		end
 	end
 end
 
