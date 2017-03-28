@@ -1,3 +1,4 @@
+local colors = require("render.colors")
 local boxtypes = require("game.steam.kof2002um.boxtypes")
 local BoxSet = require("game.boxset")
 local KOF98 = require("game.steam.kof98um.game")
@@ -11,10 +12,31 @@ KOF02.playerExtraPtrs = { 0x0167EA00, 0x01683240 }
 KOF02.cameraPtr = 0x02208BF8
 KOF02.projectilesListInfo = { start = 0x0166DE20, count = 34, step = 0x220 }
 
+KOF02.drawGuardGauge = false
+
 function KOF02:extraInit(noExport)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
+end
+
+function KOF02:setupGauges()
+	self.parent.setupGauges(self)
+	local g = self.gauges
+	local newWidth, newY = 121, 31 + self.absoluteYOffset
+	for _, gauge in pairs(g[1]) do
+		gauge.width, gauge.y = newWidth, newY
+		gauge.x = 24
+	end
+	for _, gauge in pairs(g[2]) do
+		gauge.width, gauge.y = newWidth, newY
+		gauge.x = 174
+	end
+	-- hide the stun gauge (02UM only has stun via one instant-stun move)
+	for i = 1, 2 do
+		g[i].stun.fillColor = colors.CLEAR
+		g[i].stun.borderColor = colors.CLEAR
+	end
 end
 
 return KOF02

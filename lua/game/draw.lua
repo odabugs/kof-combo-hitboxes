@@ -207,12 +207,11 @@ local ProtoGauge = {
 }
 ProtoGauge.__index = ProtoGauge
 
-function ProtoGauge:render(value, borderColor)
+function ProtoGauge:render(value)
 	local r = self.renderer
-	borderColor = (borderColor or r.gaugeBorderColor)
 	-- get "inner" box coords from the box() draw call
-	local x1, y1, x2, y2 = r:box(
-		self.x, self.y, self.rightX, self.bottomY, borderColor)
+	local x, y, w, h = self.x, self.y, self.width, self.height
+	local x1, y1, x2, y2 = r:box(x, y, x + w, y + h, self.borderColor)
 
 	local min, max, direction = self.minValue, self.maxValue, self.direction
 	-- "move" value range so that it starts at 0
@@ -236,9 +235,9 @@ end
 function draw:Gauge(description)
 	description = (description or {})
 	description.renderer = self
-	local x, y = description.x, description.y
-	local w, h = description.width, description.height
-	description.rightX, description.bottomY = x + w, y + h
+	if not description.borderColor then
+		description.borderColor = self.gaugeBorderColor
+	end
 	setmetatable(description, ProtoGauge)
 	return description
 end
