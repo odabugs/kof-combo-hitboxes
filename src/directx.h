@@ -22,12 +22,4 @@ typedef struct d3dRenderOption {
 extern UINT screenWidth, screenHeight;
 extern const luaL_Reg lib_directX[];
 
-extern void setupD3D(HWND hwnd);
-extern void DXRectangle(int leftX, int topY, int rightX, int botomY);
-extern void setColor(D3DCOLOR color);
-extern void setScissor(int width, int height);
-extern void clearFrame();
-extern void beginFrame();
-extern void endFrame();
-
 #endif /* DIRECTX_H */

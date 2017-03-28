@@ -91,26 +91,21 @@ static int l_setupD3D(lua_State *L)
 	return 0;
 }
 
-void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY)
+void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR color)
 {
 	static VOID *pVoid;
 	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
 	CUSTOMVERTEX vertices[] = {
-		{ leftX,  topY,    1.0f, 1.0f, currentColor },
-		{ rightX, topY,    1.0f, 1.0f, currentColor },
-		{ leftX,  bottomY, 1.0f, 1.0f, currentColor },
-		{ rightX, bottomY, 1.0f, 1.0f, currentColor }
+		{ leftX,  topY,    1.0f, 1.0f, color },
+		{ rightX, topY,    1.0f, 1.0f, color },
+		{ leftX,  bottomY, 1.0f, 1.0f, color },
+		{ rightX, bottomY, 1.0f, 1.0f, color }
 	};
 	memcpy(pVoid, vertices, sizeof(vertices));
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
 	//printf("(%f, %f) to (%f, %f)\n", leftX, topY, rightX, bottomY);
-}
-
-void DXRectangle(int leftX, int topY, int rightX, int bottomY)
-{
-	DXRectangleF((FLOAT)leftX, (FLOAT)topY, (FLOAT)rightX, (FLOAT)bottomY);
 }
 
 // Takes 4 mandatory arguments: Left X, top Y, right X, bottom Y (all integers)
@@ -120,20 +115,8 @@ static int l_DXRectangle(lua_State *L)
 {
 	FLOAT leftX  = luaL_checknumber(L, 1), topY    = luaL_checknumber(L, 2);
 	FLOAT rightX = luaL_checknumber(L, 3), bottomY = luaL_checknumber(L, 4);
-
-	D3DCOLOR newColor = 0, oldColor = currentColor;
-	// if we got a 5th argument for the color, use it then restore old color after
-	if (lua_isnoneornil(L, 5) == 0)
-	{
-		newColor = (D3DCOLOR)luaL_checkint(L, 5);
-		setColor(newColor);
-		DXRectangleF(leftX, topY, rightX, bottomY);
-		setColor(oldColor);
-	}
-	else
-	{
-		DXRectangleF(leftX, topY, rightX, bottomY);
-	}
+	D3DCOLOR color = (D3DCOLOR)luaL_checkint(L, 5);
+	DXRectangleF(leftX, topY, rightX, bottomY, color);
 	return 0;
 }
 
@@ -170,6 +153,8 @@ static void drawHitbox(
 	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLELIST, 0, 10);
 }
+
+#undef squareTriangleList
 
 // Takes 10 arguments:
 // - X/Y of outer top-left corner
@@ -217,62 +202,34 @@ static int l_getColor(lua_State *L)
 	return 1;
 }
 
-void setScissor(int width, int height)
-{
-	scissorRect.right = (LONG)width;
-	scissorRect.bottom = (LONG)height;
-	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
-}
-
 // Requires 2 arguments: New width/height of scissor clipping area (top-left is {0, 0})
 // Returns 0 values
 // TODO: error conditions
 static int l_setScissor(lua_State *L)
 {
-	int w = luaL_checkint(L, 1), h = luaL_checkint(L, 2);
-	setScissor(w, h);
+	int width = luaL_checkint(L, 1), height = luaL_checkint(L, 2);
+	scissorRect.right = (LONG)width;
+	scissorRect.bottom = (LONG)height;
+	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
 	return 0;
-}
-
-void clearFrame()
-{
-	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
-}
-
-// Takes 0 arguments
-// Returns 0 values
-static int l_clearFrame(lua_State *L)
-{
-	clearFrame();
-	return 0;
-}
-
-void beginFrame()
-{
-	clearFrame();
-	IDirect3DDevice9_BeginScene(d3dDevice);
-	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 }
 
 // Takes 0 arguments
 // Returns 0 values
 static int l_beginFrame(lua_State *L)
 {
-	beginFrame();
+	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+	IDirect3DDevice9_BeginScene(d3dDevice);
+	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 	return 0;
-}
-
-void endFrame()
-{
-	IDirect3DDevice9_EndScene(d3dDevice);
-	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
 }
 
 // Takes 0 arguments
 // Returns 0 values
 static int l_endFrame(lua_State *L)
 {
-	endFrame();
+	IDirect3DDevice9_EndScene(d3dDevice);
+	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
 	return 0;
 }
 
@@ -283,7 +240,6 @@ const luaL_Reg lib_directX[] = {
 	{ "getColor", l_getColor },
 	{ "setColor", l_setColor },
 	{ "setScissor", l_setScissor },
-	{ "clearFrame", l_clearFrame },
 	{ "beginFrame", l_beginFrame },
 	{ "endFrame", l_endFrame },
 	{ NULL, NULL } // sentinel
