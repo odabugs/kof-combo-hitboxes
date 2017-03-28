@@ -163,8 +163,7 @@ function KOF98:throwableBoxIsActive(player, hitbox)
 	elseif bit.band(player.statusFlags2nd[3], 0x20) ~= 0 then return false
 	elseif bit.band(player.statusFlags[2], 0x03) == 1 then return false
 	elseif player.throwableStatus ~= 0 then return false
-	elseif bit.band(hitbox.boxID, 0x80) ~= 0 then return false
-	else return true end
+	else return bit.band(hitbox.boxID, 0x80) == 0 end
 end
 
 function KOF98:captureEntity(target, isProjectile, facing)
@@ -251,16 +250,16 @@ end
 
 function KOF98:renderState()
 	KOF_Common.renderState(self)
+	local players = self.players
+	local xDistance = math.abs(players[1].screenX - players[2].screenX)
 	for which = 1, 2 do
-		local p, px = self.players[which], self.playerExtras[which]
-
+		local p, px = players[which], self.playerExtras[which]
 		local rangeIndex = self.drawRangeMarkers[which]
 		if rangeIndex and (p.yPivot.value == 0) then
 			-- subtract 1 since the marker line must actually be "behind"
 			-- the opponent's pivot axis to register a close-range attack
 			local range = px.closeRanges[rangeIndex] - 1
-			local active = range >= p.xDistance
-			self:drawRangeMarker(p, range, active)
+			self:drawRangeMarker(p, range, range >= xDistance)
 		end
 
 		if self.drawGauges then
