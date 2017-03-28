@@ -6,18 +6,16 @@ endif
 #TODO: add debug build target
 
 .PHONY: clean luaclean default lua
-INCLUDES=-I"./lib/inih" -I"./lib/luajit/src"
+INCLUDES=-I"./lib/luajit/src"
 LIBS=-L"./lib/luajit/src"
 DEFINES=-D UNICODE -D _UNICODE
-CFLAGS=-std=c11 -g -mwindows -mconsole $(DEFINES) $(INCLUDES)
-LDFLAGS=$(LIBS) -ld3d9 -lluajit -lShlwapi 
+CFLAGS=-g -mwindows -mconsole $(DEFINES) $(INCLUDES)
+LDFLAGS=$(LIBS) -ld3d9 -lluajit
 EXE_NAME=kof-hitboxes.exe
-OBJECTS=luautil.o directx.o playerstruct.o coords.o draw.o gamedefs.o gamestate.o process.o colors.o controlkey.o hotkeys.o util.o boxtypes.o boxset.o primitives.o config.o ini.o
+OBJECTS=luautil.o directx.o
 HEADERS=$(subst .o,.h,$(OBJECTS))
-KOF98_HEADERS=kof98_boxtypemap.h kof98_gamedef.h
-KOF02_HEADERS=$(subst 98,02,$(KOF98_HEADERS))
 MAIN_AND_OBJECTS=main.o $(OBJECTS)
-VPATH=src src/kof98 src/kof02 lib lib/inih lib/luajit
+VPATH=src lib lib/luajit
 
 # RUN "make lua" BEFORE THIS TARGET.
 # MinGW will complain about "unknown type SOLE_AUTHENTICATION_SERVICE" immediately after a clean build.
@@ -34,34 +32,7 @@ lua:
 main.o: main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $^
 
-playerstruct.o: playerstruct.c
-	$(CC) $(CFLAGS) -c $^
-
-coords.o: coords.c playerstruct.h
-	$(CC) $(CFLAGS) -c $^
-
-boxset.o: boxset.c playerstruct.h boxtypes.h gamedefs.h
-	$(CC) $(CFLAGS) -c $^
-
-draw.o: draw.c coords.h playerstruct.h gamestate.h boxtypes.h boxset.h hotkeys.h colors.h primitives.h
-	$(CC) $(CFLAGS) -c $^
-
-gamedefs.o: gamedefs.c gamedefs.h playerstruct.h $(KOF98_HEADERS) $(KOF02_HEADERS)
-	$(CC) $(CFLAGS) -c $^
-
-gamestate.o: gamestate.c playerstruct.h coords.h gamedefs.h
-	$(CC) $(CFLAGS) -c $^
-
-process.o: process.c gamestate.h controlkey.h util.h colors.h
-	$(CC) $(CFLAGS) -c $^
-
-colors.o boxtypes.o controlkey.o hotkeys.o util.o: %.o: %.c
-	$(CC) $(CFLAGS) -c $^
-
-ini.o: lib/inih/ini.c
-	$(CC) $(CFLAGS) -c $^
-
-config.o: config.c boxtypes.h colors.h hotkeys.h gamedefs.h util.h lib/inih/ini.h
+directx.o luautil.o: %.o: %.c
 	$(CC) $(CFLAGS) -c $^
 
 clean:
