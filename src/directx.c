@@ -176,32 +176,6 @@ static int l_drawHitbox(lua_State *L)
 	return 0;
 }
 
-void setColor(D3DCOLOR color)
-{
-	currentColor = color;
-}
-
-// Takes 1 mandatory argument: New color to set as current color
-// Returns 1 value: Old color (the prior current color before this function call)
-static int l_setColor(lua_State *L)
-{
-	D3DCOLOR oldColor = currentColor;
-	D3DCOLOR newColor = (D3DCOLOR)luaL_checkint(L, -1);
-	currentColor = newColor;
-	lua_Integer toPush = ((lua_Integer)oldColor) & MASK_32BITS;
-	lua_pushinteger(L, toPush);
-	return 1;
-}
-
-// Takes 0 arguments
-// Returns 1 value: Current color
-static int l_getColor(lua_State *L)
-{
-	lua_Integer toPush = ((lua_Integer)currentColor) & MASK_32BITS;
-	lua_pushinteger(L, toPush);
-	return 1;
-}
-
 // Requires 2 arguments: New width/height of scissor clipping area (top-left is {0, 0})
 // Returns 0 values
 // TODO: error conditions
@@ -237,8 +211,6 @@ const luaL_Reg lib_directX[] = {
 	{ "setupD3D", l_setupD3D },
 	{ "rect", l_DXRectangle },
 	{ "hitbox", l_drawHitbox },
-	{ "getColor", l_getColor },
-	{ "setColor", l_setColor },
 	{ "setScissor", l_setScissor },
 	{ "beginFrame", l_beginFrame },
 	{ "endFrame", l_endFrame },

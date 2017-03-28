@@ -34,14 +34,6 @@ local function ensureMinThickness(l, r)
 	else return r, l + 1 end
 end
 
-function draw:getColor()
-	return self.directx.getColor()
-end
-
-function draw:setColor(newColor)
-	return self.directx.setColor(newColor)
-end
-
 function draw:scaleCoords(x, y, flags)
 	flags = (flags or 0)
 	local xAdjust, yAdjust = 0, 0
