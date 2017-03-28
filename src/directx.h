@@ -19,7 +19,6 @@ typedef struct d3dRenderOption {
 	DWORD value;
 } d3dRenderOption_t;
 
-extern UINT screenWidth, screenHeight;
 extern const luaL_Reg lib_directX[];
 
 #endif /* DIRECTX_H */

@@ -35,7 +35,6 @@ static int lRegEntryCount(const luaL_Reg *reg)
 		current = (const luaL_Reg*)&(reg[++i]);
 	}
 
-	//printf("lRegEntryCount returned %d for 0x%08p\n", i, reg);
 	return i;
 }
 
@@ -50,7 +49,6 @@ static int lRegSetEntryCount(const lRegSet *regs)
 		current = (const lRegSet*)&(regs[++i]);
 	}
 
-	//printf("lRegSetEntryCount returned %d for 0x%08p\n", i, regs);
 	return i;
 }
 
@@ -80,6 +78,5 @@ int lRegisterAll(lua_State *L, const lRegSet *regs, bool asGlobals)
 		current = (const lRegSet*)&(regs[++i]);
 	}
 
-	//printf("Registered %d luaL_Reg lists (asGlobals=%s)\n", i, (asGlobals ? "true" : "false"));
 	return i;
 }

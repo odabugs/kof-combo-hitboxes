@@ -8,8 +8,6 @@
 LPDIRECT3D9 d3d;
 LPDIRECT3DDEVICE9 d3dDevice;
 LPDIRECT3DVERTEXBUFFER9 boxBuffer;
-UINT screenWidth, screenHeight;
-D3DCOLOR currentColor;
 RECT scissorRect = { .right = (LONG)1, .bottom = (LONG)1 };
 
 CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
@@ -32,7 +30,7 @@ d3dRenderOption_t renderStateOptions[] = {
 
 void setupD3D(HWND hwnd)
 {
-	//printf("hwnd = 0x%08p\n", hwnd);
+	UINT screenWidth, screenHeight;
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	D3DPRESENT_PARAMETERS presentParams;
 	memset(&presentParams, 0, sizeof(presentParams));
