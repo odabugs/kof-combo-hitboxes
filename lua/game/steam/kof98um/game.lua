@@ -51,6 +51,17 @@ KOF98.toggleHotkeys = {
 	{ hotkey.VK_F7, "drawGauges", "drawing gauge overlays" },
 }
 
+KOF98.startupMessage = [[
+Hotkeys:
+F1 - Toggle close normal range marker (player 1)
+F2 - Toggle close normal range marker (player 2)
+F3 - Toggle drawing hitbox fills
+F4 - Toggle drawing hitbox center axes
+F5 - Toggle drawing "throwable"-type boxes
+F6 - Toggle drawing "stale" throw boxes
+F7 - Toggle gauge overlays
+]]
+
 function KOF98:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
@@ -65,6 +76,7 @@ function KOF98:extraInit(noExport)
 		self.pivotSlotConstructor)
 	self.projBuffer = ffi.new("projectile")
 
+	if self.startupMessage then print(self.startupMessage) end
 	for which = 1, 2 do
 		self:printRangeMarkerState(which, true)
 	end
