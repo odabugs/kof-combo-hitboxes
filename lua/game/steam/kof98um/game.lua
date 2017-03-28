@@ -11,10 +11,8 @@ local types = require("game.steam.kof98um.types")
 local boxtypes = require("game.steam.kof98um.boxtypes")
 local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
-local Game_Common = require("game.common")
 local KOF_Common = require("game.kof_common")
-local KOF98 = Game_Common:new({ whoami = "KOF98" })
-luautil.extend(KOF98, KOF_Common)
+local KOF98 = KOF_Common:new({ whoami = "KOF98" })
 
 KOF98.configSection = "kof98umfe"
 KOF98.basicWidth = 320
@@ -288,30 +286,36 @@ function KOF98:checkInputs()
 	end
 end
 
-function KOF98:getConfigSchema()
-	local function rangeMarkerReader(which)
-		return function(key, value)
-			local originalKey = key -- for printing in error messages
-			key = key:upper()
-			if key == "NONE" then return false end
-			local result, err
-			local keyIndex = luautil.find(self.buttonNames, key)
-			if keyIndex ~= nil then
-				result = keyIndex - 1 -- we want this to start from 0
-				self.drawRangeMarkers[which] = result
-			else
-				err = string.format(
-					"Could not interpret '%s' as a range marker value.",
-					originalKey)
-			end
-			return result, err
+do
+	local function handleRangeMarker(value, which, target)
+		local oldValue = value -- for printing in error messages
+		value = value:upper()
+		if value == "NONE" then return false end
+		local result, err
+		local valueIndex = luautil.find(target.buttonNames, value)
+		if valueIndex ~= nil then
+			result = valueIndex - 1 -- we want this to start from 0
+			target.drawRangeMarkers[which] = result
+		else
+			err = string.format(
+				"Could not interpret '%s' as a range marker value.",
+				oldValue)
 		end
+		return result, err
 	end
 
+	function KOF98:rangeMarkerReader(which, target)
+		return function(value)
+			return handleRangeMarker(value, which, self)
+		end
+	end
+end
+
+function KOF98:getConfigSchema()
 	local schema = KOF_Common.getConfigSchema(self)
 	for i = 1, 2 do
 		schema["player" .. i] = {
-			drawRangeMarker = rangeMarkerReader(i),
+			drawRangeMarker = self:rangeMarkerReader(i)
 		}
 	end
 	return schema

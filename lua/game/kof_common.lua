@@ -1,67 +1,37 @@
 local luautil = require("luautil")
 local colors = require("render.colors")
 local ReadConfig = require("config")
-local KOF_Common = {}
+local Game_Common = require("game.common")
+local KOF_Common = Game_Common:new({ whoami = "KOF_Common" })
 
 KOF_Common.buttonNames = { "A", "B", "C", "D" }
 
 function KOF_Common:getConfigSchema()
 	local bt = self.boxtypes
-	local function readBoxColor(value, key)
-		local newColor, err = ReadConfig.parseColor(value)
-		if newColor then
-			local boxtypeKey = bt.colorConfigNames[key]
-			local target = bt.colormap[boxtypeKey]
-			local nc = newColor.color
-			-- set edge color
-			target[1] = colors.setAlpha(nc, bt.defaultEdgeAlpha)
-			-- set fill color
-			if not newColor.hasAlpha then
-				nc = colors.setAlpha(nc, bt.defaultFillAlpha)
-			end
-			target[2] = nc
-		end
-		return newColor, err
-	end
-
-	local function partialReader(fn, postprocess)
-		local defaultTarget = self
-		return function(targetKey, target)
-			return ReadConfig.readerGenerator(
-				fn, (target or defaultTarget), targetKey, postprocess)
-		end
-	end
-	local singleColorReader = partialReader(
-		ReadConfig.parseColor, function(newColor)
-			return newColor.color
-		end)
-	local booleanReader = partialReader(ReadConfig.parseBoolean)
-	local byteReader = partialReader(ReadConfig.parseDecimalByte)
-
 	local result = {
 		global = {
-			boxEdgeOpacity = byteReader("defaultEdgeAlpha", bt),
-			boxFillOpacity = byteReader("defaultFillAlpha", bt),
+			boxEdgeOpacity = self:byteReader("defaultEdgeAlpha", bt),
+			boxFillOpacity = self:byteReader("defaultFillAlpha", bt),
 		},
 		colors = {
-			playerPivot = singleColorReader("pivotColor"),
-			projectilePivot = singleColorReader("projectilePivotColor"),
-			rangeMarker = singleColorReader("rangeMarkerColor"),
-			activeRangeMarker = singleColorReader("activeRangeMarkerColor"),
-			gaugeBorder = singleColorReader("gaugeBorderColor"),
-			stunGauge = singleColorReader("stunGaugeColor"),
-			stunRecoveryGauge = singleColorReader("stunRecoveryGaugeColor"),
-			guardGauge = singleColorReader("guardGaugeColor"),
+			playerPivot = self:colorReader("pivotColor"),
+			projectilePivot = self:colorReader("projectilePivotColor"),
+			rangeMarker = self:colorReader("rangeMarkerColor"),
+			activeRangeMarker = self:colorReader("activeRangeMarkerColor"),
+			gaugeBorder = self:colorReader("gaugeBorderColor"),
+			stunGauge = self:colorReader("stunGaugeColor"),
+			stunRecoveryGauge = self:colorReader("stunRecoveryGaugeColor"),
+			guardGauge = self:colorReader("guardGaugeColor"),
 		},
 	}
 	local booleanKeys = {
 		"drawPlayerPivot", "drawBoxPivot", "drawGauges",
 	}
 	for _, booleanKey in ipairs(booleanKeys) do
-		result.global[booleanKey] = booleanReader(booleanKey)
+		result.global[booleanKey] = self:booleanReader(booleanKey)
 	end
 	for colorKey in pairs(bt.colorConfigNames) do
-		result.colors[colorKey] = readBoxColor
+		result.colors[colorKey] = self:hitboxColorReader(colorKey)
 	end
 	-- duplicating the schema sections and nesting them under the game's
 	-- config section name permits INI files to have game-specific sections

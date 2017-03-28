@@ -13,8 +13,8 @@ local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
 local PCSX2_Common = require("game.pcsx2.common")
 local KOF_Common = require("game.kof_common")
-local KOF_XI = PCSX2_Common:new({ whoami = "KOF_XI" })
-luautil.extend(KOF_XI, KOF_Common)
+local KOF_XI = KOF_Common:new({ whoami = "KOF_XI" })
+PCSX2_Common:export(KOF_XI)
 
 KOF_XI.configSection = "kof_xi"
 KOF_XI.basicWidth = 640

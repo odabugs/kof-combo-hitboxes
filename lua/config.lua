@@ -83,7 +83,7 @@ end
 function ReadConfig.readerGenerator(fn, target, targetKey, postprocess)
 	postprocess = (postprocess or luautil.identity)
 	return function(value, key)
-		local result, err = fn(value, key)
+		local result, err = fn(value, key, target)
 		if not err then
 			luautil.assign(target, targetKey, postprocess(result))
 		end

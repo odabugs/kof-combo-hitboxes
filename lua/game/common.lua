@@ -3,6 +3,7 @@ local window = require("window")
 local winprocess = require("winprocess")
 local winutil = require("winutil")
 local draw = require("game.draw")
+local colors = require("render.colors")
 local ReadConfig = require("config")
 local Game_Common = {}
 -- Import variables and methods from "draw" into this class.
@@ -164,6 +165,65 @@ end
 -- to be overridden by derived objects
 function Game_Common:getConfigSchema()
 	return {}
+end
+
+-- memoize generated functions since we don't need 10 of the same thing
+do
+	local readerFns = {}
+	function Game_Common:partialReader(fn, postprocess)
+		local result = readerFns[fn]
+		if not result then
+			result = function(targetKey, target)
+				return ReadConfig.readerGenerator(
+					fn, target, targetKey, postprocess)
+			end
+			readerFns[fn] = result
+		end
+		return result
+	end
+end
+
+function Game_Common:booleanReader(targetKey, target)
+	local fn = self:partialReader(ReadConfig.parseBoolean)
+	return fn(targetKey, (target or self))
+end
+
+function Game_Common:byteReader(targetKey, target)
+	local fn = self:partialReader(ReadConfig.parseDecimalByte)
+	return fn(targetKey, (target or self))
+end
+
+do
+	local function getColorValue(newColor) return newColor.color end
+	function Game_Common:colorReader(targetKey, target)
+		local fn = self:partialReader(ReadConfig.parseColor, getColorValue)
+		return fn(targetKey, (target or self))
+	end
+end
+
+do
+	local function handleBoxColor(value, key, target)
+		local newColor, err = ReadConfig.parseColor(value)
+		local bt = target.boxtypes
+		if newColor then
+			local boxtypeKey = bt.colorConfigNames[key]
+			local target = bt.colormap[boxtypeKey]
+			local nc = newColor.color
+			-- set edge color
+			target[1] = colors.setAlpha(nc, bt.defaultEdgeAlpha)
+			-- set fill color
+			if not newColor.hasAlpha then
+				nc = colors.setAlpha(nc, bt.defaultFillAlpha)
+			end
+			target[2] = nc
+		end
+		return newColor, err
+	end
+
+	function Game_Common:hitboxColorReader(targetKey, target)
+		local fn = self:partialReader(handleBoxColor)
+		return fn(targetKey, (target or self))
+	end
 end
 
 return Game_Common
