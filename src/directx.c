@@ -103,7 +103,6 @@ void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
-	//printf("(%f, %f) to (%f, %f)\n", leftX, topY, rightX, bottomY);
 }
 
 // Takes 4 mandatory arguments: Left X, top Y, right X, bottom Y (all integers)

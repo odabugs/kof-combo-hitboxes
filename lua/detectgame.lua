@@ -188,7 +188,7 @@ local detectedGames = {
 	}),
 }
 
-function detectgame.findSupportedGame(hInstance, createOverlay)
+function detectgame.findSupportedGame(hInstance)
 	local detectedGame = nil
 	local function EnumWindowsProc(hwnd, lParam)
 		local result
@@ -208,10 +208,6 @@ function detectgame.findSupportedGame(hInstance, createOverlay)
 	if detectedGame ~= nil and hInstance ~= nil then
 		detectedGame.hInstance = hInstance
 		detectedGame.consoleHwnd = window.console()
-		if createOverlay then
-			detectedGame.overlayHwnd = window.createOverlayWindow(hInstance)
-			directx.setupD3D(detectedGame.overlayHwnd)
-		end
 	end
 	return detectedGame
 end
