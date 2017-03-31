@@ -74,6 +74,8 @@ int GetSystemMetrics(int nIndex);
 local C = ffi.C
 local dwmapi = ffi.load("dwmapi")
 
+local pointBuf, rectBuf = winutil.pointBufType(), winutil.rectBufType()
+
 -- possible values for HRESULT returned by functions from dwmapi.dll
 window.S_OK = 0
 -- mode options for ShowWindow
@@ -131,8 +133,9 @@ window.defaultWindowClass = {
 }
 window.createWindowExDefaults = {
 	dwExStyle = bit.bor(
-		window.WS_EX_TOPMOST, window.WS_EX_TRANSPARENT,
-		window.WS_EX_LAYERED, window.WS_EX_COMPOSITED),
+		window.WS_EX_TRANSPARENT,
+		window.WS_EX_LAYERED,
+		window.WS_EX_COMPOSITED),
 	lpClassName = NULL,
 	lpWindowName = window.defaultWindowTitle,
 	dwStyle = window.WS_POPUP,
@@ -187,7 +190,8 @@ function window.show(hwnd, mode)
 	return result ~= 0
 end
 
-function window.createOverlayWindow(hInstance, windowClass, windowOptions)
+function window.createOverlayWindow(
+	hInstance, gameHwnd, windowClass, windowOptions)
 	if not window.supportsComposition() then
 		error("Window composition support was not detected.\nPlease enable Windows Aero before using this program.")
 	end
@@ -199,11 +203,12 @@ function window.createOverlayWindow(hInstance, windowClass, windowOptions)
 		windowClass)
 	local atom = window.registerClass(newWinClass, hInstance)
 
-	local w, h = window.getScreenSize()
+	local w, h = window.getDimensions(gameHwnd)
 	local newWinOptions = luautil.extend({},
 		window.createWindowExDefaults,
 		hi,
-		{ lpClassName = ffi.cast("LPCTSTR", atom), nWidth = w, nHeight = h },
+		{ lpClassName = ffi.cast("LPCTSTR", atom), nWidth = w, nHeight = h,
+		hWndParent = ffi.cast("HWND", gameHwnd), },
 		windowOptions)
 	local overlayHwnd = C.CreateWindowExW(
 		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
@@ -251,7 +256,7 @@ function window.getParentProcessID(hwnd, pidBuffer)
 end
 
 function window.getClientRect(hwnd, rectBuffer)
-	rectBuffer = (rectBuffer or winutil.rectBufType())
+	rectBuffer = (rectBuffer or rectBuf)
 	local result = C.GetClientRect(hwnd, rectBuffer)
 	winerror.checkNotZero(result)
 	return rectBuffer
@@ -268,7 +273,7 @@ function window.getTopLeftCorner(hwnd, pointBuffer)
 end
 
 function window.clientToScreen(hwnd, pointBuffer, x, y)
-	pointBuffer = (pointBuffer or winutil.pointBufType())
+	pointBuffer = (pointBuffer or pointBuf)
 	-- POINT struct must always be reset for repeat calls to be correct
 	pointBuffer[0].x, pointBuffer[0].y = (x or 0), (y or 0)
 	local result = C.ClientToScreen(hwnd, pointBuffer)
