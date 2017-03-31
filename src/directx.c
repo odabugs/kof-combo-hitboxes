@@ -182,11 +182,14 @@ static int l_setScissor(lua_State *L)
 	return 0;
 }
 
-// Takes 0 arguments
+// Takes 1 optional argument: Clear color (default transparent)
 // Returns 0 values
 static int l_beginFrame(lua_State *L)
 {
-	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+	D3DCOLOR clearColor;
+	if (!lua_isnoneornil(L, 1)) { clearColor = (D3DCOLOR)luaL_checkint(L, 1); }
+	else { clearColor = D3DCOLOR_RGBA(0, 0, 0, 0); }
+	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, clearColor, 1.0f, 0);
 	IDirect3DDevice9_BeginScene(d3dDevice);
 	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 	return 0;
