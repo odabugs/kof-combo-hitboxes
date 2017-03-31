@@ -3,12 +3,12 @@
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
 // slight overkill, but OK
 #define BOX_VERTEX_BUFFER_SIZE 100
-#define MASK_32BITS 0xFFFFFFFF
 
 LPDIRECT3D9 d3d;
 LPDIRECT3DDEVICE9 d3dDevice;
 LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 RECT scissorRect = { .right = (LONG)1, .bottom = (LONG)1 };
+D3DPRESENT_PARAMETERS presentParams;
 
 CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
 
@@ -28,19 +28,15 @@ d3dRenderOption_t renderStateOptions[] = {
 	{ -1, -1 } // sentinel
 };
 
-void setupD3D(HWND hwnd)
+void setupD3D(HWND hwnd, UINT w, UINT h)
 {
-	UINT screenWidth, screenHeight;
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	D3DPRESENT_PARAMETERS presentParams;
 	memset(&presentParams, 0, sizeof(presentParams));
 	presentParams.Windowed = TRUE;
 	presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
 	presentParams.hDeviceWindow = hwnd,
-	screenWidth = (UINT)GetSystemMetrics(SM_CXSCREEN);
-	screenHeight = (UINT)GetSystemMetrics(SM_CYSCREEN);
-	presentParams.BackBufferWidth = screenWidth;
-	presentParams.BackBufferHeight = screenHeight;
+	presentParams.BackBufferWidth = w;
+	presentParams.BackBufferHeight = h;
 	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
 
 	IDirect3D9_CreateDevice(
@@ -79,13 +75,15 @@ void setupD3D(HWND hwnd)
 	IDirect3DVertexBuffer9_Unlock(boxBuffer);
 }
 
-// Takes 1 mandatory argument: HWND for which to set up Direct3D
+// Takes 3 arguments: HWND for which to set up Direct3D, device width/height
 // Returns 0 values
 // TODO: return initialization errors
 static int l_setupD3D(lua_State *L)
 {
-	HWND *hwnd = (HWND*)lua_topointer(L, -1);
-	setupD3D(*hwnd);
+	HWND *hwnd = (HWND*)lua_topointer(L, 1);
+	UINT w = (UINT)luaL_checkint(L, 2);
+	UINT h = (UINT)luaL_checkint(L, 3);
+	setupD3D(*hwnd, w, h);
 	return 0;
 }
 
@@ -105,8 +103,7 @@ void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR
 	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
 }
 
-// Takes 4 mandatory arguments: Left X, top Y, right X, bottom Y (all integers)
-// Optional 5th argument: Color to use for this draw call (uses current color otherwise)
+// Takes 5 arguments: Left X, top Y, right X, bottom Y (all integers), fill color
 // Returns 0 values
 static int l_DXRectangle(lua_State *L)
 {
