@@ -154,7 +154,7 @@ function draw:getGameWindowSize()
 	self:adjustScaleAndAspect()
 	local scissorWidth = self.width - (self.xOffset * 2)
 	local scissorHeight = self.height - (self.yOffset * 2)
-	self.directx.setScissor(scissorWidth, scissorHeight)
+	self.directx.setScissor(0, 0, scissorWidth, scissorHeight)
 end
 
 function draw:repositionOverlay()

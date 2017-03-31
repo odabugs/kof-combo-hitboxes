@@ -170,12 +170,14 @@ static int l_drawHitbox(lua_State *L)
 	return 0;
 }
 
-// Requires 2 arguments: New width/height of scissor clipping area (top-left is {0, 0})
+// Takes 4 arguments: Left/top and right/bottom corners of new scissor clipping area
 // Returns 0 values
-// TODO: error conditions
 static int l_setScissor(lua_State *L)
 {
-	int width = luaL_checkint(L, 1), height = luaL_checkint(L, 2);
+	int left  = luaL_checkint(L, 1), top    = luaL_checkint(L, 2);
+	int width = luaL_checkint(L, 3), height = luaL_checkint(L, 4);
+	scissorRect.left = (LONG)left;
+	scissorRect.top = (LONG)top;
 	scissorRect.right = (LONG)width;
 	scissorRect.bottom = (LONG)height;
 	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
