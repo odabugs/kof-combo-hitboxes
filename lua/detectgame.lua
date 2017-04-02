@@ -157,11 +157,12 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof98um",
-		targetWindowTitle = "King Of Fighters 98 - Ultimate Match",
+		targetWindowTitle = "King [Oo]f Fighters .?98.-Ultimate Match",
+		rawTitle = false,
 		revisions = {
 			--["SLPS-25783"] = "NTSC-J", -- TODO: Data collection
 			--["SLPS-25935"] = "NTSC-J", -- TODO: Data collection
-			--["SLES-55280"] = "PAL", -- TODO: Data collection
+			["SLES-55280"] = "PAL",
 			["SLUS-21816"] = "NTSC-U",
 		},
 	}),
