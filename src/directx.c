@@ -9,6 +9,7 @@ LPDIRECT3DDEVICE9 d3dDevice;
 LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 RECT scissorRect = { .right = (LONG)1, .bottom = (LONG)1 };
 D3DPRESENT_PARAMETERS presentParams;
+D3DVIEWPORT9 viewport;
 
 CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
 
@@ -33,7 +34,7 @@ void setupD3D(HWND hwnd, UINT w, UINT h)
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	memset(&presentParams, 0, sizeof(presentParams));
 	presentParams.Windowed = TRUE;
-	presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
+	presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
 	presentParams.hDeviceWindow = hwnd,
 	presentParams.BackBufferWidth = w;
 	presentParams.BackBufferHeight = h;
@@ -171,7 +172,7 @@ static int l_drawHitbox(lua_State *L)
 }
 
 // Takes 4 arguments: Left/top and right/bottom corners of new scissor clipping area
-// Returns 0 values
+// Returns 1 value: HRESULT from SetScissorRect() call
 static int l_setScissor(lua_State *L)
 {
 	int left  = luaL_checkint(L, 1), top    = luaL_checkint(L, 2);
@@ -180,30 +181,55 @@ static int l_setScissor(lua_State *L)
 	scissorRect.top = (LONG)top;
 	scissorRect.right = (LONG)width;
 	scissorRect.bottom = (LONG)height;
-	IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
-	return 0;
+	HRESULT result = IDirect3DDevice9_SetScissorRect(d3dDevice, &scissorRect);
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
 // Takes 1 optional argument: Clear color (default transparent)
-// Returns 0 values
-static int l_beginFrame(lua_State *L)
+// Returns 1 value: HRESULT from Clear() call
+static int l_clearFrame(lua_State *L)
 {
 	D3DCOLOR clearColor;
 	if (!lua_isnoneornil(L, 1)) { clearColor = (D3DCOLOR)luaL_checkint(L, 1); }
 	else { clearColor = D3DCOLOR_RGBA(0, 0, 0, 0); }
-	IDirect3DDevice9_Clear(d3dDevice, 0, NULL, D3DCLEAR_TARGET, clearColor, 1.0f, 0);
-	IDirect3DDevice9_BeginScene(d3dDevice);
-	IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
-	return 0;
+	HRESULT result = IDirect3DDevice9_Clear(d3dDevice,
+		0, NULL, D3DCLEAR_TARGET, clearColor, 1.0f, 0);
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
-// Takes 0 arguments
-// Returns 0 values
+// Takes 1 optional argument: Clear color (default transparent)
+// Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
+static int l_beginFrame(lua_State *L)
+{
+	l_clearFrame(L);
+	HRESULT result = (HRESULT)lua_tointeger(L, -1);
+	if (result != D3D_OK) { goto done; }
+	result = IDirect3DDevice9_BeginScene(d3dDevice);
+	if (result != D3D_OK) { goto done; }
+	result = IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
+	done:
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
+}
+
+// Takes 4 arguments: Top-left and bottom-right coords of source rect
+// Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_endFrame(lua_State *L)
 {
-	IDirect3DDevice9_EndScene(d3dDevice);
-	IDirect3DDevice9_Present(d3dDevice, NULL, NULL, NULL, NULL);
-	return 0;
+	RECT sourceRect;
+	sourceRect.left = (LONG)luaL_checkint(L, 1);
+	sourceRect.top = (LONG)luaL_checkint(L, 2);
+	sourceRect.right = (LONG)luaL_checkint(L, 3);
+	sourceRect.bottom = (LONG)luaL_checkint(L, 4);
+	HRESULT result = IDirect3DDevice9_EndScene(d3dDevice);
+	if (result == D3D_OK)
+	{
+		result = IDirect3DDevice9_Present(d3dDevice, &sourceRect, NULL, NULL, NULL);
+	}
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
 const luaL_Reg lib_directX[] = {
@@ -211,6 +237,7 @@ const luaL_Reg lib_directX[] = {
 	{ "rect", l_DXRectangle },
 	{ "hitbox", l_drawHitbox },
 	{ "setScissor", l_setScissor },
+	{ "clearFrame", l_clearFrame },
 	{ "beginFrame", l_beginFrame },
 	{ "endFrame", l_endFrame },
 	{ NULL, NULL } // sentinel
