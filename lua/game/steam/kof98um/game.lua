@@ -52,15 +52,14 @@ KOF98.toggleHotkeys = {
 }
 
 KOF98.startupMessage = [[
-Hotkeys:
+Hotkeys available for this game:
 F1 - Toggle close normal range marker (player 1)
 F2 - Toggle close normal range marker (player 2)
 F3 - Toggle drawing hitbox fills
 F4 - Toggle drawing hitbox center axes
 F5 - Toggle drawing "throwable"-type boxes
 F6 - Toggle drawing "stale" throw boxes
-F7 - Toggle gauge overlays
-]]
+F7 - Toggle gauge overlays]]
 
 function KOF98:extraInit(noExport)
 	if not noExport then
