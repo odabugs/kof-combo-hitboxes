@@ -9,7 +9,6 @@ LPDIRECT3DDEVICE9 d3dDevice;
 LPDIRECT3DVERTEXBUFFER9 boxBuffer;
 RECT scissorRect = { .right = (LONG)1, .bottom = (LONG)1 };
 D3DPRESENT_PARAMETERS presentParams;
-D3DVIEWPORT9 viewport;
 
 CUSTOMVERTEX templateVertex = { 0.0f, 0.0f, 1.0f, 1.0f, D3DCOLOR_RGBA(0, 0, 0, 0) };
 
