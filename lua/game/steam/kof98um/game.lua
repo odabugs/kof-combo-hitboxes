@@ -64,9 +64,9 @@ F7 - Toggle gauge overlays]]
 function KOF98:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
-		self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
-			self.boxSlotConstructor, self.boxtypes)
 	end
+	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
+		self.boxSlotConstructor, self.boxtypes)
 	self.camera = ffi.new("camera")
 	self.players = ffiutil.ntypes("player", 2, 1)
 	self.playerExtras = ffiutil.ntypes("playerExtra", 2, 1)
