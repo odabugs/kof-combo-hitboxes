@@ -16,8 +16,6 @@ KOF02.drawGuardGauge = false
 
 function KOF02:extraInit(noExport)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
-	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
-		self.boxSlotConstructor, self.boxtypes)
 end
 
 function KOF02:setupGauges()
