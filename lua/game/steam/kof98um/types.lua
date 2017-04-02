@@ -2,11 +2,6 @@ local commontypes = require("game.commontypes")
 local types = commontypes:new()
 
 -- Game-specific struct definitions assume a little-endian memory layout.
--- "Absolute" address references are given relative to the start of PCSX2's
--- emulated game RAM area, unless otherwise noted.  Add the value of
--- PCSX2_Common.RAMbase (see game/pcsx2/common.lua) in order to get the
--- "real" absolute address in PCSX2's memory space.  This also applies when
--- dereferencing pointer values within the game's emulated RAM space.
 -- intptr_t is generally used in place of actual pointer types, in order to
 -- avoid excess GC overhead induced by frequent use of ffi.cast().
 types.typedefs = [[
