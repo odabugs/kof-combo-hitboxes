@@ -19,10 +19,17 @@ KOF98_PS2.revisions = {
 		},
 	},
 }
+-- use of false instead of nil avoids need for rawget() and associated issues
+KOF98_PS2.startupMessage = false
 
 function KOF98_PS2:extraInit(noExport)
 	self:importRevisionSpecificOptions(true)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
+end
+
+-- don't import Steam 98UMFE's hotkeys since they conflict with PCSX2'S hotkeys
+function KOF98_PS2:checkInputs()
+	return
 end
 
 return KOF98_PS2
