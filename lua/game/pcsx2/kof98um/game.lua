@@ -10,7 +10,7 @@ KOF98_PS2.revisions = {
 	-- TODO: NTSC-J, PAL
 	["NTSC-U"] = {
 		playerPtrs = { 0x0050F210, 0x0050F410 },
-		playerExtraPtrs = { 0x0050E008, 0x0050DDF0 },
+		playerExtraPtrs = { 0x00500B88, 0x00500978 },
 		cameraPtr = 0x00503348,
 		projectilesListInfo = { -- TODO: Are there more entries than this?
 			start = 0x00505610,
