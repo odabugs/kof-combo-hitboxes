@@ -43,7 +43,6 @@ function Game_Common:new(source)
 	source.width, source.height = 1, 1
 	source.xScale, source.yScale = 1, 1
 	source.xOffset, source.yOffset = 0, 0
-	source.xScissor, source.yScissor = 1, 1
 	source.aspect = 1
 
 	return source
@@ -84,34 +83,35 @@ function Game_Common:setupOverlay(directx)
 		self.hInstance, self.gameHwnd)
 	self.directx = directx
 	self.width, self.height = window.getDimensions(self.gameHwnd)
-	-- TODO: change directx code on the C side to support multiple instances
-	self.directx.setupD3D(self.overlayHwnd, self.width, self.height)
+	-- making the D3D surface large allows for smooth window resizing
+	self.directx.setupD3D(self.overlayHwnd, window.getScreenSize())
 end
 
 function Game_Common:read(address, buffer)
-	address = address + self.RAMbase
-	self:pointerRangeCheck(address)
-	self.addressBuf.i = address
-	local result = winprocess.read(self.gameHandle, self.addressBuf, buffer)
+	local newAddress = self:pointerRangeCheck(address)
+	local addressBuf = self.addressBuf
+	addressBuf.i = newAddress
+	local result = winprocess.read(self.gameHandle, addressBuf, buffer)
 	return result, address
 end
 
 function Game_Common:readPtr(address, buffer)
-	address = address + self.RAMbase
-	self:pointerRangeCheck(address)
+	local newAddress = self:pointerRangeCheck(address)
 	buffer = (buffer or self.pointerBuf)
-	buffer.i = address
+	buffer.i = newAddress
 	winprocess.read(self.gameHandle, buffer, buffer)
 	return buffer.i, address
 end
 
 function Game_Common:pointerRangeCheck(address)
 	local lower, upper = self.RAMbase, self.RAMlimit
+	address = address + lower
 	if address < lower or address >= upper then
 		local message = string.format(self.RAM_RANGE_ERROR,
 			address, lower, upper)
 		error(message, 3) -- throw error where read()/readPtr() was called
 	end
+	return address
 end
 
 -- to be overridden by derived objects
@@ -139,7 +139,7 @@ function Game_Common:nextFrame(drawing)
 	else
 		self.directx.beginFrame()
 	end
-	self.directx.endFrame()
+	self.directx.endFrame(0, 0, self.width, self.height)
 end
 
 function Game_Common:loadConfigs()
