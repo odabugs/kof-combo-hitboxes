@@ -12,9 +12,9 @@ KOF98_PS2.revisions = {
 		playerPtrs = { 0x0050F210, 0x0050F410 },
 		playerExtraPtrs = { 0x00500B88, 0x00500978 },
 		cameraPtr = 0x00503348,
-		projectilesListInfo = { -- TODO: Are there more entries than this?
-			start = 0x00505610,
-			count = 29,
+		projectilesListInfo = {
+			start = 0x00505210,
+			count = 80,
 			step  = 0x200,
 		},
 	},
@@ -22,9 +22,9 @@ KOF98_PS2.revisions = {
 		playerPtrs = { 0x00512B10, 0x00512D10 },
 		playerExtraPtrs = { 0x00504488, 0x00504278 },
 		cameraPtr = 0x00506C48,
-		projectilesListInfo = { -- TODO: Are there more entries than this?
-			start = 0x00508F10,
-			count = 29,
+		projectilesListInfo = {
+			start = 0x00508B10,
+			count = 80,
 			step  = 0x200,
 		},
 	},
