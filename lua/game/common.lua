@@ -54,9 +54,9 @@ function Game_Common:extraInit()
 end
 
 function Game_Common:importRevisionSpecificOptions(overwrite, source)
-	if source == nil then
+	if not source then
 		-- don't bother if the game doesn't have multiple revisions anyway
-		if self.revisions == nil then return
+		if not self.revisions then return
 		else
 			-- expects self.revision to be set beforehand by detectgame.lua
 			source = self.revisions[self.revision]
@@ -132,6 +132,7 @@ end
 function Game_Common:nextFrame(drawing)
 	self:checkInputs()
 	self:captureState()
+	if not window.isWindow(self.gameHwnd) then return false end
 	if drawing and self:shouldRenderFrame() then
 		self:repositionOverlay()
 		self.directx.beginFrame()
@@ -140,6 +141,7 @@ function Game_Common:nextFrame(drawing)
 		self.directx.beginFrame()
 	end
 	self.directx.endFrame(0, 0, self.width, self.height)
+	return true
 end
 
 function Game_Common:loadConfigs()

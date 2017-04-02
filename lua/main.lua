@@ -53,18 +53,20 @@ function mainLoop(game)
 	local fg
 
 	while running do
-		fg = window.foreground()
 		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
 			C.TranslateMessage(message)
 			C.DispatchMessageW(message)
 		end
 
-		game:nextFrame(drawing)
+		running = game:nextFrame(drawing)
+		if not running then break end
+		fg = window.foreground()
 		if fg == game.consoleHwnd then
 			if hk.down(hk.VK_Q) then
 				winutil.flushConsoleInput()
 				io.write("\n")
 				running = false
+				break
 			end
 		end
 		if fg == game.consoleHwnd or fg == game.overlayHwnd or fg == game.gameHwnd then
