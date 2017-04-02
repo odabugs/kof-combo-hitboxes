@@ -24,12 +24,18 @@ KOF_Neowave.revisions = {
 		},
 	},
 }
+-- use of false instead of nil avoids need for rawget() and associated issues
+KOF_Neowave.startupMessage = false
 
 function KOF_Neowave:extraInit(noExport)
 	self:importRevisionSpecificOptions(true)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
-	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
-		self.boxSlotConstructor, self.boxtypes)
+	self.drawGauges = false -- override config option to draw gauge overlays
+end
+
+-- don't import Steam 98UMFE's hotkeys since they conflict with PCSX2'S hotkeys
+function KOF_Neowave:checkInputs()
+	return
 end
 
 return KOF_Neowave
