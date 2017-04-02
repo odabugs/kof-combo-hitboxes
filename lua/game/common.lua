@@ -10,7 +10,7 @@ local Game_Common = {}
 -- If you see something being used that's not defined here, look in there.
 luautil.extend(Game_Common, draw)
 
-Game_Common.RAM_RANGE_ERROR = "Target address 0x%08X is outside of the range from 0x%08X (inclusive) to 0x%08X (exclusive)."
+Game_Common.RAM_RANGE_ERROR = "Target address 0x%08X must be between 0x%08X and 0x%08X (inclusive)."
 
 -- value added to address parameter in every call to read()
 Game_Common.RAMbase = 0
@@ -106,7 +106,7 @@ end
 function Game_Common:pointerRangeCheck(address)
 	local lower, upper = self.RAMbase, self.RAMlimit
 	address = address + lower
-	if address < lower or address >= upper then
+	if address < lower or address > upper then
 		local message = string.format(self.RAM_RANGE_ERROR,
 			address, lower, upper)
 		error(message, 3) -- throw error where read()/readPtr() was called
