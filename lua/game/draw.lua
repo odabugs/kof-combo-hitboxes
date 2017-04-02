@@ -2,11 +2,13 @@ local window = require("window")
 local colors = require("render.colors")
 -- This class is not intended to be instantiated directly;
 -- instead, use luautil.extend() to add its methods to a game class.
--- These methods expect the following to be defined on derived objects:
+-- These methods expect the following to be defined on the calling object:
 -- - basicWidth, basicHeight, width, height
--- - xOffset, yOffset, xScissor, yScissor, aspectMode
+-- - xOffset, yOffset, aspectMode
+-- - gameHwnd, overlayHwnd
 -- - directx (table of C functions)
 local draw = {}
+local max = math.max
 
 -- all draw calls are shifted upward by this amount
 draw.absoluteYOffset = 0
@@ -44,7 +46,7 @@ function draw:scaleCoords(x, y, flags)
 	y = math.floor(((y + yAdjust) - self.absoluteYOffset) * self.yScale)
 	-- Why does this work better when adding 1 extra?  IT IS A MYSTERY
 	y = y - yAdjust + 1
-	return x, y
+	return x + self.xOffset, y + self.yOffset
 end
 
 -- to be overridden by derived objects of draw
@@ -128,7 +130,6 @@ end
 
 function draw:adjustScaleAndAspect()
 	self.xOffset, self.yOffset = 0, 0
-	self.xScissor, self.yScissor = self.width, self.height
 	self.aspect = self.width / self.height
 	local aspectDiff = self.aspect - self.basicAspect
 	local mode = self.aspectMode
@@ -148,22 +149,32 @@ function draw:adjustScaleAndAspect()
 	end
 end
 
+function draw:getScissorDimensions()
+	local xOff, yOff = self.xOffset, self.yOffset
+	local scissorW = self.width - xOff
+	local scissorH = self.height - yOff
+	--print(xOff, yOff, scissorW, scissorH, self.width, self.height)
+	return xOff, yOff, scissorW, scissorH
+end
+
 function draw:getGameWindowSize()
-	window.getClientRect(self.gameHwnd, self.rectBuf)
-	self.width, self.height = self.rectBuf[0].right, self.rectBuf[0].bottom
+	local rb = self.rectBuf
+	window.getClientRect(self.gameHwnd, rb)
+	self.width, self.height = rb[0].right, rb[0].bottom
 	self:adjustScaleAndAspect()
-	local scissorWidth = self.width - (self.xOffset * 2)
-	local scissorHeight = self.height - (self.yOffset * 2)
-	self.directx.setScissor(0, 0, scissorWidth, scissorHeight)
 end
 
 function draw:repositionOverlay()
+	local oldW, oldH, dx = self.width, self.height, self.directx
 	self:getGameWindowSize()
-	window.move(
-		self.overlayHwnd, self.gameHwnd,
-		self.rectBuf, self.pointBuf,
-		self.xOffset, self.yOffset,
-		false) -- TODO: don't resize for now
+	local result, newX, newY, newW, newH = window.move(
+		self.overlayHwnd, self.gameHwnd, self.rectBuf, self.pointBuf,
+		0, 0, true)
+	if oldW ~= newW or oldH ~= newH then
+		dx.setScissor(0, 0, max(oldW, newW), max(oldH, newH))
+		dx.clearFrame()
+	end
+	dx.setScissor(self:getScissorDimensions())
 end
 
 function draw:printWindowPosition()

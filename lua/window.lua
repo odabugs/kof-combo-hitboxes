@@ -4,6 +4,7 @@ local winutil = require("winutil")
 local luautil = require("luautil")
 local winerror = require("winerror")
 local window = {}
+local max = math.max
 
 ffi.cdef[[
 typedef struct tagWNDCLASSEX {
@@ -302,6 +303,7 @@ function window.move(
 	newX, newY = newX + (xOffset or 0), newY + (yOffset or 0)
 	local sizeSource = (resize and source) or target
 	local newW, newH = window.getDimensions(sizeSource, rectBuffer)
+	newW, newH = max(newW, 1), max(newH, 1)
 	local result = C.MoveWindow(target, newX, newY, newW, newH, true)
 	winerror.checkNotZero(result)
 	return result, newX, newY, newW, newH
