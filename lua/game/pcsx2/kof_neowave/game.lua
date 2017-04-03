@@ -5,7 +5,16 @@ KOF_Neowave.configSection = "kof_neowave"
 KOF_Neowave.absoluteYOffset = 17
 -- game-specific constants
 KOF_Neowave.revisions = {
-	-- TODO: NTSC-J
+	["NTSC-J"] = {
+		playerPtrs = { 0x0064BDA8, 0x0064BFC0 },
+		playerExtraPtrs = { 0x0063BAC8, 0x0063B8B0 },
+		cameraPtr = 0x0063E838,
+		projectilesListInfo = {
+			start = 0x00640138,
+			count = 90,
+			step  = 0x218,
+		},
+	},
 	["PAL"] = {
 		playerPtrs = { 0x0051E2E8, 0x0051E500 },
 		playerExtraPtrs = { 0x0050E008, 0x0050DDF0 },

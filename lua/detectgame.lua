@@ -148,10 +148,11 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_neowave",
-		targetWindowTitle = "King of Fighters, The - Neo Wave",
+		targetWindowTitle = "King of Fighters, The.-Neo ?Wave",
+		rawTitle = false,
 		revisions = {
-			--["SLPS-25525"] = "NTSC-J", -- TODO: Data collection
-			--["SLPS-25712"] = "NTSC-J", -- TODO: Data collection
+			["SLPS-25525"] = "NTSC-J",
+			["SLPS-25712"] = "NTSC-J", -- TODO: NOT YET TESTED
 			["SLES-53999"] = "PAL",
 		},
 	}),
