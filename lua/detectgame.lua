@@ -167,6 +167,15 @@ local detectedGames = {
 		},
 	}),
 	PS2Game:new({
+		module = "pcsx2.kof2002um",
+		targetWindowTitle = "The King of Fighters 2002.-Unlimited Match",
+		rawTitle = false,
+		revisions = {
+			["SLPS-25915"] = "NTSC-J",
+			["SLPS-25983"] = "NTSC-J Tougeki Ver.",
+		},
+	}),
+	PS2Game:new({
 		module = "pcsx2.ngbc",
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
