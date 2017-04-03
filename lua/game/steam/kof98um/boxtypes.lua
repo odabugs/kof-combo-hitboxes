@@ -26,7 +26,7 @@ add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 18h-1Fh
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 20h-27h
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 28h-2Fh
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 30h-37h
-add(b_g , b_g , b_pv, b_pv,  b_pv, b_pv, b_pv, b_xx) -- 38h-3Fh
+add(b_g , b_g , b_pv, b_pv,  b_pv, b_pv, b_pv, b_pv) -- 38h-3Fh
 --  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
 add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 40h-47h
 add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_xx, b_xx) -- 48h-4Fh
