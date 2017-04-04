@@ -50,13 +50,21 @@ function mainLoop(game)
 	local PM_REMOVE = 0x01
 	local running = true
 	local drawing = true
+	local gameHwnd, overlayHwnd = game.gameHwnd, game.overlayHwnd
+	local consoleHwnd = game.consoleHwnd
 	local fg
 
 	while running do
-		while C.PeekMessageW(message, NULL, 0, 0, PM_REMOVE) ~= 0 do
+		-- LuaJIT's callback mechanism has known limitations with handling
+		-- infrequently used callbacks when compiled Lua code is involved.
+		-- Interpreting the offending sections instead avoids such problems.
+		-- http://www.freelists.org/post/luajit/libvlc-videolan-and-callbacks-crashing,2
+		jit.off()
+		while C.PeekMessageW(message, overlayHwnd, 0, 0, PM_REMOVE) ~= 0 do
 			C.TranslateMessage(message)
 			C.DispatchMessageW(message)
 		end
+		jit.on()
 
 		running = game:nextFrame(drawing)
 		if not running then break end
@@ -69,7 +77,7 @@ function mainLoop(game)
 				break
 			end
 		end
-		if fg == game.consoleHwnd or fg == game.overlayHwnd or fg == game.gameHwnd then
+		if fg == consoleHwnd or fg == overlayHwnd or fg == gameHwnd then
 			-- space bar toggles rendering on/off (TEMPORARY)
 			if hk.pressed(0x20) then drawing = not drawing end
 		end
