@@ -139,7 +139,7 @@ local detectedGames = {
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
 		revisions = {
-			-- TODO: SLKA-25167, SLPS-25789
+			-- TODO: SLKA-25167
 			["SLPS-25660"] = "NTSC-J",
 			["SLPS-25789"] = "NTSC-J", -- TODO: NOT YET TESTED
 			["SLUS-21687"] = "NTSC-U",
@@ -161,8 +161,8 @@ local detectedGames = {
 		targetWindowTitle = "King [Oo]f Fighters .?98.-Ultimate Match",
 		rawTitle = false,
 		revisions = {
-			--["SLPS-25783"] = "NTSC-J", -- TODO: Data collection
-			--["SLPS-25935"] = "NTSC-J", -- TODO: Data collection
+			["SLPS-25783"] = "NTSC-J",
+			["SLPS-25935"] = "NTSC-J", -- TODO: NOT YET TESTED
 			["SLES-55280"] = "PAL",
 			["SLUS-21816"] = "NTSC-U",
 		},

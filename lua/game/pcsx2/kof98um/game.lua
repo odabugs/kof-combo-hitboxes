@@ -7,7 +7,16 @@ KOF98_PS2.aspectMode = "stretch"
 KOF98_PS2.absoluteYOffset = 16
 -- game-specific constants
 KOF98_PS2.revisions = {
-	-- TODO: NTSC-J
+	["NTSC-J"] = {
+		playerPtrs = { 0x00680550, 0x00680750 },
+		playerExtraPtrs = { 0x00673EE8, 0x00673CD8 },
+		cameraPtr = 0x006766A8,
+		projectilesListInfo = {
+			start = 0x00676550,
+			count = 80,
+			step  = 0x200,
+		},
+	},
 	["NTSC-U"] = {
 		playerPtrs = { 0x0050F210, 0x0050F410 },
 		playerExtraPtrs = { 0x00500B88, 0x00500978 },
