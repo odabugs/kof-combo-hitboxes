@@ -46,8 +46,6 @@ function main(hInstance, CLibs)
 end
 
 function mainLoop(game)
-	local message = ffi.new("MSG[1]")
-	local PM_REMOVE = 0x01
 	local running = true
 	local drawing = true
 	local gameHwnd, overlayHwnd = game.gameHwnd, game.overlayHwnd
@@ -55,17 +53,7 @@ function mainLoop(game)
 	local fg
 
 	while running do
-		-- LuaJIT's callback mechanism has known limitations with handling
-		-- infrequently used callbacks when compiled Lua code is involved.
-		-- Interpreting the offending sections instead avoids such problems.
-		-- http://www.freelists.org/post/luajit/libvlc-videolan-and-callbacks-crashing,2
-		jit.off()
-		while C.PeekMessageW(message, overlayHwnd, 0, 0, PM_REMOVE) ~= 0 do
-			C.TranslateMessage(message)
-			C.DispatchMessageW(message)
-		end
-		jit.on()
-
+		pumpMessages(overlayHwnd)
 		running = game:nextFrame(drawing)
 		if not running then break end
 		fg = window.foreground()
@@ -85,4 +73,22 @@ function mainLoop(game)
 	end
 	game:close()
 	return 0
+end
+
+-- LuaJIT's callback mechanism has known limitations with handling
+-- infrequently used callbacks when compiled Lua code is involved.
+-- Interpreting the offending sections instead avoids such problems.
+-- http://www.freelists.org/post/luajit/libvlc-videolan-and-callbacks-crashing,2
+do
+	local message = ffi.new("MSG[1]")
+	local PM_REMOVE = 0x01
+
+	function pumpMessages(hwnd)
+		while C.PeekMessageW(message, hwnd, 0, 0, PM_REMOVE) ~= 0 do
+			C.TranslateMessage(message)
+			C.DispatchMessageW(message)
+		end
+	end
+
+	jit.off(pumpMessages, true)
 end
