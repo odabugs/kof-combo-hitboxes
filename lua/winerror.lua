@@ -18,18 +18,22 @@ end
 
 function winerror.checkZero(n)
 	if n ~= 0 then winerror.testLastError(2) end
+	return n
 end
 
 function winerror.checkNotZero(n)
 	if n == 0 then winerror.testLastError(2) end
+	return n
 end
 
 function winerror.checkEqual(n, key)
 	if n ~= key then winerror.testLastError(2) end
+	return n
 end
 
 function winerror.checkNotEqual(n, key)
 	if n == key then winerror.testLastError(2) end
+	return n
 end
 
 return winerror

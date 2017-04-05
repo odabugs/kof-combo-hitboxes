@@ -1,5 +1,5 @@
 local ffi = require("ffi")
-local winapi = require("winapi")
+local types = require("winapi.types")
 local winutil = require("winutil")
 local luautil = require("luautil")
 local winerror = require("winerror")
@@ -116,7 +116,7 @@ local oemResource = ffi.cast("LPCTSTR", 32512) -- default OEM icon/cursor
 local fuLoad = 0x8000 -- LR_SHARED
 window.luaTitle = "KOF Combo Hitbox Viewer"
 -- allowing this to get garbage collected can cause random startup failures
-window.wcsTitle = winapi.wcs(window.luaTitle)
+window.wcsTitle = winutil.toWideChar(window.luaTitle)
 window.defaultWindowTitle = ffi.cast("LPCTSTR", window.wcsTitle)
 window.defaultWindowClass = {
 	cbSize = ffi.sizeof("WNDCLASSEX"),
@@ -234,7 +234,7 @@ function window.getWindowTitle(hwnd, buffer)
 	local limit = winutil.stringBufferLength(buffer)
 	winerror.checkNotZero(C.GetWindowTextW(
 		hwnd, ffi.cast("LPTSTR", buffer), limit))
-	return winapi.mbs(buffer)
+	return winutil.mbs(buffer)
 end
 
 function window.getProcessImageName(hwnd, buffer, nBuffer)
@@ -243,7 +243,7 @@ function window.getProcessImageName(hwnd, buffer, nBuffer)
 	nBuffer[0] = winutil.stringBufferLength(buffer)
 	winerror.checkNotZero(C.QueryFullProcessImageNameW(
 		hwnd, 0, ffi.cast("LPTSTR", buffer), nBuffer))
-	return winapi.mbs(buffer)
+	return winutil.mbs(buffer)
 end
 
 -- returns both the parent PID (1st result) and parent thread (2nd result)
