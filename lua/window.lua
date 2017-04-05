@@ -238,7 +238,8 @@ function window.getWindowTitle(hwnd, buffer)
 end
 
 function window.getProcessImageName(hwnd, buffer, nBuffer)
-	buffer = (buffer or winutil.makeStringBuffer(1024))
+	local bufsize = winutil.defaultWCSBufferSize
+	buffer = (buffer or winutil.makeStringBuffer(bufsize))
 	nBuffer = (nBuffer or winutil.dwordBufType())
 	nBuffer[0] = winutil.stringBufferLength(buffer)
 	winerror.checkNotZero(C.QueryFullProcessImageNameW(
