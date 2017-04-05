@@ -34,7 +34,7 @@ add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 50h-57h
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 58h-5Fh
 add(b_a , b_v , b_v , b_v ,  b_v , b_v , b_v , b_xx) -- 60h-67h
 add(b_xx, b_xx, b_xx, b_xx,  b_xx, b_xx, b_a , b_a ) -- 68h-6Fh
-add(b_c , b_c , b_c , b_c ,  b_a , b_a , b_a , b_a ) -- 70h-77h
+add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 70h-77h
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 78h-7Fh
 --  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
 add(b_cl, b_cl, b_cl, b_cl,  b_xx, b_xx, b_xx, b_xx) -- 80h-87h
