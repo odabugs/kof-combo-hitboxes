@@ -129,8 +129,8 @@ function Game_Common:checkInputs()
 	return
 end
 
-function Game_Common:nextFrame(drawing)
-	self:checkInputs()
+function Game_Common:nextFrame(drawing, hasFocus)
+	if hasFocus then self:checkInputs() end
 	self:captureState()
 	if not window.isWindow(self.gameHwnd) then return false end
 	if drawing and self:shouldRenderFrame() then

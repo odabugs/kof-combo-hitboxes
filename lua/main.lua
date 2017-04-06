@@ -50,24 +50,25 @@ function mainLoop(game)
 	local drawing = true
 	local gameHwnd, overlayHwnd = game.gameHwnd, game.overlayHwnd
 	local consoleHwnd = game.consoleHwnd
-	local fg
+	local fg, hasFocus
 
 	while running do
 		pumpMessages(overlayHwnd)
-		running = game:nextFrame(drawing)
-		if not running then break end
 		fg = window.foreground()
-		if fg == game.consoleHwnd then
-			if hk.down(hk.VK_Q) then
-				winutil.flushConsoleInput()
-				io.write("\n")
-				running = false
-				break
-			end
-		end
-		if fg == consoleHwnd or fg == overlayHwnd or fg == gameHwnd then
+		hasFocus = fg == gameHwnd or fg == overlayHwnd or fg == consoleHwnd
+		running = game:nextFrame(drawing, hasFocus)
+		if not running then break end
+		if hasFocus then
 			-- space bar toggles rendering on/off (TEMPORARY)
 			if hk.pressed(0x20) then drawing = not drawing end
+			if fg == game.consoleHwnd then
+				if hk.down(hk.VK_Q) then
+					winutil.flushConsoleInput()
+					io.write("\n")
+					running = false
+					break
+				end
+			end
 		end
 		C.Sleep(5)
 	end
