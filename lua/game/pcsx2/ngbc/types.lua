@@ -44,6 +44,11 @@ typedef struct {
 	float unknown01;          // +082h: Always +1.0?
 } camera;
 
+// Mystery struct at 0x004240C4
+typedef struct {
+	float camY;               // +058h: Camera Y w/zoom accounted for?
+} cam2;
+
 // Multiple instances of this struct are embedded in "player" below.
 // Things will break if this struct is not 0Ah (decimal 10) bytes wide.
 typedef struct {
@@ -67,7 +72,7 @@ typedef struct {
 	byte collisionActive;     // +01Bh: Collision box active?
 } playerFlags;
 
-// Game allocates 4 of this struct (2 per player, 1 per character in play).
+// Game allocates at least 6 instances of this struct.
 // "playerTable" struct contains pointers to instances of this struct.
 typedef struct {
 	coordPair position;       // +000h: X/Y world position (4 bytes)
@@ -99,24 +104,15 @@ typedef struct {
 } player;
 typedef player projectile;
 
-// this struct exists at 0x004006D0 in game RAM
-typedef struct {
-	// 2x2 two-dimensional array of pointers to "player" structs.
-	// First pair points to player 1's characters, second to player 2's.
-	// Each pair is ordered based on the player's first/second picks.
-	// See "team" struct to find which char is currently on point.
-	intptr_t p[PLAYERS][CHARS_PER_TEAM]; // +000h: Pointers array
-} playerTable;
-
 // Instances of this struct are embedded in "team" struct below.
 // Struct size is 0x1C (decimal 28) bytes.
 typedef struct {
 	byte padding01[0x008];    // +000h to +008h: Unknown
 	word health;              // +008h: Health
 	word redHealth;           // +00Ah: Red (recoverable) health
-	word padding02;           // +008h: Unknown
-	word guardGauge;          // +00Ah: Guard gauge
-	byte padding03[0x010];    // +00Ch to +01Ch: Unknown
+	word padding02;           // +00Ch: Unknown
+	word guardGauge;          // +00Eh: Guard gauge
+	byte padding03[0x00C];    // +010h to +01Ch: Unknown
 } playerExtra;
 
 // struct locations: 0x00439A00 (player 1), 0x00439BB4 (player 2)
@@ -133,6 +129,20 @@ typedef struct {
 	playerExtra players[2];   // +0E0h: Extra per-character state info
 } team;
 
+// Instances of this struct are embedded in "playerTable" below
+typedef struct {
+	intptr_t target;          // +000h: Pointer to "player"-type struct
+	// Bit 15 (counting from 0 = low bit) seems to indicate whether the
+	// player struct pointed to is "active" (1 = active, 0 = inactive).
+	// We only want to render "active" player structs.
+	uint32_t flags;           // +004h: Flags for this pointer
+} flaggedPlayerPtr;
+
+// This struct exists at 0x218271F0 in game RAM
+typedef struct {
+	flaggedPlayerPtr values[4]; // +000h: Table of flagged "player" pointers
+} extraEntities;
+
 // this struct exists at 0x003857A0 in game RAM
 typedef struct {
 	// Value is equal to +1.0 when camera is zoomed in normally.
@@ -141,7 +151,7 @@ typedef struct {
 } zoom;
 
 typedef struct {
-	float value;
+	float value;              // +000h: Zoom factor
 } zoomFloat;
 
 #pragma pack(pop)
