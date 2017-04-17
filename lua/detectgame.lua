@@ -133,6 +133,17 @@ local detectedGames = {
 		targetWindowTitle = "The King of Fighters XIII",
 		targetProcessName = "kofxiii.exe",
 	}),
+	SteamGame:new({
+		module = "steam.ggxxacplusr",
+		targetWindowTitle = "GUILTY GEAR XX ..?CORE PLUS R",
+		rawTitle = false,
+		targetProcessName = "GGXXACPR_Win.exe",
+	}),
+	SteamGame:new({
+		module = "steam.ggxxreload",
+		targetWindowTitle = "GUILTYGEAR XX #RELOAD",
+		targetProcessName = "ggxx.exe",
+	}),
 	PS2Game:new({
 		module = "pcsx2.kof_xi",
 		-- PCSX2's CONSOLE window title will start with this line
