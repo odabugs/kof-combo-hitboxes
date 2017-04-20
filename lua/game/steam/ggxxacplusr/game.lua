@@ -27,15 +27,15 @@ GGXX.boxesPerLayer = 50
 GGXX.boxtypes = boxtypes
 --GGXX.playerPtrs = { 0x01416778, 0x0141A07C } -- pointers to pointers
 GGXX.playerPtrs = { 0x00F96778, 0x00F9A07C } -- pointers to pointers
-GGXX.invulPtrs = { 0x00F9A062, 0x00F9A1AA }
 GGXX.cameraPtr = 0x00F9B0D4
 
 function GGXX:extraInit(noExport)
 	if not noExport then types:export(ffi) end
 	self.camera = ffi.new("camera")
 	self.players = ffiutil.ntypes("player", 2, 1)
-	self.invul = ffiutil.ntypes("invul", 2, 1)
+	self.playerExtras = ffiutil.ntypes("playerExtra", 2, 1)
 	self.boxBuf = ffi.new("hitbox")
+	self.pushBoxBuf = ffi.new("pushbox")
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
 	self.zoom = 1.0
@@ -56,24 +56,25 @@ function GGXX:captureState()
 end
 
 function GGXX:capturePlayerState(which)
-	local player, boxBuf = self.players[which], self.boxBuf
+	local player, extra = self.players[which], self.playerExtras[which]
 	local playerPtr = self:readPtr(self.playerPtrs[which])
 	local boxset, boxAdder = self.boxset, self.addBox
-	local bt, boxtype = self.boxtypes, "dummy"
-	playerPtr = playerPtr
+	local boxBuf, bt, boxtype = self.boxBuf, self.boxtypes, "dummy"
 	if playerPtr ~= NULL then
 		self:read(playerPtr, player)
+		self:read(player.playerExtraPtr, extra)
+		--print(string.format("%d 0x%08X", which, player.playerExtraPtr))
 		local px, py = player.xPivot, player.yPivot
 		local boxPtr, boxCount = player.boxPtr, player.boxCount
 		local facing = self:facingMultiplier(player)
-		self:read(self.invulPtrs[which], self.invul[which])
-		local invul = self.invul[which].value
+		local invul = extra.invul
 		for i = 1, boxCount do
 			self:read(boxPtr, boxBuf)
 			boxtype = bt:typeForID(boxBuf.boxType)
-			if not ((boxtype == "dummy" or (boxtype == "vulnerable" and invul ~= 0))) then
-				boxset:add(boxtype, boxAdder, self, player, boxBuf, facing)
-			end
+			if boxtype == "dummy" then goto continue end
+			if (boxtype == "vulnerable") and (invul ~= 0) then goto continue end
+			boxset:add(boxtype, boxAdder, self, player, boxBuf, facing)
+			::continue::
 			boxPtr = boxPtr + 0x0C
 		end
 	end

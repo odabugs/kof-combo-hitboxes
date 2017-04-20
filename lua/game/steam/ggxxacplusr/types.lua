@@ -28,7 +28,7 @@ typedef struct {
 	byte padding01[0x01A];    // +004h to +01Eh: Unknown
 	word health;              // +01Eh: Current HP
 	byte padding02[0x00C];    // +020h to +02Ch: Unknown
-	intptr_t extraStruct;     // +02Ch: Pointer to extra state struct
+	intptr_t playerExtraPtr;  // +02Ch: Pointer to "playerExtra" struct
 	byte padding03[0x024];    // +030h to +054h: Unknown
 	intptr_t boxPtr;          // +054h: Pointer to current hitbox set
 	byte padding04[0x02C];    // +058h to +084h: Unknown
@@ -43,6 +43,14 @@ typedef struct {
 } player;
 
 typedef struct {
+	word tension;             // +000h: Tension meter
+	byte padding01[0x018];    // +002h to +01Ah: Unknown
+	word guardGauge;          // +01Ah: Guard gauge
+	byte padding02[0x00E];    // +01Ch to +02Ah: Unknown
+	byte invul;               // +02Ah: I-frames remaining
+} playerExtra;
+
+typedef struct {
 	word xOffset;             // +000h: X offset from player pivot
 	word yOffset;             // +002h: Y offset from player pivot
 	word width;               // +004h: Box width
@@ -51,8 +59,9 @@ typedef struct {
 } hitbox;
 
 typedef struct {
-	byte value;               // +001h: I-Frames remaining
-} invul;
+	word width;               // +000h: Box width
+	word height;              // +002h: Box height
+} pushbox;
 
 #pragma pack(pop)
 ]]

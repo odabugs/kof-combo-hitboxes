@@ -5,7 +5,6 @@ local GGXX = GGXXAC:new({ parent = GGXXAC, whoami = "GGXXReload" })
 
 -- game-specific constants
 GGXX.playerPtrs = { 0x005D2024, 0x005FF584 } -- pointers to pointers
-GGXX.invulPtrs = { 0x005FF56A, 0x005FF64E }
 GGXX.cameraPtr = 0x005CDCA4
 
 function GGXX:extraInit(noExport)

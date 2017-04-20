@@ -25,7 +25,9 @@ typedef struct {
 	byte projectedFacing;     // +003h: Projected facing
 	byte padding01[0x012];    // +004h to +016h: Unknown
 	word health;              // +016h: Current HP
-	byte padding02[0x034];    // +018h to +04Ch: Unknown
+	byte padding02[0x00C];    // +018h to +024h: Unknown
+	intptr_t playerExtraPtr;  // +024h: Pointer to "playerExtra" struct
+	byte padding05[0x024];    // +028h to +04Ch: Unknown
 	intptr_t boxPtr;          // +04Ch: Pointer to current hitbox set
 	byte padding03[0x028];    // +050h to +078h: Unknown
 	byte boxCount;            // +078h: Box count (plus/minus 1?)
@@ -37,6 +39,12 @@ typedef struct {
 } player;
 
 typedef struct {
+	word tension;             // +000h: Tension meter
+	byte padding01[0x028];    // +002h to +02Ah: Unknown
+	byte invul;               // +02Ah: I-frames remaining
+} playerExtra;
+
+typedef struct {
 	word xOffset;             // +000h: X offset from player pivot
 	word yOffset;             // +002h: Y offset from player pivot
 	word width;               // +004h: Box width
@@ -45,8 +53,9 @@ typedef struct {
 } hitbox;
 
 typedef struct {
-	byte value;               // +001h: I-Frames remaining
-} invul;
+	word width;               // +000h: Box width
+	word height;              // +002h: Box height
+} pushbox;
 
 #pragma pack(pop)
 ]]
