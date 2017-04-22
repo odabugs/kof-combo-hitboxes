@@ -62,7 +62,7 @@ function KOF_Common.addBox(target, parent, cx, cy, w, h)
 	return true
 end
 
--- "addFn" passed as parameter to BoxSet:add()
+-- "addFn" passed as parameter to BoxList:add()
 function KOF_Common.addPivot(target, color, x, y)
 	target.color, target.x, target.y = color, x, y
 	return true

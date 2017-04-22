@@ -40,6 +40,8 @@ function GGXX:extraInit(noExport)
 	self.pushBoxBuf = ffi.new("pushbox")
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
+	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
+		"pivots", (self.projectilesListInfo.count + 2), self.pivotSlotConstructor)
 	self.zoom = 1.0
 	---[=[
 	for i = 1, 2 do
@@ -51,6 +53,7 @@ end
 
 function GGXX:captureState()
 	self.boxset:reset()
+	self.pivots:reset()
 	local cam = self.camera
 	self:read(self.cameraPtr, cam)
 	self.zoom = cam.zoom / 100
@@ -95,6 +98,8 @@ function GGXX:captureEntity(player, extra, isProjectile)
 		::continue::
 		boxPtr = boxPtr + 0x0C
 	end
+	local pivotColor = (isProjectile and self.projectilePivotColor) or self.pivotColor
+	self.pivots:add(self.addPivot, pivotColor, self:worldToScreen(px, py))
 end
 
 function GGXX:facingMultiplier(player)
@@ -121,6 +126,7 @@ function GGXX:worldToScreen(x, y)
 	return floor(x), floor(y)
 end
 
+-- slot constructor function passed to BoxSet:new()
 function GGXX.boxSlotConstructor(i, slot, boxtypes)
 	return {
 		left = 0, top = 0, right = 0, bottom = 0,
@@ -128,6 +134,7 @@ function GGXX.boxSlotConstructor(i, slot, boxtypes)
 	}
 end
 
+-- "addFn" passed as parameter to BoxSet:add()
 function GGXX.addBox(target, parent, player, hitbox, facing)
 	if hitbox.width <= 0 or hitbox.height <= 0 then return false end
 	local x1, y1, x2, y2 = parent:deriveBoxPosition(player, hitbox, facing)
@@ -136,6 +143,7 @@ function GGXX.addBox(target, parent, player, hitbox, facing)
 	return true
 end
 
+-- "renderFn" passed as parameter to BoxSet:render()
 function GGXX.drawBox(hitbox, parent, pivotSize, drawFill)
 	local x1, y1 = hitbox.left, hitbox.top
 	local x2, y2 = hitbox.right, hitbox.bottom
@@ -145,15 +153,28 @@ function GGXX.drawBox(hitbox, parent, pivotSize, drawFill)
 	return 1
 end
 
+-- slot constructor function passed to BoxList:new()
+function GGXX.pivotSlotConstructor()
+	return { x = 0, y = 0, color = colors.WHITE }
+end
+
+-- "addFn" passed as parameter to BoxList:add()
+function GGXX.addPivot(target, color, x, y)
+	target.color, target.x, target.y = color, x, y
+	return true
+end
+
+-- "renderFn" passed as parameter to BoxList:render()
+function GGXX.drawPivot(pivot, parent, pivotSize)
+	parent:pivot(pivot.x, pivot.y, pivotSize, pivot.color)
+	return 1
+end
+
 function GGXX:renderState()
 	self.boxset:render(self.drawBox, self,
 		self.boxPivotSize, self.drawBoxFills)
-	local ps = self.players
-	local p, px, py
-	for i = 1, 2 do
-		p = ps[i]
-		local px, py = self:worldToScreen(p.xPivot, p.yPivot)
-		self:pivot(px, py)
+	if self.drawPlayerPivot then
+		self.pivots:render(self.drawPivot, self, self.pivotSize)
 	end
 end
 
