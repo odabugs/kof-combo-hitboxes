@@ -25,8 +25,9 @@ GGXX.useThickLines = false
 GGXX.boxesPerLayer = 50
 -- game-specific constants
 GGXX.boxtypes = boxtypes
---GGXX.playerPtrs = { 0x01416778, 0x0141A07C } -- pointers to pointers
 GGXX.playerPtrs = { 0x00F96778, 0x00F9A07C } -- pointers to pointers
+-- "start" here is a pointer-to-pointer
+GGXX.projectilesListInfo = { start = 0x00F9677C, step = 0x130, count = 20 }
 GGXX.cameraPtr = 0x00F9B0D4
 
 function GGXX:extraInit(noExport)
@@ -34,6 +35,7 @@ function GGXX:extraInit(noExport)
 	self.camera = ffi.new("camera")
 	self.players = ffiutil.ntypes("player", 2, 1)
 	self.playerExtras = ffiutil.ntypes("playerExtra", 2, 1)
+	self.projectileBuf = ffi.new("projectile")
 	self.boxBuf = ffi.new("hitbox")
 	self.pushBoxBuf = ffi.new("pushbox")
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
@@ -52,31 +54,46 @@ function GGXX:captureState()
 	local cam = self.camera
 	self:read(self.cameraPtr, cam)
 	self.zoom = cam.zoom / 100
-	for i = 1, 2 do self:capturePlayerState(i) end
+
+	local players, extras = self.players, self.playerExtras
+	local playerPtrs = self.playerPtrs
+	local player, extra, playerPtr
+	for i = 1, 2 do
+		playerPtr = self:readPtr(playerPtrs[i])
+		if playerPtr ~= NULL then
+			player, extra = players[i], extras[i]
+			self:read(playerPtr, player)
+			self:read(player.playerExtraPtr, extra)
+			self:captureEntity(player, extra, false)
+		end
+	end
+
+	local proj, projInfo = self.projectileBuf, self.projectilesListInfo
+	local count, step = projInfo.count, projInfo.step
+	local projPtr = self:readPtr(projInfo.start)
+	for i = 1, count do
+		self:read(projPtr, proj)
+		if proj.status ~= 0 then self:captureEntity(proj, nil, true) end
+		projPtr = projPtr + step
+	end
 end
 
-function GGXX:capturePlayerState(which)
-	local player, extra = self.players[which], self.playerExtras[which]
-	local playerPtr = self:readPtr(self.playerPtrs[which])
+function GGXX:captureEntity(player, extra, isProjectile)
 	local boxset, boxAdder = self.boxset, self.addBox
 	local boxBuf, bt, boxtype = self.boxBuf, self.boxtypes, "dummy"
-	if playerPtr ~= NULL then
-		self:read(playerPtr, player)
-		self:read(player.playerExtraPtr, extra)
-		--print(string.format("%d 0x%08X", which, player.playerExtraPtr))
-		local px, py = player.xPivot, player.yPivot
-		local boxPtr, boxCount = player.boxPtr, player.boxCount
-		local facing = self:facingMultiplier(player)
-		local invul = extra.invul
-		for i = 1, boxCount do
-			self:read(boxPtr, boxBuf)
-			boxtype = bt:typeForID(boxBuf.boxType)
-			if boxtype == "dummy" then goto continue end
-			if (boxtype == "vulnerable") and (invul ~= 0) then goto continue end
-			boxset:add(boxtype, boxAdder, self, player, boxBuf, facing)
-			::continue::
-			boxPtr = boxPtr + 0x0C
-		end
+	local px, py = player.xPivot, player.yPivot
+	local boxPtr, boxCount = player.boxPtr, player.boxCount
+	local facing = self:facingMultiplier(player)
+	local invul = (extra and extra.invul) or 0
+	for i = 1, boxCount do
+		self:read(boxPtr, boxBuf)
+		boxtype = bt:typeForID(boxBuf.boxType)
+		if boxtype == "dummy" then goto continue end
+		if (boxtype == "vulnerable") and (invul ~= 0) then goto continue end
+		if isProjectile then boxtype = bt:asProjectile(boxtype) end
+		boxset:add(boxtype, boxAdder, self, player, boxBuf, facing)
+		::continue::
+		boxPtr = boxPtr + 0x0C
 	end
 end
 

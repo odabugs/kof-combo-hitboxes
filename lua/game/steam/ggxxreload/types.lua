@@ -19,7 +19,10 @@ typedef struct {
 } camera;
 
 typedef struct {
-	word characterID;         // +000h: Current character ID (plus 1)
+	union {
+		word characterID;     // +000h: Current character ID (plus 1)
+		word status;          // +000h: Projectile "active" status
+	};
 	byte facing;              // +002h: Current facing (0 = left, 1 = right)
 	byte projectedFacing;     // +003h: Projected facing
 	byte padding01[0x012];    // +004h to +016h: Unknown
@@ -36,6 +39,7 @@ typedef struct {
 	dword xPivot;             // +0A4h: X pivot position
 	dword yPivot;             // +0A8h: Y pivot position
 } player;
+typedef player projectile;
 
 typedef struct {
 	word tension;             // +000h: Tension meter
