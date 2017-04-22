@@ -52,25 +52,34 @@ function GGXX:extraInit(noExport)
 end
 
 function GGXX:captureState()
-	self.boxset:reset()
-	self.pivots:reset()
 	local cam = self.camera
 	self:read(self.cameraPtr, cam)
 	self.zoom = cam.zoom / 100
 
+	self.boxset:reset()
+	self.pivots:reset()
+	self:capturePlayerStates()
+	self:captureProjectiles()
+end
+
+function GGXX:capturePlayerStates()
 	local players, extras = self.players, self.playerExtras
 	local playerPtrs = self.playerPtrs
 	local player, extra, playerPtr
 	for i = 1, 2 do
 		playerPtr = self:readPtr(playerPtrs[i])
-		if playerPtr ~= NULL then
+		if playerPtr ~= 0 then
 			player, extra = players[i], extras[i]
 			self:read(playerPtr, player)
-			self:read(player.playerExtraPtr, extra)
-			self:captureEntity(player, extra, false)
+			if player.playerExtraPtr ~= 0 then
+				self:read(player.playerExtraPtr, extra)
+				self:captureEntity(player, extra, false)
+			end
 		end
 	end
+end
 
+function GGXX:captureProjectiles()
 	local proj, projInfo = self.projectileBuf, self.projectilesListInfo
 	local count, step = projInfo.count, projInfo.step
 	local projPtr = self:readPtr(projInfo.start)
