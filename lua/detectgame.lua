@@ -141,8 +141,8 @@ local detectedGames = {
 	}),
 	SteamGame:new({
 		module = "steam.ggxxreload",
-		targetWindowTitle = "GUILTYGEAR XX #RELOAD",
-		targetProcessName = "ggxx.exe",
+		targetWindowTitle = "GUILTYGEAR X2 #RELOAD",
+		targetProcessName = "ggx2.exe",
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_xi",
