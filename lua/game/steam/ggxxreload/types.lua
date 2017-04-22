@@ -7,16 +7,15 @@ local types = commontypes:new()
 types.typedefs = [[
 #pragma pack(push, 1) /* DO NOT REMOVE THIS */
 
-// 2F80C
 typedef struct {
-	dword leftEdge;           // +000h: Left edge of visible area
-	byte paddingFF[0x2F7F8];  // +004h to +008h: Unknown
-	dword width;              // +000h: Width of visible area
-	byte paddingFE[0x004];    // +004h to +008h: Unknown
-	float zoom;               // +008h: Zoom factor (1.0 to 0.8)
-	byte paddingFD[0x034];    // +00Ch to +040h: Unknown
-	dword xCenter;            // +040h: X center of visible area
-	dword bottomEdge;         // +044h: Bottom edge of visible area
+	dword bottomEdge;         // +000h: Bottom edge of visible area
+	byte padding01[0x00C];    // +004h to +010h: Unknown
+	dword leftEdge;           // +010h: Left edge of visible area
+	byte padding02[0x004];    // +014h to +018h: Unknown
+	dword width;              // +018h: Width of visible area
+	dword height;             // +01Ch: Height of visible area
+	byte paddingFF[0x2F854];  // +020h to +2F8B74h: Unknown
+	float zoom;               // +2F8B74h: Zoom factor (1.0 to 0.8)
 } camera;
 
 typedef struct {

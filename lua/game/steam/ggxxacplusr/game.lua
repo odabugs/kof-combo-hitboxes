@@ -132,7 +132,7 @@ function GGXX:renderState()
 	self.boxset:render(self.drawBox, self,
 		self.boxPivotSize, self.drawBoxFills)
 	local ps = self.players
-	local p, pos, px, py
+	local p, px, py
 	for i = 1, 2 do
 		p = ps[i]
 		local px, py = self:worldToScreen(p.xPivot, p.yPivot)

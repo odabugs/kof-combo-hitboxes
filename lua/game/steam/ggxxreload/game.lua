@@ -4,8 +4,8 @@ local GGXXAC = require("game.steam.ggxxacplusr.game")
 local GGXX = GGXXAC:new({ parent = GGXXAC, whoami = "GGXXReload" })
 
 -- game-specific constants
-GGXX.playerPtrs = { 0x005D2024, 0x005FF584 } -- pointers to pointers
-GGXX.cameraPtr = 0x005CDCA4
+GGXX.playerPtrs = { 0x005D0BA4, 0x005FE064 } -- pointers to pointers
+GGXX.cameraPtr = 0x005CC714
 
 function GGXX:extraInit(noExport)
 	types:export(ffi)
