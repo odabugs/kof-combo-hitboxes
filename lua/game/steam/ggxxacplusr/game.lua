@@ -120,7 +120,7 @@ function GGXX:captureEntity(player, extra, isProjectile)
 		local index = 3
 		if band(flags, 0x400) ~= 0 then index = 1
 		elseif band(flags, 0x20000) ~= 0 then index = 2 end
-		local source = self.pushboxTargetPointers[index]
+		local source = self.pushBoxTargetPointers[index]
 		local targetX, targetY = source[1] + adjust, source[2] + adjust
 		--print(string.format("%d\t0x%02X\t0x%08X\t0x%08X", index, adjust, targetX, targetY))
 		self:read(targetX, wordBuf)
