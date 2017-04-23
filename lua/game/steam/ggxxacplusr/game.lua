@@ -13,7 +13,7 @@ local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
 local Game_Common = require("game.common")
 local GGXX = Game_Common:new({ whoami = "GGXXACPlusR" })
-local floor = math.floor
+local floor, band = math.floor, bit.band
 
 GGXX.configSection = "ggxx"
 GGXX.basicWidth = 640
@@ -28,6 +28,11 @@ GGXX.boxtypes = boxtypes
 GGXX.playerPtrs = { 0x00F96778, 0x00F9A07C } -- pointers to pointers
 -- "start" here is a pointer-to-pointer
 GGXX.projectilesListInfo = { start = 0x00F9677C, step = 0x130, count = 20 }
+GGXX.pushBoxTargetPointers = {
+	{ 0x00E55124, 0x00E55B08 },
+	{ 0x00E55B3C, 0x00E53E3C },
+	{ 0x00E53534, 0x00E53E3C },
+}
 GGXX.cameraPtr = 0x00F9B0D4
 
 function GGXX:extraInit(noExport)
@@ -38,6 +43,7 @@ function GGXX:extraInit(noExport)
 	self.projectileBuf = ffi.new("projectile")
 	self.boxBuf = ffi.new("hitbox")
 	self.pushBoxBuf = ffi.new("pushbox")
+	self.wordBuf = ffi.new("int16_t[1]")
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
@@ -85,7 +91,7 @@ function GGXX:captureProjectiles()
 	local projPtr = self:readPtr(projInfo.start)
 	for i = 1, count do
 		self:read(projPtr, proj)
-		if proj.status ~= 0 then self:captureEntity(proj, nil, true) end
+		if proj.projStatus ~= 0 then self:captureEntity(proj, nil, true) end
 		projPtr = projPtr + step
 	end
 end
@@ -93,21 +99,39 @@ end
 function GGXX:captureEntity(player, extra, isProjectile)
 	local boxset, boxAdder = self.boxset, self.addBox
 	local boxBuf, bt, boxtype = self.boxBuf, self.boxtypes, "dummy"
-	local px, py = player.xPivot, player.yPivot
 	local boxPtr, boxCount = player.boxPtr, player.boxCount
 	local facing = self:facingMultiplier(player)
 	local invul = (extra and extra.invul) or 0
+
 	for i = 1, boxCount do
 		self:read(boxPtr, boxBuf)
 		boxtype = bt:typeForID(boxBuf.boxType)
 		if boxtype == "dummy" then goto continue end
 		if (boxtype == "vulnerable") and (invul ~= 0) then goto continue end
 		if isProjectile then boxtype = bt:asProjectile(boxtype) end
-		boxset:add(boxtype, boxAdder, self, player, boxBuf, facing)
+		boxset:add(boxtype, boxAdder, self, player, boxBuf, facing, false)
 		::continue::
 		boxPtr = boxPtr + 0x0C
 	end
+
+	if not isProjectile then
+		local pushbox, wordBuf = self.pushBoxBuf, self.wordBuf
+		local adjust, flags = player.characterID * 2, player.status
+		local index = 3
+		if band(flags, 0x400) ~= 0 then index = 1
+		elseif band(flags, 0x20000) ~= 0 then index = 2 end
+		local source = self.pushboxTargetPointers[index]
+		local targetX, targetY = source[1] + adjust, source[2] + adjust
+		--print(string.format("%d\t0x%02X\t0x%08X\t0x%08X", index, adjust, targetX, targetY))
+		self:read(targetX, wordBuf)
+		pushbox.width = wordBuf[0]
+		self:read(targetY, wordBuf)
+		pushbox.height = wordBuf[0]
+		boxset:add("collision", boxAdder, self, player, pushbox, facing, true)
+	end
+
 	local pivotColor = (isProjectile and self.projectilePivotColor) or self.pivotColor
+	local px, py = player.xPivot, player.yPivot
 	self.pivots:add(self.addPivot, pivotColor, self:worldToScreen(px, py))
 end
 
@@ -115,12 +139,18 @@ function GGXX:facingMultiplier(player)
 	return ((player.facing == 0) and 1) or -1
 end
 
-function GGXX:deriveBoxPosition(player, hitbox, facing)
+function GGXX:deriveBoxPosition(player, hitbox, facing, isPushbox)
 	local px, py = player.xPivot, player.yPivot
-	local x1, y1 = hitbox.xOffset * 100, hitbox.yOffset * 100
-	x1, y1 = px + (x1 * facing), py + y1
-	local w, h = hitbox.width * 100, hitbox.height * 100
-	local x2, y2 = x1 + (w * facing), y1 + h
+	local w, h, x1, y1, x2, y2 = hitbox.width, hitbox.height
+	if isPushbox then
+		x1, y1 = px - w, py - h
+		x2, y2 = px + w, py
+	else
+		w, h = w * 100, h * 100
+		x1, y1 = hitbox.xOffset * 100, hitbox.yOffset * 100
+		x1, y1 = px + (x1 * facing), py + y1
+		x2, y2 = x1 + (w * facing), y1 + h
+	end
 	x1, y1 = self:worldToScreen(x1, y1)
 	x2, y2 = self:worldToScreen(x2, y2)
 	return x1, y1, x2, y2
@@ -144,9 +174,10 @@ function GGXX.boxSlotConstructor(i, slot, boxtypes)
 end
 
 -- "addFn" passed as parameter to BoxSet:add()
-function GGXX.addBox(target, parent, player, hitbox, facing)
+function GGXX.addBox(target, parent, player, hitbox, facing, isPushbox)
 	if hitbox.width <= 0 or hitbox.height <= 0 then return false end
-	local x1, y1, x2, y2 = parent:deriveBoxPosition(player, hitbox, facing)
+	local x1, y1, x2, y2 = parent:deriveBoxPosition(
+		player, hitbox, facing, isPushbox)
 	target.left, target.top = x1, y1
 	target.right, target.bottom = x2, y2
 	return true

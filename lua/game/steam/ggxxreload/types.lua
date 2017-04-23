@@ -14,18 +14,19 @@ typedef struct {
 	byte padding02[0x004];    // +014h to +018h: Unknown
 	dword width;              // +018h: Width of visible area
 	dword height;             // +01Ch: Height of visible area
-	byte paddingFF[0x2F854];  // +020h to +2F8B74h: Unknown
-	float zoom;               // +2F8B74h: Zoom factor (1.0 to 0.8)
+	byte paddingFF[0x2F854];  // +020h to +2F874h: Unknown
+	float zoom;               // +2F874h: Zoom factor (1.0 to 0.8)
 } camera;
 
 typedef struct {
 	union {
 		word characterID;     // +000h: Current character ID (plus 1)
-		word status;          // +000h: Projectile "active" status
+		word projStatus;      // +000h: Projectile "active" status
 	};
 	byte facing;              // +002h: Current facing (0 = left, 1 = right)
 	byte projectedFacing;     // +003h: Projected facing
-	byte padding01[0x012];    // +004h to +016h: Unknown
+	dword status;             // +004h: Various status flags
+	byte padding01[0x00E];    // +008h to +016h: Unknown
 	word health;              // +016h: Current HP
 	byte padding02[0x00C];    // +018h to +024h: Unknown
 	intptr_t playerExtraPtr;  // +024h: Pointer to "playerExtra" struct
