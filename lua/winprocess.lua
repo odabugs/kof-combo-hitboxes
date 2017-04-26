@@ -83,7 +83,7 @@ end
 function winprocess.getBaseAddress(handle)
 	local hmodule, cb = ffi.new("hModulePtr[1]"), ffi.new("ULONG[1]")
 	local result = psapi.EnumProcessModulesEx(
-		handle, hmodule[0], ffi.sizeof("HMODULE"), cb, 0) -- LIST_MODULES_DEFAULT
+		handle, hmodule[0], ffi.sizeof("HMODULE"), cb, 0x3) -- LIST_HMODULES_ALL
 	winerror.checkNotZero(result)
 	return hmodule[0].value, cb[0]
 end
