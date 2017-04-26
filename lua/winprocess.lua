@@ -9,8 +9,23 @@ HANDLE OpenProcess(DWORD access, BOOL inherit, DWORD pid);
 BOOL CloseHandle(HANDLE hObject);
 BOOL ReadProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
 BOOL WriteProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
+
+// functions from psapi.dll
+typedef union {
+	HMODULE hmod;
+	intptr_t value;
+} hModulePtr;
+
+BOOL EnumProcessModulesEx(
+	HANDLE  hProcess,
+	hModulePtr *lphModule, // out (cheating a little here with the union type)
+	DWORD   cb,
+	LPDWORD lpcbNeeded, // out
+	DWORD   dwFilterFlag
+);
 ]]
 local C = ffi.C
+local psapi = ffi.load("psapi")
 
 -- bit masks for process access rights used by OpenProcess
 luautil.insertPairs(winprocess, {
@@ -63,6 +78,14 @@ function winprocess.write(handle, address, buffer, n, bytesWrittenBuffer)
 		bytesWrittenBuffer or NULL)
 	winerror.checkNotZero(result)
 	return buffer, result
+end
+
+function winprocess.getBaseAddress(handle)
+	local hmodule, cb = ffi.new("hModulePtr[1]"), ffi.new("ULONG[1]")
+	local result = psapi.EnumProcessModulesEx(
+		handle, hmodule[0], ffi.sizeof("HMODULE"), cb, 0) -- LIST_MODULES_DEFAULT
+	winerror.checkNotZero(result)
+	return hmodule[0].value, cb[0]
 end
 
 return winprocess
