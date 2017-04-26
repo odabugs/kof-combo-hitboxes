@@ -16,6 +16,8 @@ Game_Common.RAM_RANGE_ERROR = "Target address 0x%08X must be between 0x%08X and 
 Game_Common.RAMbase = 0
 -- upper limit for valid RAM addresses; it is an error if we go above this
 Game_Common.RAMlimit = 0xFFFFFFFF
+-- runtime base address of target game process
+Game_Common.processBase = 0
 -- "ideal" screen width/height (at or nearest to 1:1 scale in the game)
 Game_Common.basicWidth = 1
 Game_Common.basicHeight = 1
@@ -30,6 +32,11 @@ function Game_Common:new(source)
 	setmetatable(source, self)
 	self.__index = self
 	if source.parent == nil then source.parent = self end
+	if source.gameHandle then
+		source.processBase = winprocess.getBaseAddress(source.gameHandle)
+		print(string.format("Base address: 0x%08X", source.processBase))
+		source:relocate(source.processBase)
+	end
 
 	-- values that are set once during init, but may vary based on
 	-- other variables set in the calling object
@@ -50,6 +57,11 @@ end
 
 -- to be (optionally) overridden by derived objects
 function Game_Common:extraInit()
+	return
+end
+
+-- to be (optionally) overridden by derived objects
+function Game_Common:relocate(baseAddress)
 	return
 end
 
@@ -131,14 +143,15 @@ end
 
 function Game_Common:nextFrame(drawing, hasFocus)
 	if hasFocus then self:checkInputs() end
-	self:captureState()
 	if not window.isWindow(self.gameHwnd) then return false end
 	if drawing and self:shouldRenderFrame() then
 		self:repositionOverlay()
 		self.directx.beginFrame()
+		self:captureState()
 		self:renderState()
 	else
 		self.directx.beginFrame()
+		self:captureState()
 	end
 	self.directx.endFrame(0, 0, self.width, self.height)
 	return true
