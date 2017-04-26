@@ -4,15 +4,15 @@ local GGXXAC = require("game.steam.ggxxacplusr.game")
 local GGXX = GGXXAC:new({ parent = GGXXAC, whoami = "GGXXReload" })
 
 -- game-specific constants
-GGXX.playerPtrs = { 0x005D0BA4, 0x005FE064 } -- pointers to pointers
+GGXX.playerPtrs = { 0x001D0BA4, 0x001FE064 } -- pointers to pointers
 -- "start" here is a pointer-to-pointer
-GGXX.projectilesListInfo = { start = 0x005D0890, step = 0x104, count = 20 }
+GGXX.projectilesListInfo = { start = 0x001D0890, step = 0x104, count = 20 }
 GGXX.pushBoxTargetPointers = {
-	{ 0x0057BF74, 0x0057BFA4 },
-	{ 0x0057BFD4, 0x0057BF44 },
-	{ 0x0057BF00, 0x0057BF44 },
+	{ 0x0017BF74, 0x0017BFA4 },
+	{ 0x0017BFD4, 0x0017BF44 },
+	{ 0x0017BF00, 0x0017BF44 },
 }
-GGXX.cameraPtr = 0x005CC714
+GGXX.cameraPtr = 0x001CC714
 
 function GGXX:extraInit(noExport)
 	types:export(ffi)

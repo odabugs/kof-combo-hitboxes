@@ -34,7 +34,7 @@ function Game_Common:new(source)
 	if source.parent == nil then source.parent = self end
 	if source.gameHandle then
 		source.processBase = winprocess.getBaseAddress(source.gameHandle)
-		print(string.format("Base address: 0x%08X", source.processBase))
+		--print(string.format("Base address: 0x%08X", source.processBase))
 		source:relocate(source.processBase)
 	end
 

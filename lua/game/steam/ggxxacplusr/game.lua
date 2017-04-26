@@ -25,15 +25,15 @@ GGXX.useThickLines = false
 GGXX.boxesPerLayer = 50
 -- game-specific constants
 GGXX.boxtypes = boxtypes
-GGXX.playerPtrs = { 0x00F96778, 0x00F9A07C } -- pointers to pointers
+GGXX.playerPtrs = { 0x00516778, 0x0051A07C } -- pointers to pointers
 -- "start" here is a pointer-to-pointer
-GGXX.projectilesListInfo = { start = 0x00F9677C, step = 0x130, count = 20 }
+GGXX.projectilesListInfo = { start = 0x0051677C, step = 0x130, count = 20 }
 GGXX.pushBoxTargetPointers = {
-	{ 0x00E55124, 0x00E55B08 },
-	{ 0x00E55B3C, 0x00E53E3C },
-	{ 0x00E53534, 0x00E53E3C },
+	{ 0x003D5124, 0x003D5B08 },
+	{ 0x003D5B3C, 0x003D3E3C },
+	{ 0x003D3534, 0x003D3E3C },
 }
-GGXX.cameraPtr = 0x00F9B0D4
+GGXX.cameraPtr = 0x0051B0D4
 
 function GGXX:extraInit(noExport)
 	if not noExport then types:export(ffi) end
@@ -43,7 +43,7 @@ function GGXX:extraInit(noExport)
 	self.projectileBuf = ffi.new("projectile")
 	self.boxBuf = ffi.new("hitbox")
 	self.pushBoxBuf = ffi.new("pushbox")
-	self.wordBuf = ffi.new("int16_t[1]")
+	self.wordBuf = ffi.new("word[1]")
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
@@ -55,6 +55,22 @@ function GGXX:extraInit(noExport)
 		print(string.format("Player %d pointer: 0x%08X (0x%08X)", i, playerPtr, self.playerPtrs[i]))
 	end
 	--]=]
+end
+
+function GGXX:relocate(base)
+	local target = self.playerPtrs
+	for i = 1, #target do
+		target[i] = target[i] + base
+	end
+	target = self.pushBoxTargetPointers
+	for i = 1, #target do
+		for j = 1, #target[i] do
+			target[i][j] = target[i][j] + base
+		end
+	end
+	target = self.projectilesListInfo
+	target.start = target.start + base
+	self.cameraPtr = self.cameraPtr + base
 end
 
 function GGXX:captureState()
