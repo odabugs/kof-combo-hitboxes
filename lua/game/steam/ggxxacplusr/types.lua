@@ -28,8 +28,9 @@ typedef struct {
 	};
 	byte facing;              // +002h: Current facing (0 = left, 1 = right)
 	byte projectedFacing;     // +003h: Projected facing
-	dword status;             // +004h: Various status flags
-	byte padding01[0x016];    // +008h to +01Eh: Unknown
+	byte padding06[0x008];    // +004h to +00Ch: Unknown
+	dword status;             // +00Ch: Various status flags
+	byte padding01[0x00E];    // +010h to +01Eh: Unknown
 	word health;              // +01Eh: Current HP
 	byte padding02[0x00C];    // +020h to +02Ch: Unknown
 	intptr_t playerExtraPtr;  // +02Ch: Pointer to "playerExtra" struct
