@@ -105,6 +105,7 @@ function GGXX:captureProjectiles()
 	local proj, projInfo = self.projectileBuf, self.projectilesListInfo
 	local count, step = projInfo.count, projInfo.step
 	local projPtr = self:readPtr(projInfo.start)
+	if projPtr == 0 then return end
 	for i = 1, count do
 		self:read(projPtr, proj)
 		if proj.projStatus ~= 0 then self:captureEntity(proj, nil, true) end
