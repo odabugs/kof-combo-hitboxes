@@ -19,7 +19,7 @@ local b_tv = "throwable"
 local b_t  = "throw"
 
 --  +00h  +01h  +02h  +03h   +04h  +05h  +06h  +07h
-add(b_v , b_v , b_v , b_v ,  b_v , b_v , b_v , b_v ) -- 00h-07h
+add(b_v , b_v , b_v , b_vc,  b_vc, b_v , b_v , b_v ) -- 00h-07h
 add(b_v , b_g , b_g , b_g ,  b_a , b_a , b_a , b_a ) -- 08h-0Fh
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_va) -- 10h-17h
 add(b_a , b_a , b_a , b_a ,  b_a , b_a , b_a , b_a ) -- 18h-1Fh
