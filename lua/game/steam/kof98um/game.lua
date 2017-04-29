@@ -117,13 +117,16 @@ end
 function KOF98:captureProjectiles()
 	local info, current = self.projectilesListInfo, self.projBuffer
 	local pointer, step = info.start, info.step
+	local minAddress, maxAddress = pointer
 	for i = 1, info.count do
+		maxAddress = pointer
 		self:read(pointer, current)
 		if current.basicStatus > 0 then
 			self:captureEntity(current, true)
 		end
 		pointer = pointer + step
 	end
+	--print(string.format("Read from range 0x%08X to 0x%08X", minAddress, maxAddress))
 end
 
 function KOF98:captureState()
@@ -182,6 +185,9 @@ function KOF98:captureEntity(target, isProjectile, facing)
 			end
 			if isProjectile then
 				boxtype = bt:asProjectile(boxtype)
+			end
+			if boxtype == "dummy" then
+				--print(string.format("Dummy box at 0x%02X", hitbox.boxID))
 			end
 			boxset:add(boxtype, boxAdder, self, self:deriveBoxPosition(
 				target, hitbox, facing))
@@ -294,41 +300,6 @@ function KOF98:checkInputs()
 			self:toggleState(toggleKey[2], toggleKey[3])
 		end
 	end
-end
-
-do
-	local function handleRangeMarker(value, which, target)
-		local oldValue = value -- for printing in error messages
-		value = value:upper()
-		if value == "NONE" then return false end
-		local result, err
-		local valueIndex = luautil.find(target.buttonNames, value)
-		if valueIndex ~= nil then
-			result = valueIndex - 1 -- we want this to start from 0
-			target.drawRangeMarkers[which] = result
-		else
-			err = string.format(
-				"Could not interpret '%s' as a range marker value.",
-				oldValue)
-		end
-		return result, err
-	end
-
-	function KOF98:rangeMarkerReader(which, target)
-		return function(value)
-			return handleRangeMarker(value, which, self)
-		end
-	end
-end
-
-function KOF98:getConfigSchema()
-	local schema = KOF_Common.getConfigSchema(self)
-	for i = 1, 2 do
-		schema["player" .. i] = {
-			drawRangeMarker = self:rangeMarkerReader(i)
-		}
-	end
-	return schema
 end
 
 return KOF98

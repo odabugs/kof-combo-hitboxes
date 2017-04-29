@@ -158,10 +158,12 @@ function Game_Common:nextFrame(drawing, hasFocus)
 end
 
 function Game_Common:loadConfigs()
-	local configSection = self.configSection
 	local result = {}
 	self:loadConfigFile(result, "default.ini")
-	self:loadConfigFile(result, configSection .. ".ini", configSection)
+	local configSection = self.configSection
+	if configSection then
+		self:loadConfigFile(result, configSection .. ".ini", configSection)
+	end
 	return result
 end
 
@@ -241,6 +243,41 @@ do
 		local fn = self:partialReader(handleBoxColor)
 		return fn(targetKey, (target or self))
 	end
+end
+
+function Game_Common:getConfigSchema()
+	local schema = {
+		colors = {
+			playerPivot = self:colorReader("pivotColor"),
+			projectilePivot = self:colorReader("projectilePivotColor"),
+		},
+	}
+	local bt = self.boxtypes
+	if bt then
+		schema.global = {
+			boxEdgeOpacity = self:byteReader("defaultEdgeAlpha", bt),
+			boxFillOpacity = self:byteReader("defaultFillAlpha", bt),
+		}
+		for colorKey in pairs(bt.colorConfigNames) do
+			schema.colors[colorKey] = self:hitboxColorReader(colorKey)
+		end
+	else
+		schema.global = {}
+	end
+	local booleanKeys = {
+		"drawPlayerPivot", "drawBoxPivot", "drawGauges",
+	}
+	local g = schema.global
+	for _, booleanKey in ipairs(booleanKeys) do
+		g[booleanKey] = self:booleanReader(booleanKey)
+	end
+	-- duplicating the schema sections and nesting them under the game's
+	-- config section name permits INI files to have game-specific sections;
+	-- shallow copy allows games to extend existing sections w/o extra work
+	if self.configSection then
+		schema[self.configSection] = luautil.extend({}, schema)
+	end
+	return schema
 end
 
 return Game_Common

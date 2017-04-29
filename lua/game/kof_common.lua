@@ -6,37 +6,54 @@ local KOF_Common = Game_Common:new({ whoami = "KOF_Common" })
 
 KOF_Common.buttonNames = { "A", "B", "C", "D" }
 
+do
+	local function handleRangeMarker(value, which, target)
+		local oldValue = value -- for printing in error messages
+		value = value:upper()
+		if value == "NONE" then return false end
+		local result, err
+		local valueIndex = luautil.find(target.buttonNames, value)
+		if valueIndex ~= nil then
+			result = valueIndex - 1 -- we want this to start from 0
+			target.drawRangeMarkers[which] = result
+		else
+			err = string.format(
+				"Could not interpret '%s' as a range marker value.",
+				oldValue)
+		end
+		return result, err
+	end
+
+	function KOF_Common:rangeMarkerReader(which, target)
+		return function(value)
+			return handleRangeMarker(value, which, self)
+		end
+	end
+end
+
 function KOF_Common:getConfigSchema()
-	local bt = self.boxtypes
-	local result = {
-		global = {
-			boxEdgeOpacity = self:byteReader("defaultEdgeAlpha", bt),
-			boxFillOpacity = self:byteReader("defaultFillAlpha", bt),
-		},
-		colors = {
-			playerPivot = self:colorReader("pivotColor"),
-			projectilePivot = self:colorReader("projectilePivotColor"),
-			rangeMarker = self:colorReader("rangeMarkerColor"),
-			activeRangeMarker = self:colorReader("activeRangeMarkerColor"),
-			gaugeBorder = self:colorReader("gaugeBorderColor"),
-			stunGauge = self:colorReader("stunGaugeColor"),
-			stunRecoveryGauge = self:colorReader("stunRecoveryGaugeColor"),
-			guardGauge = self:colorReader("guardGaugeColor"),
-		},
-	}
-	local booleanKeys = {
-		"drawPlayerPivot", "drawBoxPivot", "drawGauges",
-	}
+	local schema = Game_Common.getConfigSchema(self)
+	luautil.extend(schema.colors, {
+		rangeMarker = self:colorReader("rangeMarkerColor"),
+		activeRangeMarker = self:colorReader("activeRangeMarkerColor"),
+		gaugeBorder = self:colorReader("gaugeBorderColor"),
+		stunGauge = self:colorReader("stunGaugeColor"),
+		stunRecoveryGauge = self:colorReader("stunRecoveryGaugeColor"),
+		guardGauge = self:colorReader("guardGaugeColor"),
+	})
+	local booleanKeys = { "drawGauges" }
+	local g = schema.global
 	for _, booleanKey in ipairs(booleanKeys) do
-		result.global[booleanKey] = self:booleanReader(booleanKey)
+		g[booleanKey] = self:booleanReader(booleanKey)
 	end
-	for colorKey in pairs(bt.colorConfigNames) do
-		result.colors[colorKey] = self:hitboxColorReader(colorKey)
+	for i = 1, 2 do
+		local playerSchema = {
+			drawRangeMarker = self:rangeMarkerReader(i)
+		}
+		schema["player" .. i] = playerSchema
+		schema[self.configSection]["player" .. i] = playerSchema
 	end
-	-- duplicating the schema sections and nesting them under the game's
-	-- config section name permits INI files to have game-specific sections
-	result[self.configSection] = luautil.extend({}, result)
-	return result
+	return schema
 end
 
 -- slot constructor function passed to BoxSet:new()
