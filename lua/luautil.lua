@@ -8,11 +8,6 @@ function luautil.collect(iterator, target)
 	return target
 end
 
-function luautil.insertPairs(target, source)
-	for k, v in pairs(source) do target[k] = v end
-	return target
-end
-
 function luautil.asBoolean(predicate)
 	return (predicate and true) or false
 end
@@ -49,8 +44,7 @@ end
 
 function luautil.insertn(t, start, ...)
 	t = (t or {})
-	local n = start
-	local current
+	local n, current = start
 	for i = 1, select("#", ...) do
 		current = select(i, ...)
 		t[n] = current

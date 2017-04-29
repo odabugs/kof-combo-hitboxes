@@ -28,20 +28,18 @@ local C = ffi.C
 local psapi = ffi.load("psapi")
 
 -- bit masks for process access rights used by OpenProcess
-luautil.insertPairs(winprocess, {
-	["PROCESS_TERMINATE"]       = 0x0001,
-	["PROCESS_CREATE_THREAD"]   = 0x0002,
-	["PROCESS_VM_OPERATION"]    = 0x0008,
-	["PROCESS_VM_READ"]         = 0x0010,
-	["PROCESS_VM_WRITE"]        = 0x0020,
-	["PROCESS_DUP_HANDLE"]      = 0x0040,
-	["PROCESS_CREATE_PROCESS"]  = 0x0080,
-	["PROCESS_SET_QUOTA"]       = 0x0100,
-	["PROCESS_SET_INFORMATION"] = 0x0200,
-	["PROCESS_QUERY_INFORMATION"] = 0x0400,
-	["PROCESS_SUSPEND_RESUME"]  = 0x0800,
-	["PROCESS_QUERY_LIMITED_INFORMATION"] = 0x1000,
-})
+winprocess.PROCESS_TERMINATE       = 0x0001
+winprocess.PROCESS_CREATE_THREAD   = 0x0002
+winprocess.PROCESS_VM_OPERATION    = 0x0008
+winprocess.PROCESS_VM_READ         = 0x0010
+winprocess.PROCESS_VM_WRITE        = 0x0020
+winprocess.PROCESS_DUP_HANDLE      = 0x0040
+winprocess.PROCESS_CREATE_PROCESS  = 0x0080
+winprocess.PROCESS_SET_QUOTA       = 0x0100
+winprocess.PROCESS_SET_INFORMATION = 0x0200
+winprocess.PROCESS_QUERY_INFORMATION = 0x0400
+winprocess.PROCESS_SUSPEND_RESUME  = 0x0800
+winprocess.PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
 local defaultRights = bit.bor(
 	winprocess.PROCESS_VM_READ,
 	--winprocess.PROCESS_VM_WRITE,
