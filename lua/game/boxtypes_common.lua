@@ -32,7 +32,7 @@ Boxtypes_Common.defaultColorPair = {
 Boxtypes_Common.colormap = {
 	[b_xx] = { colors.CLEAR, colors.CLEAR },
 	[b_co] = { colors.WHITE, false },
-	[b_c]  = { colors.CYAN, false },
+	[b_c]  = { colors.BLUE, false },
 	[b_v]  = { colors.BLUE, false },
 	[b_vc] = { colors.BLUE, false },
 	[b_va] = { colors.BLUE, false },
@@ -49,7 +49,7 @@ Boxtypes_Common.colormap = {
 -- mapping of option names used in config files to internal color names
 Boxtypes_Common.colorConfigNames = {
 	vulnerableBox = b_v,
-	counterBox = b_c,
+	counterBox = b_vc,
 	counterVulnerableBox = b_vc,
 	anywhereBox = b_va,
 	otgBox = b_vo,
