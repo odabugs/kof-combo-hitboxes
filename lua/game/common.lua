@@ -265,12 +265,13 @@ function Game_Common:getConfigSchema()
 		schema.global = {}
 	end
 	local booleanKeys = {
-		"drawPlayerPivot", "drawBoxPivot", "drawGauges",
+		"drawPlayerPivot", "drawBoxPivot",
 	}
 	local g = schema.global
 	for _, booleanKey in ipairs(booleanKeys) do
 		g[booleanKey] = self:booleanReader(booleanKey)
 	end
+	g.drawBoxFill = self:booleanReader("drawBoxFills")
 	-- duplicating the schema sections and nesting them under the game's
 	-- config section name permits INI files to have game-specific sections;
 	-- shallow copy allows games to extend existing sections w/o extra work
