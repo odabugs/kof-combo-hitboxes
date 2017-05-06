@@ -38,7 +38,6 @@ KOF98.gauges = { {}, {} }
 KOF98.drawGauges = true -- "false" here overrides the two values below
 KOF98.drawStunGauge = true -- also applies to the stun recovery gauge
 KOF98.drawGuardGauge = true
-KOF98.gaugeFillAlpha = 0xA0
 KOF98.stunGaugeColor = colors.rgb(0xFF, 0xB0, 0x90)
 KOF98.stunRecoveryGaugeColor = colors.RED
 KOF98.guardGaugeColor = colors.rgb(0xA0, 0xC0, 0xE0)
@@ -86,17 +85,17 @@ function KOF98:setupGauges()
 	local g, a = self.gauges, self.gaugeFillAlpha
 	g[1].stun = self:Gauge({
 		x = 10, y = 51, width = 130, height = 5, direction = "left",
-		fillColor = colors.setAlpha(self.stunGaugeColor, a),
+		fillColor = self.stunGaugeColor,
 		minValue = 0, maxValue = 0x77,
 	})
 	-- stun and stun recovery gauges overlap (since we never draw both)
 	g[1].stunRecovery = self:Gauge(luautil.extend({}, g[1].stun, {
-		fillColor = colors.setAlpha(self.stunRecoveryGaugeColor, a),
+		fillColor = self.stunRecoveryGaugeColor,
 		maxValue = 0xF0,
 	}))
 	-- guard gauge appears right below the stun/stun recovery gauge
 	g[1].guard = self:Gauge(luautil.extend({}, g[1].stun, {
-		fillColor = colors.setAlpha(self.guardGaugeColor, a),
+		fillColor = self.guardGaugeColor,
 		maxValue = 0x77, y = (g[1].stun.y + g[1].stun.height),
 	}))
 	-- copy the "mirror image" of player 1's gauges to the player 2 side

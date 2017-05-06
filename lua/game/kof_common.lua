@@ -32,26 +32,29 @@ do
 end
 
 function KOF_Common:getConfigSchema()
+	local function gaugeReader(key)
+		return self:colorReader(key, self, "gaugeFillAlpha")
+	end
 	local schema = Game_Common.getConfigSchema(self)
 	luautil.extend(schema.colors, {
 		rangeMarker = self:colorReader("rangeMarkerColor"),
 		activeRangeMarker = self:colorReader("activeRangeMarkerColor"),
 		gaugeBorder = self:colorReader("gaugeBorderColor"),
-		stunGauge = self:colorReader("stunGaugeColor"),
-		stunRecoveryGauge = self:colorReader("stunRecoveryGaugeColor"),
-		guardGauge = self:colorReader("guardGaugeColor"),
+		stunGauge = gaugeReader("stunGaugeColor"),
+		stunRecoveryGauge = gaugeReader("stunRecoveryGaugeColor"),
+		guardGauge = gaugeReader("guardGaugeColor"),
 	})
 	local booleanKeys = { "drawGauges" }
 	local g = schema.global
-	for _, booleanKey in ipairs(booleanKeys) do
-		g[booleanKey] = self:booleanReader(booleanKey)
-	end
+	g.drawGauges = self:booleanReader("drawGauges")
+	g.gaugeFillOpacity = self:byteReader("gaugeFillAlpha")
 	for i = 1, 2 do
 		local playerSchema = {
-			drawRangeMarker = self:rangeMarkerReader(i)
+			drawRangeMarker = self:rangeMarkerReader(i),
 		}
-		schema["player" .. i] = playerSchema
-		schema[self.configSection]["player" .. i] = playerSchema
+		local playerKey = "player" .. i
+		schema[playerKey] = playerSchema
+		schema[self.configSection][playerKey] = playerSchema
 	end
 	return schema
 end

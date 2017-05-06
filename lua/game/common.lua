@@ -181,24 +181,10 @@ function Game_Common:loadConfigFile(target, path, sectionPrefix)
 	end
 end
 
--- to be overridden by derived objects
-function Game_Common:getConfigSchema()
-	return {}
-end
-
--- memoize generated functions since we don't need 10 of the same thing
-do
-	local readerFns = {}
-	function Game_Common:partialReader(fn, postprocess)
-		local result = readerFns[fn]
-		if not result then
-			result = function(targetKey, target)
-				return ReadConfig.readerGenerator(
-					fn, target, targetKey, postprocess)
-			end
-			readerFns[fn] = result
-		end
-		return result
+function Game_Common:partialReader(fn, postprocess, extra)
+	return function(targetKey, target)
+		return ReadConfig.readerGenerator(
+			fn, target, targetKey, postprocess, extra)
 	end
 end
 
@@ -213,10 +199,27 @@ function Game_Common:byteReader(targetKey, target)
 end
 
 do
-	local function getColorValue(newColor) return newColor.color end
-	function Game_Common:colorReader(targetKey, target)
-		local fn = self:partialReader(ReadConfig.parseColor, getColorValue)
-		return fn(targetKey, (target or self))
+	local function handleColor(value, key, target, alphaKey)
+		local newColor, err = ReadConfig.parseColor(value)
+		if newColor then
+			-- get "default" alpha value from target object if needed
+			if target and alphaKey and (not newColor.hasAlpha) then
+				local nc = newColor.color
+				if target[alphaKey] then
+					nc = colors.setAlpha(nc, target[alphaKey])
+					newColor.color = nc
+				end
+			end
+		end
+		return newColor, err
+	end
+
+	local function getColorValue(value) return value.color end
+
+	function Game_Common:colorReader(targetKey, target, alphaKey)
+		local fn = self:partialReader(
+			handleColor, getColorValue, alphaKey)
+		return fn(targetKey, (target or self), alphaKey)
 	end
 end
 
@@ -247,31 +250,28 @@ end
 
 function Game_Common:getConfigSchema()
 	local schema = {
+		global = {
+			drawBoxFill = self:booleanReader("drawBoxFills"),
+		},
 		colors = {
 			playerPivot = self:colorReader("pivotColor"),
 			projectilePivot = self:colorReader("projectilePivotColor"),
 		},
 	}
-	local bt = self.boxtypes
+	local bt, g = self.boxtypes, schema.global
 	if bt then
-		schema.global = {
-			boxEdgeOpacity = self:byteReader("defaultEdgeAlpha", bt),
-			boxFillOpacity = self:byteReader("defaultFillAlpha", bt),
-		}
+		g.boxEdgeOpacity = self:byteReader("defaultEdgeAlpha", bt)
+		g.boxFillOpacity = self:byteReader("defaultFillAlpha", bt)
 		for colorKey in pairs(bt.colorConfigNames) do
 			schema.colors[colorKey] = self:hitboxColorReader(colorKey)
 		end
-	else
-		schema.global = {}
 	end
 	local booleanKeys = {
 		"drawPlayerPivot", "drawBoxPivot",
 	}
-	local g = schema.global
 	for _, booleanKey in ipairs(booleanKeys) do
 		g[booleanKey] = self:booleanReader(booleanKey)
 	end
-	g.drawBoxFill = self:booleanReader("drawBoxFills")
 	-- duplicating the schema sections and nesting them under the game's
 	-- config section name permits INI files to have game-specific sections;
 	-- shallow copy allows games to extend existing sections w/o extra work

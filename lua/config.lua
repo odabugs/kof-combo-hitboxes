@@ -80,10 +80,10 @@ function ReadConfig.parseColor(s)
 	return { color = colors.rgba(unpack(packed)), hasAlpha = hasAlpha }, nil
 end
 
-function ReadConfig.readerGenerator(fn, target, targetKey, postprocess)
+function ReadConfig.readerGenerator(fn, target, targetKey, postprocess, extra)
 	postprocess = (postprocess or luautil.identity)
 	return function(value, key)
-		local result, err = fn(value, key, target)
+		local result, err = fn(value, key, target, extra)
 		if not err then
 			luautil.assign(target, targetKey, postprocess(result))
 		end

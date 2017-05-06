@@ -23,6 +23,7 @@ draw.projectilePivotColor = colors.GREEN
 draw.rangeMarkerColor = colors.GREEN
 draw.activeRangeMarkerColor = colors.RED
 draw.gaugeBorderColor = colors.BLACK
+draw.gaugeFillAlpha = 0xA0
 
 -- optional flags to pass when calling draw:scaleCoords
 draw.COORD_RIGHT_EDGE = 0x01
