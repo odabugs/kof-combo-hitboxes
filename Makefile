@@ -9,7 +9,7 @@ endif
 INCLUDES=-I"./lib/luajit/src"
 LIBS=-L"./lib/luajit/src"
 DEFINES=-D UNICODE -D _UNICODE
-CFLAGS=-g -mwindows -mconsole $(DEFINES) $(INCLUDES)
+CFLAGS=-std=c99 -g -mwindows -mconsole $(DEFINES) $(INCLUDES)
 LDFLAGS=$(LIBS) -ld3d9 -lluajit
 EXE_NAME=kof-hitboxes.exe
 OBJECTS=luautil.o directx.o
