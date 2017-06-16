@@ -39,6 +39,7 @@ function main(hInstance, CLibs)
 		game:printWindowPosition()
 		game:extraInit()
 		game:setupOverlay(CLibs.directx)
+		collectgarbage()
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")
@@ -59,8 +60,6 @@ function mainLoop(game)
 		running = game:nextFrame(drawing, hasFocus)
 		if not running then break end
 		if hasFocus then
-			-- space bar toggles rendering on/off (TEMPORARY)
-			if hk.pressed(0x20) then drawing = not drawing end
 			if fg == game.consoleHwnd then
 				if hk.down(hk.VK_Q) then
 					winutil.flushConsoleInput()
