@@ -26,7 +26,8 @@ typedef struct {
 	byte facing;              // +002h: Current facing (0 = left, 1 = right)
 	byte projectedFacing;     // +003h: Projected facing
 	dword status;             // +004h: Various status flags
-	byte padding01[0x00E];    // +008h to +016h: Unknown
+	dword projActive;         // +008h: Projectile hitbox active? (-1 = no)
+	byte padding01[0x00A];    // +00Ch to +016h: Unknown
 	word health;              // +016h: Current HP
 	byte padding02[0x00C];    // +018h to +024h: Unknown
 	intptr_t playerExtraPtr;  // +024h: Pointer to "playerExtra" struct
@@ -44,8 +45,21 @@ typedef player projectile;
 
 typedef struct {
 	word tension;             // +000h: Tension meter
-	byte padding01[0x028];    // +002h to +02Ah: Unknown
+	byte padding01[0x002];    // +002h to +004h: Unknown
+	word damageAdjustment;    // +004h: Damage modifier (100 = x1.00)
+	byte padding03[0x014];    // +006h to +01Ah: Unknown
+	word guardGauge;          // +01Ah: Guard gauge
+	byte padding04[0x00E];    // +01Ch to +02Ah: Unknown
 	byte invul;               // +02Ah: I-frames remaining
+	byte padding05[0x044];    // +02Ch to +070h: Unknown
+	word stun;                // +070h: Stun meter (fills up from 0)
+	word stunRecovery;        // +072h: Stun recovery meter
+	// TODO: Figure out how the game actually decides when you're stunned
+	byte padding06[0x008];    // +073h to +07Bh: Unknown
+	byte stunLimit;           // +07Bh: Max stun value?  (Strange behavior)
+	byte padding07[0x05C];    // +07Ch to +0D8h: Unknown
+	word burst;               // +0D8h: Burst meter (15000 = full)
+	byte canBurst;            // +0DAh: Burst allowed? (01 = yes, 00 = no)
 } playerExtra;
 
 typedef struct {

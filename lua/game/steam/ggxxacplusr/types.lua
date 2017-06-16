@@ -28,7 +28,8 @@ typedef struct {
 	};
 	byte facing;              // +002h: Current facing (0 = left, 1 = right)
 	byte projectedFacing;     // +003h: Projected facing
-	byte padding06[0x008];    // +004h to +00Ch: Unknown
+	dword status2;            // +004h: Various status flags
+	dword projActive;         // +008h: Projectile hitbox active? (-1 = no)
 	dword status;             // +00Ch: Various status flags
 	byte padding01[0x00E];    // +010h to +01Eh: Unknown
 	word health;              // +01Eh: Current HP
