@@ -97,9 +97,16 @@ function ReadConfig.readPath(path, schema, target)
 	else return nil, fileErr end
 end
 
+function ReadConfig.readFile(file, schema, target, sectionPrefix)
+	local source = file:lines()
+	local result = ReadConfig.readLines(source, schema, target, sectionPrefix)
+	file:close()
+	return result
+end
+
 -- schema dictates what config file structure to expect,
 -- and the appropriate handler for each item in that structure
-function ReadConfig.readFile(file, schema, target, sectionPrefix)
+function ReadConfig.readLines(source, schema, target, sectionPrefix)
 	local result = (target or {})
 	sectionPrefix = (sectionPrefix and sectionPrefix .. ".") or ""
 	local currentSection = "global" -- implicit "default" config section
@@ -109,7 +116,7 @@ function ReadConfig.readFile(file, schema, target, sectionPrefix)
 	local handler = selectSection(schema, currentSection, false)
 	local i = 1 -- current line number
 
-	for line in file:lines() do
+	for line in source do
 		line = trim(stripComment(line))
 		if line:len() > 0 then
 			-- is the current line a section header?
@@ -136,7 +143,6 @@ function ReadConfig.readFile(file, schema, target, sectionPrefix)
 		i = i + 1
 	end
 
-	file:close()
 	return result
 end
 
