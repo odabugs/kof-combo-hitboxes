@@ -19,7 +19,7 @@ GGXX.configSection = "ggxx"
 GGXX.basicWidth = 640
 GGXX.basicHeight = 480
 GGXX.aspectMode = "pillarbox"
-GGXX.absoluteYOffset = 40 -- TODO: find best value
+GGXX.absoluteYOffset = 40
 GGXX.pivotSize = 12
 GGXX.useThickLines = false
 GGXX.boxesPerLayer = 50
@@ -49,7 +49,7 @@ function GGXX:extraInit(noExport)
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
 		"pivots", (self.projectilesListInfo.count + 2), self.pivotSlotConstructor)
 	self.zoom = 1.0
-	---[=[
+	--[=[
 	for i = 1, 2 do
 		local playerPtr = self:readPtr(self.playerPtrs[i])
 		print(string.format("Player %d pointer: 0x%08X (0x%08X)", i, playerPtr, self.playerPtrs[i]))
@@ -86,8 +86,8 @@ end
 
 function GGXX:capturePlayerStates()
 	local players, extras = self.players, self.playerExtras
-	local playerPtrs = self.playerPtrs
-	local player, extra, playerPtr
+	local playerPtrs, player, extra, playerPtr = self.playerPtrs
+	local pivotColor = self.pivotColor
 	for i = 1, 2 do
 		playerPtr = self:readPtr(playerPtrs[i])
 		if playerPtr ~= 0 then
@@ -95,7 +95,7 @@ function GGXX:capturePlayerStates()
 			self:read(playerPtr, player)
 			if player.playerExtraPtr ~= 0 then
 				self:read(player.playerExtraPtr, extra)
-				self:captureEntity(player, extra, false)
+				self:captureEntity(player, extra, false, pivotColor)
 			end
 		end
 	end
@@ -105,26 +105,33 @@ function GGXX:captureProjectiles()
 	local proj, projInfo = self.projectileBuf, self.projectilesListInfo
 	local count, step = projInfo.count, projInfo.step
 	local projPtr = self:readPtr(projInfo.start)
+	local pivotColor = self.projectilePivotColor
 	if projPtr == 0 then return end
 	for i = 1, count do
 		self:read(projPtr, proj)
-		if proj.projStatus ~= 0 then self:captureEntity(proj, nil, true) end
+		if proj.projStatus ~= 0 then
+			--print(string.format("%d, %08X", i, projPtr))
+			self:captureEntity(proj, nil, true, pivotColor)
+		end
 		projPtr = projPtr + step
 	end
 end
 
-function GGXX:captureEntity(player, extra, isProjectile)
+function GGXX:captureEntity(player, extra, isProjectile, pivotColor)
 	local boxset, boxAdder = self.boxset, self.addBox
 	local boxBuf, bt, boxtype = self.boxBuf, self.boxtypes, "dummy"
 	local boxPtr, boxCount = player.boxPtr, player.boxCount
 	local facing = self:facingMultiplier(player)
 	local invul = (extra and extra.invul) or 0
+	if isProjectile then invul = 0 end
+	local hitboxActive = (not isProjectile) or (player.projActive ~= -1)
 
 	for i = 1, boxCount do
 		self:read(boxPtr, boxBuf)
 		boxtype = bt:typeForID(boxBuf.boxType)
 		if boxtype == "dummy" then goto continue end
 		if (boxtype == "vulnerable") and (invul ~= 0) then goto continue end
+		if (boxtype == "attack") and not hitboxActive then goto continue end
 		if isProjectile then boxtype = bt:asProjectile(boxtype) end
 		boxset:add(boxtype, boxAdder, self, player, boxBuf, facing, false)
 		::continue::
@@ -147,8 +154,8 @@ function GGXX:captureEntity(player, extra, isProjectile)
 		boxset:add("collision", boxAdder, self, player, pushbox, facing, true)
 	end
 
-	local pivotColor = (isProjectile and self.projectilePivotColor) or self.pivotColor
 	local px, py = player.xPivot, player.yPivot
+	pivotColor = (pivotColor or colors.WHITE)
 	self.pivots:add(self.addPivot, pivotColor, self:worldToScreen(px, py))
 end
 
