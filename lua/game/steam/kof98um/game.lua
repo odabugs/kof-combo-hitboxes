@@ -18,6 +18,7 @@ KOF98.configSection = "kof98umfe"
 KOF98.basicWidth = 320
 KOF98.basicHeight = 224
 KOF98.aspectMode = "pillarbox"
+KOF98.recommendResolution = "640x448"
 KOF98.absoluteYOffset = 16
 KOF98.pivotSize = 5
 KOF98.boxPivotSize = 2
@@ -74,7 +75,7 @@ function KOF98:extraInit(noExport)
 		self.pivotSlotConstructor)
 	self.projBuffer = ffi.new("projectile")
 
-	if self.startupMessage then print(self.startupMessage) end
+	luautil.ifNotEmpty(self.startupMessage)
 	for which = 1, 2 do
 		self:printRangeMarkerState(which, true)
 	end

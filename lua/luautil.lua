@@ -2,6 +2,11 @@ local luautil = {}
 
 local SECTION_PATTERN = "([%w_]+)(%.?)"
 
+function luautil.ifNotEmpty(source, action)
+	action = (action or print)
+	if source and #source > 0 then action(source) end
+end
+
 function luautil.collect(iterator, target)
 	target = (target or {})
 	for i in iterator do table.insert(target, i) end

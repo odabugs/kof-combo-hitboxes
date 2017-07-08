@@ -52,6 +52,7 @@ function Game_Common:new(source)
 	source.xOffset, source.yOffset = 0, 0
 	source.aspect = 1
 
+	source:printRecommendations()
 	return source
 end
 
@@ -63,6 +64,15 @@ end
 -- to be (optionally) overridden by derived objects
 function Game_Common:relocate(baseAddress)
 	return
+end
+
+function Game_Common:printRecommendations()
+	local res = self.basicWidth .. "x" .. self.basicHeight
+	res = self.recommendResolution or res
+	print(string.format(
+		"For best visual results, a game window resolution of %s is recommended.",
+		res))
+	luautil.ifNotEmpty(self.extraRecommendation)
 end
 
 function Game_Common:importRevisionSpecificOptions(overwrite, source)

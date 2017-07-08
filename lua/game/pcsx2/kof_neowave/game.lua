@@ -26,6 +26,9 @@ KOF_Neowave.revisions = {
 		},
 	},
 }
+KOF_Neowave.extraRecommendation = [[
+Additionally, please set Screen to Type A in Game Options, Graphic Settings.]]
+
 function KOF_Neowave:extraInit(noExport)
 	self:importRevisionSpecificOptions(true)
 	self.parent.extraInit(self, false) -- inherit typedefs from KOF98
