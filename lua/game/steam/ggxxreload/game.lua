@@ -13,6 +13,8 @@ GGXX.pushBoxTargetPointers = {
 	{ 0x0017BF00, 0x0017BF44 },
 }
 GGXX.cameraPtr = 0x001CC714
+GGXX.startupMessage = GGXXAC.startupMessage .. "\n" .. [[
+* Some projectiles currently don't display an attack hitbox.]]
 
 function GGXX:extraInit(noExport)
 	types:export(ffi)

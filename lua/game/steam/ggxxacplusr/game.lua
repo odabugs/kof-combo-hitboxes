@@ -34,6 +34,10 @@ GGXX.pushBoxTargetPointers = {
 	{ 0x003D3534, 0x003D3E3C },
 }
 GGXX.cameraPtr = 0x0051B0D4
+GGXX.startupMessage = [[
+This game has known issues.
+* Grab boxes are currently not displayed.
+* The projectile hitbox on Millia 236H is incorrect.]]
 
 function GGXX:extraInit(noExport)
 	if not noExport then types:export(ffi) end
@@ -49,12 +53,7 @@ function GGXX:extraInit(noExport)
 	self.pivots = BoxList:new( -- dual purposing BoxList to draw pivots
 		"pivots", (self.projectilesListInfo.count + 2), self.pivotSlotConstructor)
 	self.zoom = 1.0
-	--[=[
-	for i = 1, 2 do
-		local playerPtr = self:readPtr(self.playerPtrs[i])
-		print(string.format("Player %d pointer: 0x%08X (0x%08X)", i, playerPtr, self.playerPtrs[i]))
-	end
-	--]=]
+	luautil.ifNotEmpty(self.startupMessage)
 end
 
 function GGXX:relocate(base)
@@ -110,7 +109,6 @@ function GGXX:captureProjectiles()
 	for i = 1, count do
 		self:read(projPtr, proj)
 		if proj.projStatus ~= 0 then
-			--print(string.format("%d, %08X", i, projPtr))
 			self:captureEntity(proj, nil, true, pivotColor)
 		end
 		projPtr = projPtr + step
@@ -146,7 +144,6 @@ function GGXX:captureEntity(player, extra, isProjectile, pivotColor)
 		elseif band(flags, 0x20000) ~= 0 then index = 2 end
 		local source = self.pushBoxTargetPointers[index]
 		local targetX, targetY = source[1] + adjust, source[2] + adjust
-		--print(string.format("%d\t0x%02X\t0x%08X\t0x%08X", index, adjust, targetX, targetY))
 		self:read(targetX, wordBuf)
 		pushbox.width = wordBuf[0]
 		self:read(targetY, wordBuf)
