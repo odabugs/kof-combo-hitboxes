@@ -1,7 +1,7 @@
 ifeq ($(USING_BATCH_FILE),true)
 CC=gcc # for native compilation with MinGW on Windows
 else
-CC=i686-pc-mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW (or native with Cygwin)
+CC=i686-w64-mingw32-gcc # for Linux-to-Windows cross-compilation with MinGW (or native with Cygwin)
 endif
 #TODO: add debug build target
 
