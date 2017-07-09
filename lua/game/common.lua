@@ -52,7 +52,6 @@ function Game_Common:new(source)
 	source.xOffset, source.yOffset = 0, 0
 	source.aspect = 1
 
-	source:printRecommendations()
 	return source
 end
 

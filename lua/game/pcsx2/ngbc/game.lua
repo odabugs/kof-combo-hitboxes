@@ -19,7 +19,6 @@ NGBC.configSection = "ngbc"
 NGBC.basicWidth = 640
 NGBC.basicHeight = 448
 NGBC.absoluteYOffset = 22
---NGBC.absoluteYOffset = 0
 NGBC.groundLevel = NGBC.basicHeight - NGBC.absoluteYOffset
 -- game-specific constants
 NGBC.boxtypes = boxtypes
@@ -30,28 +29,24 @@ NGBC.revisions = {
 		teamPtrs = { 0x009DDFF0, 0x009DE1A4 },
 		activePlayerPtrs = { 0x009DD9A0, 0x009DD9A8 },
 		extraEntitiesPtr = 0x009DD9B0,
-		--cameraPtr = 0x009DDFD0,
 		cameraPtr = 0x009DDF62,
-		zoomPtr = 0x00347240,
 	},
 	["NTSC-U"] = {
 		teamPtrs = { 0x00439A00, 0x00439BB4 },
 		activePlayerPtrs = { 0x018271E0, 0x018271E8 },
 		extraEntitiesPtr = 0x018271F0,
-		--cameraPtr = 0x004399E0,
 		cameraPtr = 0x00439972,
-		--zoomPtr = 0x003857A0,
-		zoomPtr = 0x01FFE2B0,
-		--zoomPtr = 0x0184E940,
 	},
 	["PAL"] = {
 		teamPtrs = { 0x003CA480, 0x003CA634 },
 		activePlayerPtrs = { 0x017B7C60, 0x017B7C68 },
 		extraEntitiesPtr = 0x017B7C70,
-		--cameraPtr = 0x003CA460,
 		cameraPtr = 0x003CA3F2,
 	},
 }
+NGBC.startupMessage = [[
+This game has known issues.
+* Hitboxes do not align to onscreen sprites properly when the camera is zoomed out.]]
 
 function NGBC:extraInit(noExport)
 	if not noExport then
@@ -62,7 +57,6 @@ function NGBC:extraInit(noExport)
 	end
 	-- init XI, but using NGBC's typedefs instead
 	self.parent.extraInit(self, true)
-	self.zoomBuffer = ffi.new("zoom")
 	self.zoom, self.xZoom, self.yZoom = 1, 1, 1 -- camera zoom factor
 	self.extraEntities = ffi.new("extraEntities")
 	self.playerBufs = ffiutil.ntypes("player", 6, 0)
@@ -70,6 +64,7 @@ function NGBC:extraInit(noExport)
 	self.visibleHeight = self.basicHeight
 	self.screenCenterX = self.basicWidth / 2
 	self.screenCenterY = self.basicHeight / 2
+	luautil.ifNotEmpty(self.startupMessage)
 end
 
 function NGBC:worldToScreen(x, y)
@@ -80,15 +75,8 @@ function NGBC:worldToScreen(x, y)
 	local z, xz, yz = self.zoom, self.xZoom, self.yZoom
 	local scx, wcx = self.screenCenterX, self.worldCenterX
 	x = (x - camX) * xz
-	--[=[
-	local topY = cam.topEdge
-	y = (y + camY) * z
-	y = bh - 0xDA + y
-	--]=]
-	---[=[
-	y = (y - 0xDA - camY) * yz
+	y = (y - camY - 0xDA) * yz
 	y = bh + y
-	--]=]
 	return x, y
 end
 
@@ -101,26 +89,8 @@ function NGBC:captureWorldState()
 	self.visibleHeight = top - bottom
 	local cx = math.floor((left + right) / 2)
 	self.worldCenterX = cx
-	--[=[
-	local zb = self.zoomBuffer
-	self:read(self.zoomPtr, zb)
-	local z = zb.value
-	--]=]
-	---[=[
 	self.xZoom = self.basicWidth / self.visibleWidth
 	self.yZoom = self.basicHeight / self.visibleHeight
-	--local z = self.xZoom
-	--z = (z + 1) / 2
-	--]=]
-	-- Zoom value occasionally contains NaN which can cause a viewer crash.
-	-- This test relies on the property that NaN is not equal to itself.
-	if z == z then self.zoom = z end
-	--print(left, right, cx, cam.centerY, z)
-	--]=]
-	--[=[
-	print(string.format("camX=%d, camY=%d",
-		cam.leftEdge, cam.centerY))
-	--]=]
 	local tbl, playerBuf, target = self.extraEntities
 	self:read(self.extraEntitiesPtr, tbl)
 	-- capture "extra" entities controlled by players w/certain characters

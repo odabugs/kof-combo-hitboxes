@@ -42,6 +42,8 @@ KOF_XI.revisions = {
 		cameraPtr = 0x008EF7E0,
 	},
 }
+KOF_XI.extraRecommendation = [[
+Additionally, please set Screen to Type A in Game Options, Graphic Settings.]]
 
 function KOF_XI:extraInit(noExport)
 	if not noExport then
@@ -60,18 +62,6 @@ function KOF_XI:extraInit(noExport)
 	-- we use the player table for XI, but not for NGBC
 	if self.playerTablePtr ~= nil then
 		self.playerTable = ffi.new("playerTable") -- shared by both players
-		--[=[
-		self:read(self.playerTablePtr, self.playerTable)
-		print()
-		for i = 1, 2 do
-			for j = 0, self.playersPerTeam - 1 do
-				print(string.format(
-					"Player %d, character %d pointer: 0x%08X",
-					i, j, self.playerTable.p[i-1][j]))
-			end
-		end
-		print()
-		--]=]
 	end
 end
 
@@ -156,25 +146,7 @@ function KOF_XI:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
 	self:captureWorldState()
-	for i = 1, 2 do
-		self:capturePlayerState(i)
-	end
-
-	--[=[ -- testing code for determining activation range of close normals
-	local p, t = self.players, self.teams
-	local distance = math.abs(p[1].position.x - p[2].position.x)
-	io.write(string.format("\r%04X", distance), "\t", t[1].point, "\t", t[2].point)
-	--]=]
-	--[=[
-	local n = 1
-	local activeIndex = self.teams[n].point
-	local active = self.players[n]
-	io.write(string.format(
-		"\rP%d active character's (%d) position is { x=0x%04X, y=0x%04X, pointer=0x%08X }        ",
-		n, activeIndex, active.position.x, active.position.y,
-		self.playerTable.p[n-1][activeIndex] + self.RAMbase))
-	io.flush()
-	--]=]
+	for i = 1, 2 do self:capturePlayerState(i) end
 end
 
 -- return -1 if player is facing left, or +1 if player is facing right
