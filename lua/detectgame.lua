@@ -19,7 +19,7 @@ local function checkClassName(hwnd, params)
 	local imageName = window.getProcessImageName(handle)
 	local target = params.targetProcessName
 	local result = luautil.stringEndsWith(imageName, target, true)
-	if result == false then
+	if not result then
 		winprocess.close(handle)
 		return nil
 	else
@@ -52,7 +52,7 @@ local function checkWindowTitleAndProcessName(params, hwnd, lParam)
 			end
 		end
 		if detectedRevision == nil then
-			-- TODO: better handling of unsupported revisions of a game
+			print("A currently unsupported version of this game was detected.")
 			return nil
 		end
 	end
@@ -117,6 +117,8 @@ local PS2Game = GameTemplate:new({
 	targetProcessName = "pcsx2.exe",
 })
 
+-- games are detected and prioritized in the order listed here;
+-- if two games are running, the game that appears first in this list wins
 local detectedGames = {
 	SteamGame:new({
 		module = "steam.kof98um",
@@ -196,16 +198,6 @@ local detectedGames = {
 			["SLPS-25737"] = "NTSC-J", -- PCSX2 thinks this is the same?
 			["SLUS-21708"] = "NTSC-U",
 			["SLES-54395"] = "PAL",
-		},
-	}),
-	PS2Game:new({
-		module = "pcsx2.samsho6",
-		targetWindowTitle = "Samurai Showdown Anthology", -- not a typo
-		revisions = {
-			["SLPS-25839"] = "NTSC-J",
-			["SLPS-25934"] = "NTSC-J", -- TODO: NOT YET TESTED
-			["SLUS-21629"] = "NTSC-U",
-			["SLES-55292"] = "PAL",
 		},
 	}),
 }

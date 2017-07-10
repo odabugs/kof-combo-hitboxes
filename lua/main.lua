@@ -43,6 +43,7 @@ function main(hInstance, CLibs)
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")
+		print("Exiting now.")
 	end
 end
 
