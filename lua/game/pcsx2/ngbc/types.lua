@@ -124,7 +124,6 @@ typedef struct {
 	playerExtra players[2];   // +0E0h: Extra per-character state info
 } team;
 
-// Instances of this struct are embedded in "playerTable" below
 typedef struct {
 	intptr_t target;          // +000h: Pointer to "player"-type struct
 	// Bit 15 (counting from 0 = low bit) seems to indicate whether the
