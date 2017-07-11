@@ -144,12 +144,6 @@ local detectedGames = {
 		targetProcessName = "KingOfFighters2002UM.exe",
 	}),
 	SteamGame:new({
-		module = "steam.kof_xiii",
-		prettyName = "King of Fighters XIII",
-		targetWindowTitle = "The King of Fighters XIII",
-		targetProcessName = "kofxiii.exe",
-	}),
-	SteamGame:new({
 		module = "steam.ggxxacplusr",
 		prettyName = "Guilty Gear XX Accent Core +R",
 		targetWindowTitle = "GUILTY GEAR XX ..?CORE PLUS R",
