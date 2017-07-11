@@ -44,11 +44,6 @@ typedef struct {
 	float unknown01;          // +082h: Always +1.0?
 } camera;
 
-// Mystery struct at 0x004240C4
-typedef struct {
-	float camY;               // +058h: Camera Y w/zoom accounted for?
-} cam2;
-
 // Multiple instances of this struct are embedded in "player" below.
 // Things will break if this struct is not 0Ah (decimal 10) bytes wide.
 typedef struct {
@@ -142,17 +137,6 @@ typedef struct {
 typedef struct {
 	flaggedPlayerPtr values[4]; // +000h: Table of flagged "player" pointers
 } extraEntities;
-
-// this struct exists at 0x003857A0 in game RAM
-typedef struct {
-	// Value is equal to +1.0 when camera is zoomed in normally.
-	// Value increases as camera zooms outward.
-	double value;             // +000h: Zoom factor
-} zoom;
-
-typedef struct {
-	float value;              // +000h: Zoom factor
-} zoomFloat;
 
 #pragma pack(pop)
 ]]
