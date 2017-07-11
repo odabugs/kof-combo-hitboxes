@@ -180,6 +180,8 @@ function Game_Common:loadConfigFile(target, path, sectionPrefix)
 	io.write("Loading config file '", path, "'...\n")
 	local file, fileErr = io.open(path, "r")
 	if fileErr then
+		local start, finish = string.find(fileErr, ": ")
+		if finish then fileErr = string.sub(fileErr, finish + 1) end
 		io.write("Failed to load config file '", path, "': ", fileErr, "\n")
 	else
 		local schema = self.schema or self:getConfigSchema()
