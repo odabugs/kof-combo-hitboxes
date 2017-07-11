@@ -27,11 +27,21 @@ VOID Sleep(DWORD ms);
 ]]
 local C = ffi.C
 
+local openingMessage = [[
+KoF Combo Hitbox Viewer, Version 0.1.0
+<https://github.com/odabugs/kof-combo-hitboxes/>
+LuaJIT Copyright 2005-2017 Mike Pall.
+<http://luajit.org/>
+]]
+
 function main(hInstance, CLibs)
+	print(openingMessage)
 	hInstance = ffi.cast("HINSTANCE", hInstance)
 	local detected = detectgame.findSupportedGame(hInstance)
 	if detected then
 		local game = detectgame.moduleForGame(detected)
+		print(string.format("Running game detected: %s (%s).",
+			detected.prettyName, game.platformType))
 		game:loadConfigs()
 		print()
 		game:printRecommendations()
@@ -40,6 +50,7 @@ function main(hInstance, CLibs)
 		game:extraInit()
 		game:setupOverlay(CLibs.directx)
 		collectgarbage()
+		print("Press Q in this console window to exit the hitbox viewer.")
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")

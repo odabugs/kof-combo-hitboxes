@@ -43,9 +43,11 @@ local function checkWindowTitleAndProcessName(params, hwnd, lParam)
 	-- does the target game have multiple revisions we have to check for?
 	if params.revisions ~= nil then
 		for k, v in pairs(params.revisions) do
+			--[[
 			print(string.format(
 				"Checking for \"%s\" in title \"%s\" (v=%s)...",
 				k, title, v))
+			--]]
 			if string.find(title, k, 1, true) ~= nil then
 				detectedRevision = v
 				break
@@ -86,6 +88,8 @@ local function findGameWindowByParentPID(params, game)
 	winerror.checkNotZero(successful)
 	if result ~= nil then
 		game.gameHwnd = result
+		game.prettyName = params.prettyName
+		game.platformType = params.platformType
 		return game
 	else
 		winprocess.close(game.gameHandle)
@@ -93,7 +97,11 @@ local function findGameWindowByParentPID(params, game)
 	end
 end
 
-local function noPostprocess(params, game) return game end
+local function noPostprocess(params, game)
+	game.prettyName = params.prettyName
+	game.platformType = params.platformType
+	return game
+end
 
 local GameTemplate = {
 	new = function(self, source)
@@ -103,11 +111,13 @@ local GameTemplate = {
 	end
 }
 local SteamGame = GameTemplate:new({
+	platformType = "Steam",
 	detectMethod = checkWindowTitleAndProcessName,
 	postprocess = noPostprocess,
 	rawTitle = true, -- use false if title is a Lua pattern string
 })
 local PS2Game = GameTemplate:new({
+	platformType = "PS2",
 	detectMethod = checkWindowTitleAndProcessName,
 	postprocess = findGameWindowByParentPID,
 	-- PCSX2's GAME DISPLAY window title will contain this line
@@ -122,32 +132,38 @@ local PS2Game = GameTemplate:new({
 local detectedGames = {
 	SteamGame:new({
 		module = "steam.kof98um",
+		prettyName = "King of Fighters '98 Ultimate Match Final Edition",
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 		targetProcessName = "KingOfFighters98UM.exe",
 	}),
 	SteamGame:new({
 		module = "steam.kof2002um",
+		prettyName = "King of Fighters 2002 Unlimited Match",
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",
 		targetProcessName = "KingOfFighters2002UM.exe",
 	}),
 	SteamGame:new({
 		module = "steam.kof_xiii",
+		prettyName = "King of Fighters XIII",
 		targetWindowTitle = "The King of Fighters XIII",
 		targetProcessName = "kofxiii.exe",
 	}),
 	SteamGame:new({
 		module = "steam.ggxxacplusr",
+		prettyName = "Guilty Gear XX Accent Core +R",
 		targetWindowTitle = "GUILTY GEAR XX ..?CORE PLUS R",
 		rawTitle = false,
 		targetProcessName = "GGXXACPR_Win.exe",
 	}),
 	SteamGame:new({
 		module = "steam.ggxxreload",
+		prettyName = "Guilty Gear XX #Reload",
 		targetWindowTitle = "GUILTYGEAR X2 #RELOAD",
 		targetProcessName = "ggx2.exe",
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_xi",
+		prettyName = "King of Fighters XI",
 		-- PCSX2's CONSOLE window title will start with this line
 		-- (we search for this window first because it has the game title)
 		targetWindowTitle = "King of Fighters XI",
@@ -161,6 +177,7 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof_neowave",
+		prettyName = "King of Fighters NeoWave",
 		targetWindowTitle = "King of Fighters, The.-Neo ?Wave",
 		rawTitle = false,
 		revisions = {
@@ -171,6 +188,7 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof98um",
+		prettyName = "King of Fighters '98 Ultimate Match",
 		targetWindowTitle = "King [Oo]f Fighters .?98.-Ultimate Match",
 		rawTitle = false,
 		revisions = {
@@ -182,6 +200,7 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.kof2002um",
+		prettyName = "King of Fighters 2002 Unlimited Match",
 		targetWindowTitle = "The King of Fighters 2002.-Unlimited Match",
 		rawTitle = false,
 		revisions = {
@@ -191,6 +210,7 @@ local detectedGames = {
 	}),
 	PS2Game:new({
 		module = "pcsx2.ngbc",
+		prettyName = "NeoGeo Battle Coliseum",
 		targetWindowTitle = "NeoGeo Battle Coliseum",
 		revisions = {
 			-- Both NTSC-J revisions report as SLPS-25558 in PCSX2 console
