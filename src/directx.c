@@ -3,6 +3,10 @@
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
 // slight overkill, but OK
 #define BOX_VERTEX_BUFFER_SIZE 100
+#define CHECK_RESULT(x) result = (x); \
+	if (result != D3D_OK) { \
+		goto done; \
+	}
 
 LPDIRECT3D9 d3d;
 LPDIRECT3DDEVICE9 d3dDevice;
@@ -28,8 +32,9 @@ d3dRenderOption_t renderStateOptions[] = {
 	{ -1, -1 } // sentinel
 };
 
-void setupD3D(HWND hwnd, UINT w, UINT h)
+HRESULT setupD3D(HWND hwnd, UINT w, UINT h)
 {
+	HRESULT result;
 	d3d = Direct3DCreate9(D3D_SDK_VERSION);
 	memset(&presentParams, 0, sizeof(presentParams));
 	presentParams.Windowed = TRUE;
@@ -39,7 +44,7 @@ void setupD3D(HWND hwnd, UINT w, UINT h)
 	presentParams.BackBufferHeight = h;
 	presentParams.BackBufferFormat = D3DFMT_A8R8G8B8;
 
-	IDirect3D9_CreateDevice(
+	CHECK_RESULT(IDirect3D9_CreateDevice(
 		d3d,
 		D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
@@ -47,48 +52,51 @@ void setupD3D(HWND hwnd, UINT w, UINT h)
 		// D3DCREATE_FPU_PRESERVE is necessary to avoid undefined behavior with LuaJIT
 		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE,
 		&presentParams,
-		&d3dDevice);
+		&d3dDevice));
 
 	for (int i = 0; renderStateOptions[i].option != -1 || renderStateOptions[i].value != -1; i++)
 	{
-		IDirect3DDevice9_SetRenderState(
+		CHECK_RESULT(IDirect3DDevice9_SetRenderState(
 			d3dDevice,
 			renderStateOptions[i].option,
-			renderStateOptions[i].value);
+			renderStateOptions[i].value));
 	}
 
-	IDirect3DDevice9_CreateVertexBuffer(
+	CHECK_RESULT(IDirect3DDevice9_CreateVertexBuffer(
 		d3dDevice,
 		BOX_VERTEX_BUFFER_SIZE * sizeof(CUSTOMVERTEX),
 		0, // mandatory if CreateDevice used D3DCREATE_HARDWARE_VERTEXPROCESSING
 		CUSTOMFVF,
 		D3DPOOL_MANAGED,
 		&boxBuffer,
-		NULL);
+		NULL));
 
 	CUSTOMVERTEX *pVoid;
-	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
+	CHECK_RESULT(IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0));
 	for (int i = 0; i < BOX_VERTEX_BUFFER_SIZE; i++)
 	{
 		memcpy(&(pVoid[i]), &templateVertex, sizeof(templateVertex));
 	}
-	IDirect3DVertexBuffer9_Unlock(boxBuffer);
+	CHECK_RESULT(IDirect3DVertexBuffer9_Unlock(boxBuffer));
+	done:
+	return result;
 }
 
 // Takes 3 arguments: HWND for which to set up Direct3D, device width/height
-// Returns 0 values
-// TODO: return initialization errors
+// Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_setupD3D(lua_State *L)
 {
 	HWND *hwnd = (HWND*)lua_topointer(L, 1);
 	UINT w = (UINT)luaL_checkint(L, 2);
 	UINT h = (UINT)luaL_checkint(L, 3);
-	setupD3D(*hwnd, w, h);
-	return 0;
+	HRESULT result = setupD3D(*hwnd, w, h);
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
-void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR color)
+HRESULT DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR color)
 {
+	HRESULT result;
 	static VOID *pVoid;
 	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
 	CUSTOMVERTEX vertices[] = {
@@ -98,20 +106,23 @@ void DXRectangleF(FLOAT leftX, FLOAT topY, FLOAT rightX, FLOAT bottomY, D3DCOLOR
 		{ rightX, bottomY, 1.0f, 1.0f, color }
 	};
 	memcpy(pVoid, vertices, sizeof(vertices));
-	IDirect3DVertexBuffer9_Unlock(boxBuffer);
-	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
-	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2);
+	CHECK_RESULT(IDirect3DVertexBuffer9_Unlock(boxBuffer));
+	CHECK_RESULT(IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX)));
+	CHECK_RESULT(IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLESTRIP, 0, 2));
+	done:
+	return result;
 }
 
 // Takes 5 arguments: Left X, top Y, right X, bottom Y (all integers), fill color
-// Returns 0 values
+// Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_DXRectangle(lua_State *L)
 {
 	FLOAT leftX  = luaL_checknumber(L, 1), topY    = luaL_checknumber(L, 2);
 	FLOAT rightX = luaL_checknumber(L, 3), bottomY = luaL_checknumber(L, 4);
 	D3DCOLOR color = (D3DCOLOR)luaL_checkint(L, 5);
-	DXRectangleF(leftX, topY, rightX, bottomY, color);
-	return 0;
+	HRESULT result = DXRectangleF(leftX, topY, rightX, bottomY, color);
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
 // create vertices that render as a square when using D3DPT_TRIANGLELIST
@@ -123,13 +134,14 @@ static int l_DXRectangle(lua_State *L)
 	{ right, bottom, 1.0f, 1.0f, color }, \
 	{ left,  bottom, 1.0f, 1.0f, color }
 
-static void drawHitbox(
+HRESULT drawHitbox(
 	FLOAT outerLeftX, FLOAT outerTopY, FLOAT outerRightX, FLOAT outerBottomY,
 	FLOAT innerLeftX, FLOAT innerTopY, FLOAT innerRightX, FLOAT innerBottomY,
 	D3DCOLOR edge, D3DCOLOR fill)
 {
+	HRESULT result;
 	static VOID *pVoid;
-	IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0);
+	CHECK_RESULT(IDirect3DVertexBuffer9_Lock(boxBuffer, 0, 0, (void**)&pVoid, 0));
 	CUSTOMVERTEX vertices[] = {
 		// inside fill
 		squareTriangleList(innerLeftX,  innerTopY,    innerRightX, innerBottomY, fill),
@@ -143,9 +155,11 @@ static void drawHitbox(
 		squareTriangleList(innerLeftX,  innerBottomY, innerRightX, outerBottomY, edge)
 	};
 	memcpy(pVoid, vertices, sizeof(vertices));
-	IDirect3DVertexBuffer9_Unlock(boxBuffer);
-	IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX));
-	IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLELIST, 0, 10);
+	CHECK_RESULT(IDirect3DVertexBuffer9_Unlock(boxBuffer));
+	CHECK_RESULT(IDirect3DDevice9_SetStreamSource(d3dDevice, 0, boxBuffer, 0, sizeof(CUSTOMVERTEX)));
+	CHECK_RESULT(IDirect3DDevice9_DrawPrimitive(d3dDevice, D3DPT_TRIANGLELIST, 0, 10));
+	done:
+	return result;
 }
 
 #undef squareTriangleList
@@ -157,17 +171,18 @@ static void drawHitbox(
 // - X/Y of inner bottom-right corner
 // - Box edge color
 // - Box fill color
-// Returns 0 values
+// Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_drawHitbox(lua_State *L)
 {
-	drawHitbox(
+	HRESULT result = drawHitbox(
 		luaL_checknumber(L, 1), luaL_checknumber(L, 2),
 		luaL_checknumber(L, 3), luaL_checknumber(L, 4),
 		luaL_checknumber(L, 5), luaL_checknumber(L, 6),
 		luaL_checknumber(L, 7), luaL_checknumber(L, 8),
 		(D3DCOLOR)luaL_checkint(L, 9), (D3DCOLOR)luaL_checkint(L, 10)
 	);
-	return 0;
+	lua_pushinteger(L, (lua_Integer)result);
+	return 1;
 }
 
 // Takes 4 arguments: Left/top and right/bottom corners of new scissor clipping area
@@ -202,11 +217,10 @@ static int l_clearFrame(lua_State *L)
 // Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_beginFrame(lua_State *L)
 {
+	HRESULT result;
 	l_clearFrame(L);
-	HRESULT result = (HRESULT)lua_tointeger(L, -1);
-	if (result != D3D_OK) { goto done; }
-	result = IDirect3DDevice9_BeginScene(d3dDevice);
-	if (result != D3D_OK) { goto done; }
+	CHECK_RESULT((HRESULT)lua_tointeger(L, -1));
+	CHECK_RESULT(IDirect3DDevice9_BeginScene(d3dDevice));
 	result = IDirect3DDevice9_SetFVF(d3dDevice, CUSTOMFVF);
 	done:
 	lua_pushinteger(L, (lua_Integer)result);
@@ -217,16 +231,15 @@ static int l_beginFrame(lua_State *L)
 // Returns 1 value: HRESULT from last D3D call made (stops at first failed call)
 static int l_endFrame(lua_State *L)
 {
+	HRESULT result;
 	RECT sourceRect;
 	sourceRect.left = (LONG)luaL_checkint(L, 1);
 	sourceRect.top = (LONG)luaL_checkint(L, 2);
 	sourceRect.right = (LONG)luaL_checkint(L, 3);
 	sourceRect.bottom = (LONG)luaL_checkint(L, 4);
-	HRESULT result = IDirect3DDevice9_EndScene(d3dDevice);
-	if (result == D3D_OK)
-	{
-		result = IDirect3DDevice9_Present(d3dDevice, &sourceRect, NULL, NULL, NULL);
-	}
+	CHECK_RESULT(IDirect3DDevice9_EndScene(d3dDevice));
+	result = IDirect3DDevice9_Present(d3dDevice, &sourceRect, NULL, NULL, NULL);
+	done:
 	lua_pushinteger(L, (lua_Integer)result);
 	return 1;
 }
