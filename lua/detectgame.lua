@@ -66,7 +66,7 @@ end
 
 local function findGameWindowByParentPID(params, game)
 	-- nested EnumWindows; not the greatest, but functional
-	local targetTitle = params.gameWindowTitle
+	local targetTitles = params.gameWindowTitles
 	local targetPID = game.gamePID
 	local pidBuffer = winutil.dwordBufType(0)
 	local result = nil
@@ -76,12 +76,13 @@ local function findGameWindowByParentPID(params, game)
 			return true -- continue EnumWindows loop
 		end
 		local title = window.getWindowTitle(hwnd)
-		if string.find(title, targetTitle, 1, true) ~= nil then
-			result = hwnd
-			return false -- match found; stop EnumWindows loop
-		else
-			return true -- continue EnumWindows loop
+		for _, targetTitle in ipairs(targetTitles) do
+			if string.find(title, targetTitle, 1, true) ~= nil then
+				result = hwnd
+				return false -- match found; stop EnumWindows loop
+			end
 		end
+		return true -- continue EnumWindows loop
 	end
 
 	local successful = C.EnumWindows(EnumWindowsProc, 0)
@@ -122,7 +123,7 @@ local PS2Game = GameTemplate:new({
 	postprocess = findGameWindowByParentPID,
 	-- PCSX2's GAME DISPLAY window title will contain this line
 	-- (this is the window we really want, not the console window)
-	gameWindowTitle = "GSdx",
+	gameWindowTitles = { "GSdx", "ZeroGS" },
 	rawTitle = true,
 	targetProcessName = "pcsx2.exe",
 })
