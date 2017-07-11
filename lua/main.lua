@@ -24,6 +24,7 @@ BOOL PeekMessageW(
 BOOL TranslateMessage(MSG *lpMsg);
 LRESULT DispatchMessageW(MSG *lpMsg);
 VOID Sleep(DWORD ms);
+int _kbhit(void);
 ]]
 local C = ffi.C
 
@@ -54,7 +55,8 @@ function main(hInstance, CLibs)
 		return mainLoop(game)
 	else
 		print("Failed to detect a supported game running.")
-		print("Exiting now.")
+		print("Press any key to exit.")
+		while C._kbhit() == 0 do C.Sleep(5) end -- Rest In Peace, conio.h
 	end
 end
 
