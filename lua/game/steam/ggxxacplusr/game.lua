@@ -12,8 +12,10 @@ local boxtypes = require("game.steam.ggxxacplusr.boxtypes")
 local BoxSet = require("game.boxset")
 local BoxList = require("game.boxlist")
 local Game_Common = require("game.common")
+local Game_Common_Extra = require("game.common_extra")
 local GGXX = Game_Common:new({ whoami = "GGXXACPlusR" })
 local floor, band = math.floor, bit.band
+luautil.extend(GGXX, Game_Common_Extra)
 
 GGXX.configSection = "ggxx"
 GGXX.basicWidth = 640
@@ -186,14 +188,6 @@ function GGXX:worldToScreen(x, y)
 	return floor(x), floor(y)
 end
 
--- slot constructor function passed to BoxSet:new()
-function GGXX.boxSlotConstructor(i, slot, boxtypes)
-	return {
-		left = 0, top = 0, right = 0, bottom = 0,
-		colorPair = boxtypes:colorForType(slot),
-	}
-end
-
 -- "addFn" passed as parameter to BoxSet:add()
 function GGXX.addBox(target, parent, player, hitbox, facing, isPushbox)
 	if hitbox.width <= 0 or hitbox.height <= 0 then return false end
@@ -212,17 +206,6 @@ function GGXX.drawBox(hitbox, parent, pivotSize, drawFill)
 	local edge, fill = colorPair[1], (drawFill and colorPair[2]) or colors.CLEAR
 	parent:box(x1, y1, x2, y2, edge, fill)
 	return 1
-end
-
--- slot constructor function passed to BoxList:new()
-function GGXX.pivotSlotConstructor()
-	return { x = 0, y = 0, color = colors.WHITE }
-end
-
--- "addFn" passed as parameter to BoxList:add()
-function GGXX.addPivot(target, color, x, y)
-	target.color, target.x, target.y = color, x, y
-	return true
 end
 
 -- "renderFn" passed as parameter to BoxList:render()
