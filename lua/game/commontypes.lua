@@ -10,6 +10,21 @@ typedef uint16_t uword;
 typedef int32_t dword;
 typedef uint32_t udword;
 
+typedef union {
+	byte value;
+	ubyte uvalue;
+} byteBuffer;
+
+typedef union {
+	word value;
+	uword uvalue;
+} wordBuffer;
+
+typedef union {
+	dword value;
+	udword uvalue;
+} dwordBuffer;
+
 // 16.16 fixed point coordinate
 typedef union {
 	struct {
