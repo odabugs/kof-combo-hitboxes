@@ -215,6 +215,27 @@ local detectedGames = {
 			["SLES-54395"] = "PAL",
 		},
 	}),
+	PS2Game:new({
+		module = "pcsx2.cvs2",
+		prettyName = "Capcom vs. SNK 2",
+		targetWindowTitle = "Capcom vs. SNK 2 - Mark of the Millennium 2001",
+		revisions = {
+			["SLPM-65047"] = "NTSC-J",
+			["SLUS-20246"] = "NTSC-U",
+			["SLES-50541"] = "PAL",
+		},
+	}),
+	PS2Game:new({
+		module = "pcsx2.cfj",
+		prettyName = "Capcom Fighting Evolution",
+		targetWindowTitle = "Capcom Fighting Evolution",
+		revisions = {
+			["SLPM-65794"] = "NTSC-J",
+			["SLUS-20950"] = "NTSC-U",
+			["SLES-52852"] = "PAL",
+			["SLES-52854"] = "PAL",
+		},
+	}),
 }
 
 function detectgame.findSupportedGame(hInstance)
