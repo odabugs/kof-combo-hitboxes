@@ -1,6 +1,7 @@
 local ffi = require("ffi")
 local types = require("winapi.types")
 local winerror = require("winerror")
+local winutil = require("winutil")
 local luautil = require("luautil")
 local winprocess = {}
 
@@ -22,6 +23,13 @@ BOOL EnumProcessModulesEx(
 	DWORD   cb,
 	LPDWORD lpcbNeeded, // out
 	DWORD   dwFilterFlag
+);
+
+DWORD GetModuleFileNameExW(
+	HANDLE  hProcess,
+	HMODULE hModule, // optional
+	LPTSTR filename, // out
+	DWORD nSize
 );
 ]]
 local C = ffi.C
@@ -84,6 +92,41 @@ function winprocess.getBaseAddress(handle)
 		handle, hmodule[0], ffi.sizeof("HMODULE"), cb, 0x3) -- LIST_HMODULES_ALL
 	winerror.checkNotZero(result)
 	return hmodule[0].value, cb[0]
+end
+
+function winprocess.listLoadedModules(handle, moduleNamesOnly)
+	local modulesList = {}
+	local maxModules, maxModuleNameLength = 1000, 1024
+	local hmodules, cb = ffi.new("hModulePtr[" .. maxModules .. "]")
+	local cb = ffi.new("ULONG[1]")
+	local result = psapi.EnumProcessModulesEx(
+		handle, hmodules, ffi.sizeof("HMODULE") * maxModules, cb, 0x3) -- LIST_HMODULES_ALL
+	winerror.checkNotZero(result)
+	local moduleCount = cb[0] / ffi.sizeof("HMODULE")
+	if moduleCount > 0 then
+		local buffer = winutil.makeStringBuffer(maxModuleNameLength)
+		local limit = winutil.stringBufferLength(buffer)
+		for i = 0, moduleCount - 1 do
+			result = psapi.GetModuleFileNameExW(
+				-- silly, but it's the easiest way to get each HMODULE's value
+				handle, ffi.cast("HMODULE", hmodules[i].value),
+				ffi.cast("LPTSTR", buffer), limit)
+			winerror.checkNotZero(result)
+			local moduleName = winutil.mbs(buffer)
+			-- module names returned by GetModuleFileNameEx normally
+			-- contain the complete file path of the module .dll;
+			-- if moduleNamesOnly is true, trim them down to the file name
+			if moduleNamesOnly then
+				local temp = moduleName
+				for substr in string.gmatch(moduleName, "[^\\]+") do
+					temp = substr
+				end
+				moduleName = temp
+			end
+			modulesList[moduleName] = true
+		end
+	end
+	return modulesList
 end
 
 return winprocess
