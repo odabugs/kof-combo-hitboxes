@@ -29,7 +29,7 @@ int _kbhit(void);
 local C = ffi.C
 
 local openingMessage = [[
-KoF Combo Hitbox Viewer, Version 1.0.0
+KoF Combo Hitbox Viewer, Version 1.0.1
 <https://github.com/odabugs/kof-combo-hitboxes/>
 LuaJIT Copyright 2005-2017 Mike Pall.
 <http://luajit.org/>
