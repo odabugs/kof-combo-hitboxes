@@ -28,10 +28,20 @@ KOF98.useThickLines = true
 KOF98.boxesPerLayer = 20
 -- game-specific constants
 KOF98.boxtypes = boxtypes
-KOF98.playerPtrs = { 0x0170D000, 0x0170D200 }
-KOF98.playerExtraPtrs = { 0x01715600, 0x0171580C }
-KOF98.cameraPtr = 0x0180C938
-KOF98.projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 }
+KOF98.revisions = {
+	["Steam"] = {
+		playerPtrs = { 0x0170D000, 0x0170D200 },
+		playerExtraPtrs = { 0x01715600, 0x0171580C },
+		cameraPtr = 0x0180C938,
+		projectilesListInfo = { start = 0x01703000, count = 51, step = 0x200 },
+	},
+	["GOG.com"] = {
+		playerPtrs = { 0x01759700, 0x01759900 },
+		playerExtraPtrs = { 0x0175DD00, 0x0175DF0C },
+		cameraPtr = 0x0176DC78,
+		projectilesListInfo = { start = 0x0174F700, count = 29, step = 0x200 },
+	},
+}
 
 KOF98.drawRangeMarkers = { false, false }
 KOF98.rangeMarkerHotkeys = { hotkey.VK_F1, hotkey.VK_F2 }
@@ -64,6 +74,7 @@ F7 - Toggle gauge overlays]]
 function KOF98:extraInit(noExport)
 	if not noExport then
 		types:export(ffi)
+		self:importRevisionSpecificOptions(true)
 	end
 	self.boxset = BoxSet:new(self.boxtypes.order, self.boxesPerLayer,
 		self.boxSlotConstructor, self.boxtypes)

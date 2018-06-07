@@ -64,6 +64,19 @@ local function checkWindowTitleAndProcessName(params, hwnd, lParam)
 	return result
 end
 
+-- the Steam and GOG.com versions of KOF98UMFE/KOF2002UM can't be
+-- distinguished by window title, nor by any other obvious features;
+-- we have to check whether the game has loaded steam_api.dll to tell
+local function checkGameIsSteamOrGOG(params, hwnd, lParam)
+	local result = checkWindowTitleAndProcessName(params, hwnd, lParam)
+	if result then
+		local handle = result.gameHandle
+		local modules = winprocess.listLoadedModules(handle, true)
+		result.revision = (modules["steam_api.dll"] and "Steam") or "GOG.com"
+	end
+	return result
+end
+
 local function findGameWindowByParentPID(params, game)
 	-- nested EnumWindows; not the greatest, but functional
 	local targetTitles = params.gameWindowTitles
@@ -117,6 +130,9 @@ local SteamGame = GameTemplate:new({
 	postprocess = noPostprocess,
 	rawTitle = true, -- use false if title is a Lua pattern string
 })
+local SteamOrGOGGame = SteamGame:new({
+	detectMethod = checkGameIsSteamOrGOG,
+})
 local PS2Game = GameTemplate:new({
 	platformType = "PS2",
 	detectMethod = checkWindowTitleAndProcessName,
@@ -131,13 +147,13 @@ local PS2Game = GameTemplate:new({
 -- games are detected and prioritized in the order listed here;
 -- if two games are running, the game that appears first in this list wins
 local detectedGames = {
-	SteamGame:new({
+	SteamOrGOGGame:new({
 		module = "steam.kof98um",
 		prettyName = "King of Fighters '98 Ultimate Match Final Edition",
 		targetWindowTitle = "King of Fighters '98 Ultimate Match Final Edition",
 		targetProcessName = "KingOfFighters98UM.exe",
 	}),
-	SteamGame:new({
+	SteamOrGOGGame:new({
 		module = "steam.kof2002um",
 		prettyName = "King of Fighters 2002 Unlimited Match",
 		targetWindowTitle = "King of Fighters 2002 Unlimited Match",

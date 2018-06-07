@@ -7,10 +7,20 @@ local KOF02 = KOF98:new({ parent = KOF98, whoami = "KOF02" })
 KOF02.configSection = "kof2002um"
 -- game-specific constants
 KOF02.boxtypes = boxtypes
-KOF02.playerPtrs = { 0x0167C3A0, 0x0167C5C0 }
-KOF02.playerExtraPtrs = { 0x0167EA00, 0x01683240 }
-KOF02.cameraPtr = 0x02208BF8
-KOF02.projectilesListInfo = { start = 0x0166DE20, count = 34, step = 0x220 }
+KOF02.revisions = {
+	["Steam"] = {
+		playerPtrs = { 0x0167C3A0, 0x0167C5C0 },
+		playerExtraPtrs = { 0x0167EA00, 0x01683240 },
+		cameraPtr = 0x02208BF8,
+		projectilesListInfo = { start = 0x0166DE20, count = 34, step = 0x220 },
+	},
+	["GOG.com"] = {
+		playerPtrs = { 0x01BD33C0, 0x01BD35E0 },
+		playerExtraPtrs = { 0x01BBFB80, 0x01BBFE98 },
+		cameraPtr = 0x01BE0758,
+		projectilesListInfo = { start = 0x01BC4A00, count = 41, step = 0x220 },
+	},
+}
 KOF02.extraRecommendation = [[
 Additionally, please set Screen to Type B in Game Options, Graphic Settings.]]
 
