@@ -104,6 +104,7 @@ function winprocess.listLoadedModules(handle, moduleNamesOnly)
 	winerror.checkNotZero(result)
 	local moduleCount = cb[0] / ffi.sizeof("HMODULE")
 	if moduleCount > 0 then
+		moduleCount = math.min(moduleCount, maxModules)
 		local buffer = winutil.makeStringBuffer(maxModuleNameLength)
 		local limit = winutil.stringBufferLength(buffer)
 		for i = 0, moduleCount - 1 do
