@@ -1,4 +1,4 @@
-KoF Combo Hitbox Viewer Copyright (C) 2015-2017 E. Fuller
+KoF Combo Hitbox Viewer Copyright (C) 2015-2018 E. Fuller
 <https://github.com/odabugs/kof-combo-hitboxes>
 
 Permission to use, copy, modify, and distribute this software and its
