@@ -58,6 +58,11 @@ HWND CreateWindowExW(
 	HMENU hMenu,          // optional
 	HINSTANCE hInstance,  // optional
 	LPVOID lpParam);
+BOOL SetLayeredWindowAttributes(
+	HWND hwnd,
+	COLORREF crKey,
+	BYTE bAlpha,
+	DWORD dwFlags);
 BOOL DestroyWindow(HWND hWnd);
 HANDLE LoadImageW(
 	HINSTANCE hinst, // optional
@@ -91,6 +96,10 @@ window.WS_EX_TOPMOST = 0x08
 window.WS_EX_TRANSPARENT = 0x20
 window.WS_EX_LAYERED = 0x00080000
 window.WS_EX_COMPOSITED = 0x02000000
+-- bit masks for "dwFlags" parameter to SetLayeredWindowAttributes()
+window.LWA_COLORKEY = 0x01
+window.LWA_ALPHA = 0x02
+window.defaultLayeredWindowAttributeFlags = window.LWA_ALPHA
 -- keys for GetSystemMetrics()
 window.SM_CXSCREEN = 0
 window.SM_CYSCREEN = 1
@@ -208,13 +217,17 @@ function window.createOverlayWindow(
 	local newWinOptions = luautil.extend({},
 		window.createWindowExDefaults,
 		hi,
-		{ lpClassName = ffi.cast("LPCTSTR", atom), nWidth = w, nHeight = h,
+		{ lpClassName = ffi.cast("LPCTSTR", atom),
+		nWidth = w, nHeight = h,
 		hWndParent = ffi.cast("HWND", gameHwnd), },
 		windowOptions)
-	local overlayHwnd = C.CreateWindowExW(
-		luautil.unpackKeys(newWinOptions, window.createWindowExParamsOrder))
+	local overlayHwnd = C.CreateWindowExW(luautil.unpackKeys(
+		newWinOptions, window.createWindowExParamsOrder))
 	winerror.checkNotEqual(overlayHwnd, NULL)
 
+	-- LWA_COLORKEY must be explicitly disabled or the overlay
+	-- won't work (as of Windows 10 Creators Update)
+	window.setLayeredAttributes(overlayHwnd)
 	window.extendFrame(overlayHwnd, window.extendMarginsPtr)
 	window.show(overlayHwnd)
 	window.update(overlayHwnd)
@@ -289,6 +302,16 @@ function window.supportsComposition()
 	local result = dwmapi.DwmIsCompositionEnabled(buffer)
 	winerror.checkEqual(result, window.S_OK)
 	return buffer[0] ~= 0
+end
+
+function window.setLayeredAttributes(hwnd, colorKey, alpha, flags)
+	colorKey = colorKey or 0
+	alpha = alpha or 255
+	flags = flags or window.defaultLayeredWindowAttributeFlags
+	local result = C.SetLayeredWindowAttributes(
+		hwnd, colorKey, alpha, flags)
+	winerror.checkNotZero(result)
+	return result
 end
 
 function window.extendFrame(hwnd, margins)
