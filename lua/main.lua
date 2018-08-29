@@ -29,9 +29,9 @@ int _kbhit(void);
 local C = ffi.C
 
 local openingMessage = [[
-KoF Combo Hitbox Viewer, Version 1.0.1
+KoF Combo Hitbox Viewer, Version 1.0.2
 <https://github.com/odabugs/kof-combo-hitboxes/>
-LuaJIT Copyright 2005-2017 Mike Pall.
+LuaJIT Copyright 2005-2018 Mike Pall.
 <http://luajit.org/>
 ]]
 
@@ -56,7 +56,7 @@ function main(hInstance, CLibs)
 	else
 		print("Failed to detect a supported game running.")
 		print("Press any key to exit.")
-		while C._kbhit() == 0 do C.Sleep(5) end -- Rest In Peace, conio.h
+		while C._kbhit() == 0 do C.Sleep(5) end
 	end
 end
 

@@ -1,4 +1,4 @@
-KoF Combo Hitbox Viewer, version 1.0.1
+KoF Combo Hitbox Viewer, version 1.0.2
 https://github.com/odabugs/kof-combo-hitboxes
 
 Basic usage instructions:
