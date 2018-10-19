@@ -51,7 +51,6 @@ function Game_Common:new(source)
 	source.xScale, source.yScale = 1, 1
 	source.xOffset, source.yOffset = 0, 0
 	source.aspect = 1
-	source.playersEnabled = { true, true }
 
 	return source
 end
@@ -264,6 +263,7 @@ function Game_Common:getConfigSchema()
 	local schema = {
 		global = {
 			drawBoxFill = self:booleanReader("drawBoxFills"),
+			drawProjectiles = self:booleanReader("projectilesEnabled"),
 		},
 		colors = {
 			playerPivot = self:colorReader("pivotColor"),
