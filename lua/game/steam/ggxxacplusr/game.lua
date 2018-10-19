@@ -82,7 +82,9 @@ function GGXX:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
 	self:capturePlayerStates()
-	self:captureProjectiles()
+	if self.projectilesEnabled then
+		self:captureProjectiles()
+	end
 end
 
 function GGXX:capturePlayerStates()
@@ -90,6 +92,7 @@ function GGXX:capturePlayerStates()
 	local playerPtrs, player, extra, playerPtr = self.playerPtrs
 	local pivotColor = self.pivotColor
 	for i = 1, 2 do
+		if not self.playersEnabled[i] then goto continue end
 		playerPtr = self:readPtr(playerPtrs[i])
 		if playerPtr ~= 0 then
 			player, extra = players[i], extras[i]
@@ -99,6 +102,7 @@ function GGXX:capturePlayerStates()
 				self:captureEntity(player, extra, false, pivotColor)
 			end
 		end
+		::continue::
 	end
 end
 

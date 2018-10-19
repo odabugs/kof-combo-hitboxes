@@ -117,6 +117,17 @@ function CVS2:capturePlayerState(which)
 	self:captureEntity(player, which, false)
 end
 
+function CVS2:captureProjectiles()
+	local projectiles, projInfo = self.projectiles, self.projectilesListInfo
+	local addr, step = projInfo.start, projInfo.step
+	for i = 0, projInfo.count - 1 do
+		local proj = projectiles[i]
+		self:read(addr, proj)
+		self:captureEntity(proj, 3, true)
+		addr = addr + step
+	end
+end
+
 function CVS2.facingMultiplier(player)
 	return ((player.facing == 0) and 1) or -1
 end
@@ -134,14 +145,13 @@ function CVS2:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
 	self:captureWorldState()
-	for i = 1, 2 do self:capturePlayerState(i) end
-	local projectiles, projInfo = self.projectiles, self.projectilesListInfo
-	local addr, step = projInfo.start, projInfo.step
-	for i = 0, projInfo.count - 1 do
-		local proj = projectiles[i]
-		self:read(addr, proj)
-		self:captureEntity(proj, 3, true)
-		addr = addr + step
+	for i = 1, 2 do 
+		if self.playersEnabled[i] then
+			self:capturePlayerState(i)
+		end
+	end
+	if self.projectilesEnabled then
+		self:captureProjectiles()
 	end
 end
 

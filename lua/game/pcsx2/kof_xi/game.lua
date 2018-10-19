@@ -139,14 +139,20 @@ function KOF_XI:capturePlayerState(which)
 	self:read(self.playerTable.p[which-1][team.point], player)
 	local facing = self:facingMultiplier(player)
 	self:captureEntity(player, facing, false)
-	self:capturePlayerProjectiles(which, facing)
+	if self.projectilesEnabled then
+		self:capturePlayerProjectiles(which, facing)
+	end
 end
 
 function KOF_XI:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
 	self:captureWorldState()
-	for i = 1, 2 do self:capturePlayerState(i) end
+	for i = 1, 2 do 
+		if self.playersEnabled[i] then
+			self:capturePlayerState(i)
+		end
+	end
 end
 
 -- return -1 if player is facing left, or +1 if player is facing right

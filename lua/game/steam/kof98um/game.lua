@@ -144,8 +144,14 @@ function KOF98:captureState()
 	self.boxset:reset()
 	self.pivots:reset()
 	self:read(self.cameraPtr, self.camera)
-	for i = 1, 2 do self:capturePlayerState(i) end
-	self:captureProjectiles()
+	for i = 1, 2 do 
+		if self.playersEnabled[i] then
+			self:capturePlayerState(i)
+		end
+	end
+	if self.projectilesEnabled then
+		self:captureProjectiles()
+	end
 end
 
 -- return -1 if player is facing left, or +1 if player is facing right

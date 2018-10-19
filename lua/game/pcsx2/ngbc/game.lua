@@ -95,6 +95,7 @@ function NGBC:captureWorldState()
 	self:read(self.extraEntitiesPtr, tbl)
 	-- capture "extra" entities controlled by players w/certain characters
 	-- (e.g., Nakoruru's pet eagle, Goodman's "ghost" assistant)
+	if not self.projectilesEnabled then goto continue end
 	for i = 0, 3 do
 		if bit.band(tbl.values[i].flags, 0x00008000) ~= 0 then
 			target = tbl.values[i].target
@@ -106,6 +107,7 @@ function NGBC:captureWorldState()
 			end
 		end
 	end
+	::continue::
 end
 
 function NGBC:capturePlayerState(which)
@@ -116,8 +118,9 @@ function NGBC:capturePlayerState(which)
 	self:read(activePtr, player)
 	local facing = self:facingMultiplier(player)
 	self:captureEntity(player, facing, false)
-	self:capturePlayerProjectiles(which, facing)
-	return activePtr
+	if self.projectilesEnabled then
+		self:capturePlayerProjectiles(which, facing)
+	end
 end
 
 return NGBC
