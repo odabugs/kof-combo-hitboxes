@@ -51,6 +51,7 @@ function Game_Common:new(source)
 	source.xScale, source.yScale = 1, 1
 	source.xOffset, source.yOffset = 0, 0
 	source.aspect = 1
+	source.playersEnabled = { true, true }
 
 	return source
 end
@@ -282,6 +283,13 @@ function Game_Common:getConfigSchema()
 	}
 	for _, booleanKey in ipairs(booleanKeys) do
 		g[booleanKey] = self:booleanReader(booleanKey)
+	end
+	for i = 1, 2 do
+		local playerKey = "player" .. i
+		local playerSchema = {
+			enabled = self:booleanReader("" .. i, self.playersEnabled)
+		}
+		schema[playerKey] = playerSchema
 	end
 	-- duplicating the schema sections and nesting them under the game's
 	-- config section name permits INI files to have game-specific sections;

@@ -108,6 +108,8 @@ end
 -- that targets an arbitrary "starting point" table instead of _G
 function luautil.assign(target, section, value)
 	for segment, dot in section:gmatch(SECTION_PATTERN) do
+		-- properly handle updating values in an "array-like" table
+		segment = tonumber(segment) or segment
 		if dot == "" then -- last field reached
 			target[segment] = value
 		else

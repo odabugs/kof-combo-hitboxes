@@ -51,10 +51,12 @@ function KOF_Common:getConfigSchema()
 	g.drawGauges = self:booleanReader("drawGauges")
 	g.gaugeFillOpacity = self:byteReader("gaugeFillAlpha")
 	for i = 1, 2 do
-		local playerSchema = {
-			drawRangeMarker = self:rangeMarkerReader(i),
-		}
 		local playerKey = "player" .. i
+		local playerSchema = luautil.extend({},
+			schema[playerKey],
+			{
+				drawRangeMarker = self:rangeMarkerReader(i),
+			})
 		schema[playerKey] = playerSchema
 		schema[self.configSection][playerKey] = playerSchema
 	end
